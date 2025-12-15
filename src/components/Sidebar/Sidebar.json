@@ -1,0 +1,118 @@
+{
+  "SidebarHeader": {
+    "logo": "/logo2.png",
+    "title": "dara"
+  },
+  "MENU": [
+    {
+      "label": "Dashboard",
+      "iconActive": "/icons/dashboardActive.png",
+      "iconInActive": "/icons/dashboardInactive.png",
+      "location": "/app/dashboard"
+    },
+    {
+      "label": "User Management",
+      "iconActive": "/icons/userActive.png",
+      "iconInActive": "/icons/userInactive.png",
+      "children": [
+        {
+          "label": "Parent Monitoring",
+          "location": "/app/parent-monitoring"
+        },
+        {
+          "label": "Child Monitoring",
+          "location": "/app/child-monitoring"
+        }
+      ]
+    },
+    {
+      "label": "CMS",
+      "iconActive": "/icons/cmsActive.png",
+      "iconInActive": "/icons/cmsInactive.png",
+      "location": "/app/cms"
+    },
+    {
+      "label": "RBAC Management",
+      "iconActive": "/icons/userActive.png",
+      "iconInActive": "/icons/userInactive.png",
+      "children": [
+        {
+          "label": "Role Management",
+          "location": "/app/rbac"
+        },
+        {
+          "label": "Admin Management",
+          "location": "/app/admin"
+        }
+      ]
+    },
+    {
+      "label": "Content Management",
+      "iconActive": "/icons/userActive.png",
+      "iconInActive": "/icons/userInactive.png",
+      "children": [
+        {
+          "label": "Categories",
+          "location": "/app/categories"
+        }
+      ]
+    },
+    {
+      "label": "Learning Content",
+      "iconActive": "/icons/learningActive.png",
+      "iconInActive": "/icons/learningInactive.png",
+      "location": "/app/learning"
+    },
+    {
+      "label": "Subscription & Plans",
+      "iconActive": "/icons/subscriptionActive.png",
+      "iconInActive": "/icons/subscriptionInactive.png",
+      "location": "/app/subscription"
+    },
+    {
+      "label": "Reports & Analytics",
+      "iconActive": "/icons/reportsActive.png",
+      "iconInActive": "/icons/reportsInactive.png",
+      "location": "/app/reports"
+    },
+    {
+      "label": "Child Activity",
+      "iconActive": "/icons/parentControllActive.png",
+      "iconInActive": "/icons/parentControllInactive.png",
+      "location": "/app/child-activity"
+    },
+    {
+      "label": " Language & Voice",
+      "iconActive": "/icons/languageActive.png",
+      "iconInActive": "/icons/languageInactive.png",
+      "location": "/app/language"
+    },
+    {
+      "label": "Notification",
+      "iconActive": "/icons/notificationActive.png",
+      "iconInActive": "/icons/notificationInactive.png",
+      "children": [
+        {
+          "label": "Push Notification",
+          "location": "/app/push-notifications"
+        },
+        {
+          "label": "Scheduling Notification",
+          "location": "/app/scheduling-notifications"
+        }
+      ]
+    },
+    {
+      "label": "Help & Support",
+      "iconActive": "/icons/supportActive.png",
+      "iconInActive": "/icons/supportInactive.png",
+      "location": "/app/support"
+    },
+    {
+      "label": "App Setting",
+      "iconActive": "/icons/settingInactive.png",
+      "iconInActive": "/icons/settingInactive.png",
+      "location": "/app/setting"
+    }
+  ]
+}
