@@ -67,7 +67,7 @@ const onConfirmLogout = () => {
       <div className="flex flex-col flex-1 w-full md:ml-10 lg:ml-72 xl:ml-72 2xl:ml:96 overflow-hidden h-screen">
         <main className="flex-1 overflow-auto lg:rounded-l-3xl lg:z-[50] w-full h-full
           [&::-webkit-scrollbar]:w-2 
-          [&::-webkit-scrollbar-track]:bg-gray-100 
+          [&::-webkit-scrollbar-track]:bg-gray-900 
           [&::-webkit-scrollbar-thumb]:bg-[#7038C4] 
           [&::-webkit-scrollbar-thumb]:rounded-full 
           [&::-webkit-scrollbar-track]:rounded-full 
