@@ -173,7 +173,7 @@ const App = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   // Helper function to render protected routes
-  const renderProtectedRoute = () => (
+  const renderProtectedRoute = (Component) => (
     <ProtectedRoute>
       <MainLayout
         websiteMode={websiteMode}
