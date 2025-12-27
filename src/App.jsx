@@ -65,11 +65,8 @@ import LeaveRequest from "./pages/RequestManagement/LeaveRequest";
 import Complaints from "./pages/RequestManagement/Complaints";
 
 // Import new Attendance Management components
-import MarkAttendance from "./pages/AttendanceManagement/MarkAttendance";
 import MarkTeacherAttendance from "./pages/AttendanceManagement/MarkTeacherAttendance";
 import MarkStudentAttendance from "./pages/AttendanceManagement/MarkStudentAttendance";
-import ListTeacherAttendance from "./pages/AttendanceManagement/ListTeacherAttendance";
-import ListStudentAttendance from "./pages/AttendanceManagement/ListStudentAttendance";
 
 // Import new Certificate Management components
 import StudentCertificate from "./pages/CertificateManagement/StudentCertificate";
@@ -273,11 +270,8 @@ const App = () => {
         <Route path="/complaints" element={renderProtectedRoute(Complaints)} />
         
         {/* New Attendance Routes */}
-        <Route path="/mark-attendance" element={renderProtectedRoute(MarkAttendance)} />
         <Route path="/mark-teacher-attendance" element={renderProtectedRoute(MarkTeacherAttendance)} />
         <Route path="/mark-student-attendance" element={renderProtectedRoute(MarkStudentAttendance)} />
-        <Route path="/list-teacher-attendance" element={renderProtectedRoute(ListTeacherAttendance)} />
-        <Route path="/list-student-attendance" element={renderProtectedRoute(ListStudentAttendance)} />
         
         {/* New Certificate Routes */}
         <Route path="/student-certificate" element={renderProtectedRoute(StudentCertificate)} />

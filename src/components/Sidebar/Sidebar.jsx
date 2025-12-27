@@ -303,12 +303,6 @@ const allSections = {
     title: "Attendance",
     items: [
       {
-        id: "markAttendance",
-        label: "Mark Attendance",
-        icon: CalendarCheck,
-        path: "/mark-attendance",
-      },
-      {
         id: "markTeacherAttendance",
         label: "Mark Teacher Attendance",
         icon: Users,
@@ -319,19 +313,7 @@ const allSections = {
         label: "Mark Student Attendance",
         icon: GraduationCap,
         path: "/mark-student-attendance",
-      },
-      {
-        id: "listTeacherAttendance",
-        label: "List Teacher Attendance",
-        icon: Users,
-        path: "/list-teacher-attendance",
-      },
-      {
-        id: "listStudentAttendance",
-        label: "List Student Attendance",
-        icon: GraduationCap,
-        path: "/list-student-attendance",
-      },
+      }
     ],
   },
   certificate: {
