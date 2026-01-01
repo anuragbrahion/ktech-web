@@ -46,6 +46,12 @@ import {
   ChevronUp,
   X,
   Menu,
+  Package,
+  Activity,
+  Share2,
+  Tags,
+  Layers,
+  List,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 const allSections = {
@@ -158,35 +164,72 @@ const allSections = {
       },
     ],
   },
-  branchManagement: {
-    title: "Branch Management",
-    items: [
-      {
-        id: "branchManagement",
-        label: "Branch Management",
-        icon: GitBranch,
-        path: "/branch-management",
-      },
-      {
-        id: "visitorsBook",
-        label: "Visitor's Book",
-        icon: Book,
-        path: "/visitors-book",
-      },
-      {
-        id: "referralAmount",
-        label: "Referral Amount",
-        icon: CreditCard,
-        path: "/referral-amount",
-      },
-      {
-        id: "roleGoalAssign",
-        label: "Role/Goal-Assign",
-        icon: ClipboardList,
-        path: "/role-goal-assign",
-      },
-    ],
-  },
+branchManagement: {
+  title: "Branch Management",
+  items: [
+    {
+      id: "visitorsBook",
+      label: "Visitor's Book",
+      icon: Book,
+      path: "/visitors-book",
+    },
+    {
+      id: "referralAmount",
+      label: "Referral Amount",
+      icon: CreditCard,
+      path: "/referral-amount",
+    },
+    {
+      id: "roleGoalAssign",
+      label: "Role/Goal-Assign",
+      icon: ClipboardList,
+      path: "/role-goal-assign",
+    },
+
+    {
+      id: "courseList",
+      label: "Course List",
+      icon: List,
+      path: "/course-list",
+    },
+    {
+      id: "coursePlans",
+      label: "Course Plans",
+      icon: Layers,
+      path: "/course-plans",
+    },
+    {
+      id: "courseCategories",
+      label: "Course Categories",
+      icon: Tags,
+      path: "/course-categories",
+    },
+    {
+      id: "courseBatches",
+      label: "Course Batches",
+      icon: Calendar,
+      path: "/course-batches",
+    },
+    {
+      id: "inquirySource",
+      label: "Inquiry Source",
+      icon: Share2,
+      path: "/inquiry-source",
+    },
+    {
+      id: "inquiryStatus",
+      label: "Inquiry Status",
+      icon: Activity,
+      path: "/inquiry-status",
+    },
+    {
+      id: "productCategory",
+      label: "Product Category",
+      icon: Package,
+      path: "/product-category",
+    },
+  ],
+},
   courseManagement: {
     title: "Course Management",
     items: [
@@ -485,7 +528,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
     return (
       <Link
         to={to}
-        className="group flex items-center gap-3 relative py-3"
+        className="group flex items-center gap-3 relative py-1 ml-6"
         onMouseEnter={(e) => {
           setTooltip({
             visible: true,
@@ -704,8 +747,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </button>
         </div>
 
-        {/* Search Bar - Only when sidebar is open */}
-        {isOpen && (
+         {isOpen && (
           <div className="p-3 border-b border-gray-200">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -772,7 +814,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </div>
         )}
 
-        {/* Mode Toggle Button */}
         <div
           className={`p-3 border-b border-gray-200 ${
             isOpen ? "block" : "hidden"
@@ -780,13 +821,13 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
         >
           <button
             onClick={handleModeToggle}
-            className={`w-full flex items-center justify-center gap-3 text-white py-3 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-md ${
+            className={`w-full flex items-center justify-center gap-3 text-white py-3 rounded-xl text-sm font-semibold transform hover:scale-[1.02] active:scale-95 shadow-md ${
               websiteMode
                 ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
                 : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             }`}
           >
-            <RefreshCw className="w-4 h-4 animate-spin-slow" />
+            <RefreshCw className="w-4 h-4" />
             {websiteMode ? "Switch to Course" : "Switch to Website"}
           </button>
         </div>
@@ -967,18 +1008,8 @@ const Header = ({ isSidebarOpen, onSidebarToggle, websiteMode, onLogout }) => {
 
 export { Header };
 
-// Add CSS for custom scrollbar and animations
 const style = document.createElement("style");
 style.textContent = `
-  @keyframes spin-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  
-  .animate-spin-slow {
-    animation: spin-slow 3s linear infinite;
-  }
-  
   .scrollbar-thin {
     scrollbar-width: thin;
   }
@@ -1001,8 +1032,7 @@ style.textContent = `
     background-color: rgba(156, 163, 175, 0.8);
   }
   
-  /* Ensure sidebar doesn't overflow on mobile */
-  @media (max-width: 1024px) {
+   @media (max-width: 1024px) {
     aside {
       max-height: 100vh;
       overflow-y: auto;

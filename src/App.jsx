@@ -94,6 +94,7 @@ import Logout from "./pages/UserManagement/Logout";
 import LeaveType from "./pages/EmployeeManagement/LeaveType";
 import AssignTask from "./pages/EmployeeManagement/AssignTask";
 import AllAssignTask from "./pages/EmployeeManagement/AllAssignTask";
+import CourseCategory from "./pages/CourseManagement/CourseCategory";
 
 // Import new Examination Management components
 // import Examinations from "./pages/ExaminationManagement/Examinations";
@@ -249,6 +250,7 @@ const App = () => {
         
         {/* New Course Management Routes */}
         <Route path="/course-list" element={renderProtectedRoute(CourseList)} />
+        <Route path="/course-categories" element={renderProtectedRoute(CourseCategory)} />
         <Route path="/course-plans" element={renderProtectedRoute(CoursePlans)} />
         <Route path="/course-batches" element={renderProtectedRoute(CourseBatches)} />
         <Route path="/inquiry-source" element={renderProtectedRoute(InquirySource)} />

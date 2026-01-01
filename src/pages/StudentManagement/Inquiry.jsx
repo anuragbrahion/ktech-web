@@ -304,7 +304,7 @@ const Inquiry = () => {
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-sky-600">Inquiry Management</h1>
+          <h1 className="text-3xl font-bold text-black">Inquiry Management</h1>
           <p className="text-black mt-2">Manage customer inquiries and follow-ups</p>
         </div>
 
@@ -343,7 +343,8 @@ const Inquiry = () => {
               </button>
               <button
                 onClick={handleAddInquiry}
-                className="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 flex items-center gap-2"
+                className="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2 px-6 rounded-lg transition
+                duration-300 flex items-center gap-2"
               >
                 <span>+</span>
                 Add Inquiry
@@ -364,7 +365,7 @@ const Inquiry = () => {
 
               {todayInquiries.length > 0 ? (
                 <Table
-                  headers={['Name', 'Phone No', 'Course', 'Source', 'Status', 'Remarks', 'Actions']}
+                  headers={['Name', 'Phone No', 'Course', 'Source', 'Status', 'Remarks','Convert', 'Actions']}
                   data={todayInquiries}
                   renderRow={(inquiry, index) => (
                     <tr 
@@ -400,6 +401,15 @@ const Inquiry = () => {
                       </td>
                       <td className="py-4 px-4 text-black text-sm max-w-xs truncate">
                         {inquiry.remarks || 'No remarks'}
+                      </td>
+                      <td>
+                      <p
+                            onClick={() => handleDeleteInquiry(inquiry.id)}
+                            className="text-green-500 hover:text-green-700 p-1 hover:bg-green-50 cursor-pointer rounded"
+                            title="Delete"
+                          >
+                            Move to addmission
+                          </p>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex space-x-2">

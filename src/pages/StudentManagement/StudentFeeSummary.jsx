@@ -96,10 +96,10 @@ const StudentFeeSummary = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      'Paid': { bg: 'bg-green-100', text: 'text-green-800', label: '✓ Paid' },
-      'Pending': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: '⏳ Pending' },
-      'Overdue': { bg: 'bg-red-100', text: 'text-red-800', label: '⚠️ Overdue' },
-      'Partial': { bg: 'bg-blue-100', text: 'text-blue-800', label: '↕️ Partial' }
+      'Paid': { bg: '', text: 'text-green-800', label: '✓ Paid' },
+      'Pending': { bg: '', text: 'text-yellow-800', label: '⏳ Pending' },
+      'Overdue': { bg: '', text: 'text-red-800', label: '⚠️ Overdue' },
+      'Partial': { bg: '', text: 'text-blue-800', label: '↕️ Partial' }
     };
     
     const config = statusConfig[status] || { bg: 'bg-gray-100', text: 'text-gray-800', label: status };
