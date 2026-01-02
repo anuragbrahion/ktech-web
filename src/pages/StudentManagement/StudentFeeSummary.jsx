@@ -111,16 +111,16 @@ const StudentFeeSummary = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-sky-600">Student Fee Summary</h1>
+          <h1 className="text-3xl font-bold">Student Fee Summary</h1>
           <p className="text-black mt-2">View and manage student fee details</p>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="mb-8">
-            <h2 className="text-xl font-bold text-sky-600 mb-4">Select Student & Course</h2>
+            <h2 className="text-xl font-bold mb-4">Select Student & Course</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-black mb-2">Student Name</label>
@@ -292,7 +292,7 @@ const StudentFeeSummary = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-purple-50 p-6 rounded-lg shadow border border-purple-100">
             <h3 className="text-lg font-semibold text-purple-700">Payment Progress</h3>
             <div className="mt-4">
@@ -357,7 +357,7 @@ const StudentFeeSummary = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -63,9 +63,8 @@ const RoleManagement = () => {
   const tableHeaders = ['Role Name', 'Course', 'Total Days', 'Delete'];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+    <div className="">
+      <div className="container">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-black">Role Management</h1>
           <button
@@ -108,26 +107,6 @@ const RoleManagement = () => {
               </tr>
             )}
           />
-        </div>
-
-        {/* Stats */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-sky-100 p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-sky-700">Total Roles</h3>
-            <p className="text-3xl font-bold text-black mt-2">{roles.length}</p>
-          </div>
-          <div className="bg-sky-100 p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-sky-700">Total Days</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {roles.reduce((total, role) => total + parseInt(role.days), 0)} Days
-            </p>
-          </div>
-          <div className="bg-sky-100 p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-sky-700">Unique Courses</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {new Set(roles.map(role => role.course)).size}
-            </p>
-          </div>
         </div>
       </div>
 

@@ -54,34 +54,11 @@ import {
   List,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+
 const allSections = {
-  courseOptions: {
-    title: "Courses",
-    items: [
-      {
-        id: "exam",
-        label: "Exam Grade System",
-        icon: Award,
-        path: "/exam-grade-system",
-      },
-      { id: "subjects", label: "Subjects", icon: BookOpen, path: "/subjects" },
-      { id: "languages", label: "Languages", icon: Globe, path: "/languages" },
-      {
-        id: "categories",
-        label: "Course Categories",
-        icon: Grid,
-        path: "/course-categories",
-      },
-      {
-        id: "awards",
-        label: "Course Award Categories",
-        icon: Grid,
-        path: "/course-award-categories",
-      },
-    ],
-  },
   websiteOptions: {
     title: "Website Management",
+    icon: Globe,
     items: [
       { id: "homePage", label: "Home Page", icon: Home, path: "/home-page" },
       { id: "blogs", label: "Blogs", icon: FileText, path: "/blogs" },
@@ -121,8 +98,60 @@ const allSections = {
       },
     ],
   },
+  courseOptions: {
+    title: "Courses",
+    icon: BookOpen,
+    items: [
+      {
+        id: "exam",
+        label: "Exam Grade System",
+        icon: Award,
+        path: "/exam-grade-system",
+      },
+      { id: "subjects", label: "Subjects", icon: BookOpen, path: "/subjects" },
+      { id: "languages", label: "Languages", icon: Globe, path: "/languages" },
+      {
+        id: "categories",
+        label: "Course Categories",
+        icon: Grid,
+        path: "/course-categories",
+      },
+      {
+        id: "awards",
+        label: "Course Award Categories",
+        icon: Grid,
+        path: "/course-award-categories",
+      },
+    ],
+  },
+  studentInfo: {
+    title: "Student Information",
+    icon: Users,
+    items: [
+      {
+        id: "admission",
+        label: "Admission",
+        icon: UserCircle,
+        path: "/admission",
+      },
+      {
+        id: "reAdmission",
+        label: "Re-Admission",
+        icon: RefreshCw,
+        path: "/re-admission",
+      },
+      { id: "inquiry", label: "Inquiry", icon: FileSearch, path: "/inquiry" },
+      {
+        id: "studentFeeSummary",
+        label: "Student Fee Summary",
+        icon: FileBarChart,
+        path: "/student-fee-summary",
+      },
+    ],
+  },
   employeeManagement: {
     title: "Employee Management",
+    icon: UserCog,
     items: [
       { id: "role", label: "Role", icon: UserCog, path: "/role" },
       { id: "goal", label: "Goal", icon: Target, path: "/goal" },
@@ -147,169 +176,111 @@ const allSections = {
       {
         id: "leaveType",
         label: "Leave Type",
-        icon: Building,
+        icon: Calendar,
         path: "/leave-type",
       },
       {
         id: "assignTask",
         label: "Assign Task",
-        icon: Building,
+        icon: ClipboardCheck,
         path: "/assign-task",
       },
       {
         id: "allAssignTask",
         label: "All Assign Task",
-        icon: Building,
+        icon: ClipboardList,
         path: "/all-assign-task",
       },
     ],
   },
-branchManagement: {
-  title: "Branch Management",
-  items: [
-    {
-      id: "visitorsBook",
-      label: "Visitor's Book",
-      icon: Book,
-      path: "/visitors-book",
-    },
-    {
-      id: "referralAmount",
-      label: "Referral Amount",
-      icon: CreditCard,
-      path: "/referral-amount",
-    },
-    {
-      id: "roleGoalAssign",
-      label: "Role/Goal-Assign",
-      icon: ClipboardList,
-      path: "/role-goal-assign",
-    },
-
-    {
-      id: "courseList",
-      label: "Course List",
-      icon: List,
-      path: "/course-list",
-    },
-    {
-      id: "coursePlans",
-      label: "Course Plans",
-      icon: Layers,
-      path: "/course-plans",
-    },
-    {
-      id: "courseCategories",
-      label: "Course Categories",
-      icon: Tags,
-      path: "/course-categories",
-    },
-    {
-      id: "courseBatches",
-      label: "Course Batches",
-      icon: Calendar,
-      path: "/course-batches",
-    },
-    {
-      id: "inquirySource",
-      label: "Inquiry Source",
-      icon: Share2,
-      path: "/inquiry-source",
-    },
-    {
-      id: "inquiryStatus",
-      label: "Inquiry Status",
-      icon: Activity,
-      path: "/inquiry-status",
-    },
-    {
-      id: "productCategory",
-      label: "Product Category",
-      icon: Package,
-      path: "/product-category",
-    },
-  ],
-},
-  courseManagement: {
-    title: "Course Management",
+  examinations: {
+    title: "Examinations",
+    icon: Award,
     items: [
       {
-        id: "courseList",
-        label: "Course List",
+        id: "allPastExams",
+        label: "All Past Examinations List",
+        icon: FileText,
+        path: "/all-past-exams",
+      },
+      {
+        id: "studentExams",
+        label: "Student Examinations",
+        icon: GraduationCap,
+        path: "/student-exams",
+      },
+      {
+        id: "roleExams",
+        label: "Role Examination",
+        icon: UserCog,
+        path: "/role-exams",
+      },
+      {
+        id: "goalExams",
+        label: "Goal Examination",
+        icon: Target,
+        path: "/goal-exams",
+      },
+    ],
+  },
+  branchManagement: {
+    title: "Branch Management",
+    icon: GitBranch,
+    items: [
+      {
+        id: "visitorsBook",
+        label: "Visitor's Book",
+        icon: Book,
+        path: "/visitors-book",
+      },
+      {
+        id: "referralAmount",
+        label: "Referral Amount",
+        icon: CreditCard,
+        path: "/referral-amount",
+      },
+      {
+        id: "roleGoalAssign",
+        label: "Role/Goal-Assign",
         icon: ClipboardList,
-        path: "/course-list",
+        path: "/role-goal-assign",
       },
       {
         id: "coursePlans",
         label: "Course Plans",
-        icon: BookOpen,
+        icon: Layers,
         path: "/course-plans",
-      },
-      {
-        id: "courseCategories",
-        label: "Course Categories",
-        icon: Grid,
-        path: "/course-categories",
       },
       {
         id: "courseBatches",
         label: "Course Batches",
-        icon: GraduationCap,
+        icon: Calendar,
         path: "/course-batches",
       },
       {
         id: "inquirySource",
         label: "Inquiry Source",
-        icon: FileSearch,
+        icon: Share2,
         path: "/inquiry-source",
       },
       {
         id: "inquiryStatus",
         label: "Inquiry Status",
-        icon: ClipboardCheck,
+        icon: Activity,
         path: "/inquiry-status",
       },
       {
         id: "productCategory",
         label: "Product Category",
-        icon: ShoppingBag,
+        icon: Package,
         path: "/product-category",
       },
     ],
   },
-  studentInfo: {
-    title: "Student Information",
-    items: [
-      {
-        id: "admission",
-        label: "Admission",
-        icon: UserCircle,
-        path: "/admission",
-      },
-      {
-        id: "reAdmission",
-        label: "Re-Admission",
-        icon: RefreshCw,
-        path: "/re-admission",
-      },
-      { id: "inquiry", label: "Inquiry", icon: FileSearch, path: "/inquiry" },
-      {
-        id: "studentFeeSummary",
-        label: "Student Fee Summary",
-        icon: FileBarChart,
-        path: "/student-fee-summary",
-      },
-    ],
-  },
   requestManagement: {
-    title: "Request Management",
-    items: [
-      {
-        id: "allRequest",
-        label: "All Request",
-        icon: ClipboardList,
-        path: "/all-request",
-      },
+    title: "All Request",
+    icon: ClipboardList,
+    items: [ 
       {
         id: "roleExamRequest",
         label: "Role Exam Request",
@@ -343,7 +314,8 @@ branchManagement: {
     ],
   },
   attendance: {
-    title: "Attendance",
+    title: "Mark Attendance",
+    icon: Calendar,
     items: [
       {
         id: "markTeacherAttendance",
@@ -356,18 +328,13 @@ branchManagement: {
         label: "Mark Student Attendance",
         icon: GraduationCap,
         path: "/mark-student-attendance",
-      }
+      },
     ],
   },
   certificate: {
-    title: "Certificate",
+    title: "Student Certificate",
+    icon: FileCheck,
     items: [
-      {
-        id: "studentCertificate",
-        label: "Student Certificate",
-        icon: FileCheck,
-        path: "/student-certificate",
-      },
       {
         id: "allCertificate",
         label: "All Certificate",
@@ -377,26 +344,16 @@ branchManagement: {
     ],
   },
   config: {
-    title: "Configuration",
+    title: "Config Information",
+    icon: Settings,
     items: [
-      {
-        id: "configInformation",
-        label: "Config Information",
-        icon: Info,
-        path: "/config-information",
-      },
       { id: "config", label: "Config", icon: Cog, path: "/config" },
     ],
   },
   financial: {
     title: "Financial Management",
+    icon: Wallet,
     items: [
-      {
-        id: "financialManagement",
-        label: "Financial Management",
-        icon: Wallet,
-        path: "/financial-management",
-      },
       {
         id: "category",
         label: "Category",
@@ -412,7 +369,8 @@ branchManagement: {
     ],
   },
   ecommerce: {
-    title: "E-commerce",
+    title: "Ecommerce",
+    icon: ShoppingCart,
     items: [
       {
         id: "ecommerce",
@@ -434,47 +392,14 @@ branchManagement: {
       },
     ],
   },
-  examinations: {
-    title: "Examinations",
-    items: [
-      {
-        id: "examinations",
-        label: "Examinations",
-        icon: Award,
-        path: "/examinations",
-      },
-      {
-        id: "allPastExams",
-        label: "All Past Examinations List",
-        icon: FileText,
-        path: "/all-past-exams",
-      },
-      {
-        id: "studentExams",
-        label: "Student Examinations",
-        icon: GraduationCap,
-        path: "/student-exams",
-      },
-      {
-        id: "roleExams",
-        label: "Role Examination",
-        icon: UserCog,
-        path: "/role-exams",
-      },
-      {
-        id: "goalExams",
-        label: "Goal Examination",
-        icon: Target,
-        path: "/goal-exams",
-      },
-    ],
-  },
+  
   userManagement: {
     title: "User Management",
+    icon: Users,
     items: [
       { id: "users", label: "Users", icon: Users, path: "/users" },
       { id: "profile", label: "Profile", icon: User, path: "/profile" },
-      { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
+      // { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
       { id: "logout", label: "Logout", icon: LogOut, path: "/logout" },
     ],
   },
@@ -487,7 +412,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
   const [expandedSections, setExpandedSections] = useState(() => {
     const state = {};
     Object.keys(allSections).forEach((key) => {
-      state[key] = false; // CLOSED by default
+      state[key] = false;
     });
     return state;
   });
@@ -501,7 +426,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
     y: 0,
   });
 
-  // Initialize all sections as collapsed by default
   useEffect(() => {
     const initialState = {};
     Object.keys(allSections).forEach((key) => {
@@ -575,7 +499,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
         onMouseEnter={() => !isOpen && setHoveredSection(sectionKey)}
         onMouseLeave={() => !isOpen && setHoveredSection(null)}
       >
-        {/* Section Header - Only visible when sidebar is open */}
         {isOpen && (
           <button
             onClick={() => toggleSection(sectionKey)}
@@ -598,7 +521,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </button>
         )}
 
-        {/* Section Items */}
         <div className={`space-y-1 ${!isOpen ? "pt-2" : ""}`}>
           {(isOpen ? isExpanded : true) &&
             items.map((item) => (
@@ -612,7 +534,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
             ))}
         </div>
 
-        {/* Section Tooltip for collapsed sidebar */}
         {!isOpen && hoveredSection === sectionKey && (
           <div className="absolute left-full top-0 ml-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
             <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
@@ -665,11 +586,10 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
 
   const currentOptions = websiteMode
     ? allSections.websiteOptions
-    : allSections.courseOptions;
+    : (allSections.courseOptions || allSections.websiteOptions);
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isOpen && (
         <div
           onClick={onToggle}
@@ -677,7 +597,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         ref={sidebarRef}
         className={`fixed lg:sticky top-0 z-40 h-screen bg-white border-r border-gray-200 shadow-sm
@@ -689,7 +608,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           }
           lg:flex lg:flex-col`}
       >
-        {/* Logo and Toggle */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 bg-white sticky top-0 z-10">
           {isOpen ? (
             <Link
@@ -747,7 +665,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </button>
         </div>
 
-         {isOpen && (
+        {isOpen && (
           <div className="p-3 border-b border-gray-200">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -767,7 +685,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                 </button>
               )}
 
-              {/* Search Results */}
               {searchTerm && searchResults.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
                   <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
@@ -832,17 +749,14 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </button>
         </div>
 
-        {/* Navigation Menu */}
         <nav className="flex-1 overflow-y-auto pb-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
           <div className="px-2 pt-4">
-            {/* Dashboard Link */}
             <NavItem
               to={websiteMode ? "/website-dashboard" : "/dashboard"}
               icon={Home}
               label="Dashboard"
             />
 
-            {/* Current Mode Section (Courses or Website) */}
             {isOpen && (
               <div className="mt-6 mb-4">
                 <div className="px-3 mb-2">
@@ -858,10 +772,8 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
               </div>
             )}
 
-            {/* All Other Sections */}
             <div className="mt-2">
               {Object.entries(allSections).map(([key, section]) => {
-                // Skip the current mode section since it's already displayed
                 if (
                   (websiteMode && key === "websiteOptions") ||
                   (!websiteMode && key === "courseOptions")
@@ -881,7 +793,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </div>
         </nav>
 
-        {/* Footer */}
         {isOpen && (
           <div className="border-t border-gray-200 p-4 bg-gradient-to-r from-gray-50 to-white">
             <div className="text-center">
@@ -907,106 +818,6 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
 };
 
 export default Sidebar;
-
-// Header Component
-const Header = ({ isSidebarOpen, onSidebarToggle, websiteMode, onLogout }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const getPageTitle = () => {
-    const path = location.pathname;
-    const pathMap = {
-      "/dashboard": "Dashboard",
-      "/website-dashboard": "Website Dashboard",
-      "/home-page": "Home Page Editor",
-      "/exam-grade-system": "Exam Grade System",
-      "/subjects": "Subjects",
-      "/languages": "Languages",
-      "/course-categories": "Course Categories",
-      "/course-award-categories": "Course Award Categories",
-      "/pages": "Pages Management",
-      "/media-library": "Media Library",
-      "/user-management": "User Management",
-      "/website-settings": "Website Settings",
-    };
-
-    return (
-      pathMap[path] ||
-      (websiteMode ? "Website Management" : "Course Management")
-    );
-  };
-
-  const handleLogout = () => {
-    onLogout();
-    navigate("/login");
-  };
-
-  return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-      <div className="px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Mobile Menu Button */}
-            <button
-              onClick={onSidebarToggle}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden"
-              aria-label="Toggle sidebar"
-            >
-              <Menu className="w-5 h-5 text-gray-600" />
-            </button>
-
-            {/* Page Title */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-2 h-8 rounded-full bg-gradient-to-b ${
-                  websiteMode
-                    ? "from-emerald-500 to-teal-600"
-                    : "from-blue-500 to-purple-600"
-                }`}
-              ></div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
-                  {getPageTitle()}
-                </h1>
-                <p className="text-sm text-gray-500 hidden sm:block">
-                  {websiteMode
-                    ? "Website Administration Panel"
-                    : "Course Management Panel"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* User Actions */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            <button
-              onClick={() => navigate("/profile")}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl hover:from-gray-100 hover:to-gray-200 transition-all duration-300 shadow-sm hover:shadow"
-              title="Profile"
-            >
-              <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-              <span className="font-medium text-sm sm:text-base hidden sm:inline">
-                Profile
-              </span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl hover:from-red-600 hover:to-pink-700 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 shadow-md hover:shadow-lg"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="font-medium text-sm sm:text-base hidden sm:inline">
-                Log out
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-};
-
-export { Header };
 
 const style = document.createElement("style");
 style.textContent = `

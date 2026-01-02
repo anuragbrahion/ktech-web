@@ -57,8 +57,7 @@ import Inquiry from "./pages/StudentManagement/Inquiry";
 import StudentFeeSummary from "./pages/StudentManagement/StudentFeeSummary";
 
 // Import new Request Management components
-import AllRequest from "./pages/RequestManagement/AllRequest";
-import RoleExamRequest from "./pages/RequestManagement/RoleExamRequest";
+ import RoleExamRequest from "./pages/RequestManagement/RoleExamRequest";
 import GoalExamRequest from "./pages/RequestManagement/GoalExamRequest";
 import CertificateRequestStatus from "./pages/RequestManagement/CertificateRequestStatus";
 import LeaveRequest from "./pages/RequestManagement/LeaveRequest";
@@ -69,15 +68,12 @@ import MarkTeacherAttendance from "./pages/AttendanceManagement/MarkTeacherAtten
 import MarkStudentAttendance from "./pages/AttendanceManagement/MarkStudentAttendance";
 
 // Import new Certificate Management components
-import StudentCertificate from "./pages/CertificateManagement/StudentCertificate";
-import AllCertificate from "./pages/CertificateManagement/AllCertificate";
+ import AllCertificate from "./pages/CertificateManagement/AllCertificate";
 
 // Import new Config Management components
-import ConfigInformation from "./pages/ConfigManagement/ConfigInformation";
-import Config from "./pages/ConfigManagement/Config";
+ import Config from "./pages/ConfigManagement/Config";
 
 // Import new Financial Management components
-import FinancialManagement from "./pages/FinancialManagement/FinancialManagement";
 import Category from "./pages/FinancialManagement/Category";
 import Transactions from "./pages/FinancialManagement/Transactions";
 
@@ -95,13 +91,10 @@ import LeaveType from "./pages/EmployeeManagement/LeaveType";
 import AssignTask from "./pages/EmployeeManagement/AssignTask";
 import AllAssignTask from "./pages/EmployeeManagement/AllAssignTask";
 import CourseCategory from "./pages/CourseManagement/CourseCategory";
-
-// Import new Examination Management components
-// import Examinations from "./pages/ExaminationManagement/Examinations";
-// import AllPastExaminationsList from "./pages/ExaminationManagement/AllPastExaminationsList";
-// import StudentExaminations from "./pages/ExaminationManagement/StudentExaminations";
-// import RoleExamination from "./pages/ExaminationManagement/RoleExamination";
-// import GoalExamination from "./pages/ExaminationManagement/GoalExamination";
+import AllPastExaminationsList from "./pages/ExaminationsManagement/AllPastExaminationsList";
+import StudentExaminations from "./pages/ExaminationsManagement/StudentExaminations";
+import RoleExamination from "./pages/ExaminationsManagement/RoleExamination";
+import GoalExamination from "./pages/ExaminationsManagement/GoalExamination";
 
 // Generic components for other routes
 const Pages = () => <div>Pages</div>;
@@ -264,7 +257,6 @@ const App = () => {
         <Route path="/student-fee-summary" element={renderProtectedRoute(StudentFeeSummary)} />
         
         {/* New Request Management Routes */}
-        <Route path="/all-request" element={renderProtectedRoute(AllRequest)} />
         <Route path="/role-exam-request" element={renderProtectedRoute(RoleExamRequest)} />
         <Route path="/goal-exam-request" element={renderProtectedRoute(GoalExamRequest)} />
         <Route path="/certificate-request-status" element={renderProtectedRoute(CertificateRequestStatus)} />
@@ -276,15 +268,12 @@ const App = () => {
         <Route path="/mark-student-attendance" element={renderProtectedRoute(MarkStudentAttendance)} />
         
         {/* New Certificate Routes */}
-        <Route path="/student-certificate" element={renderProtectedRoute(StudentCertificate)} />
         <Route path="/all-certificate" element={renderProtectedRoute(AllCertificate)} />
         
         {/* New Configuration Routes */}
-        <Route path="/config-information" element={renderProtectedRoute(ConfigInformation)} />
         <Route path="/config" element={renderProtectedRoute(Config)} />
         
         {/* New Financial Management Routes */}
-        <Route path="/financial-management" element={renderProtectedRoute(FinancialManagement)} />
         <Route path="/financial-category" element={renderProtectedRoute(Category)} />
         <Route path="/transactions" element={renderProtectedRoute(Transactions)} />
         
@@ -300,11 +289,10 @@ const App = () => {
         <Route path="/logout" element={renderProtectedRoute(Logout)} />
         
         {/* New Examination Routes */}
-        {/* <Route path="/examinations" element={renderProtectedRoute(Examinations)} />
         <Route path="/all-past-exams" element={renderProtectedRoute(AllPastExaminationsList)} />
         <Route path="/student-exams" element={renderProtectedRoute(StudentExaminations)} />
         <Route path="/role-exams" element={renderProtectedRoute(RoleExamination)} />
-        <Route path="/goal-exams" element={renderProtectedRoute(GoalExamination)} /> */}
+        <Route path="/goal-exams" element={renderProtectedRoute(GoalExamination)} />
 
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

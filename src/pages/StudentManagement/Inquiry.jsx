@@ -155,11 +155,11 @@ const Inquiry = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl">
-          <div className="bg-sky-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+          <div className="bg-gray-200 text-black p-4 rounded-t-lg flex justify-between items-center">
             <h2 className="text-xl font-semibold">Today's Follow Ups</h2>
             <button
               onClick={() => setIsFollowUpPopupOpen(false)}
-              className="text-white hover:text-gray-200 text-2xl"
+              className="text-black hover:text-gray-500 text-3xl"
             >
               ×
             </button>
@@ -301,8 +301,8 @@ const Inquiry = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="container mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-black">Inquiry Management</h1>
           <p className="text-black mt-2">Manage customer inquiries and follow-ups</p>

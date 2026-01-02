@@ -36,12 +36,12 @@ const TeacherDetailsModal = ({ isOpen, onClose, teacherData, onUpdate }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl">
-        <div className="bg-sky-500 text-white p-4 rounded-t-lg">
+        <div className="bg-gray-200 text-black p-4 rounded-t-lg">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">Update User - {teacherData.name}</h2>
             <button
               onClick={onClose}
-              className="text-white hover:text-gray-200"
+              className="text-black hover:text-gray-500"
             >
               ✕
             </button>

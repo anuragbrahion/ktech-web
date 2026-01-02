@@ -68,8 +68,8 @@ const LeaveType = () => {
   const tableHeaders = ['Type', 'Status', 'Actions'];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="container mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-black">Leave Type</h1>

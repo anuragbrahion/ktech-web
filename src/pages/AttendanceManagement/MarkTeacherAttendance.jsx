@@ -109,10 +109,10 @@ const MarkTeacherAttendance = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-sky-600">Marked Teacher Attendance</h1>
+          <h1 className="text-3xl font-bold">Marked Teacher Attendance</h1>
           <p className="text-black mt-2">Manage teacher attendance and details</p>
         </div>
 
@@ -188,29 +188,6 @@ const MarkTeacherAttendance = () => {
           />
         </div>
 
-        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-sky-700 mb-4">Attendance Summary</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-black">Attendance Rate</span>
-              <span className="font-bold text-green-600">
-                {((stats.present / stats.total) * 100).toFixed(1)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-black">Absent Rate</span>
-              <span className="font-bold text-red-600">
-                {((stats.absent / stats.total) * 100).toFixed(1)}%
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-black">Leave Rate</span>
-              <span className="font-bold text-yellow-600">
-                {((stats.leave / stats.total) * 100).toFixed(1)}%
-              </span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <TeacherDetailsModal

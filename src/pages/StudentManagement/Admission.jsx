@@ -515,10 +515,10 @@ const Admission = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="container mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-sky-600">Student Admission List</h1>
+          <h1 className="text-3xl font-bold">Student Admission List</h1>
           <p className="text-black mt-2">Manage student admissions and enrollment</p>
         </div>
 

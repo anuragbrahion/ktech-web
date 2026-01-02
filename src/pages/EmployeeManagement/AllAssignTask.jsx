@@ -122,8 +122,8 @@ const AllAssignTask = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="container mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-black">Assign Task List</h1>
           <p className="text-black mt-2">View and manage all assigned tasks</p>

@@ -4,7 +4,7 @@ const AttendanceDetailsModal = ({ isOpen, onClose, studentData, onSubmit }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-sky-600 mb-4">Attendance Details</h2>
+        <h2 className="text-2xl font-bold mb-4">Attendance Details</h2>
         <form>
           <div className="mb-4">
             <label className="block text-black mb-2">Name</label>
