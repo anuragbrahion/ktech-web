@@ -193,36 +193,36 @@ const allSections = {
       },
     ],
   },
-  examinations: {
-    title: "Examinations",
-    icon: Award,
-    items: [
-      {
-        id: "allPastExams",
-        label: "All Past Examinations List",
-        icon: FileText,
-        path: "/all-past-exams",
-      },
-      {
-        id: "studentExams",
-        label: "Student Examinations",
-        icon: GraduationCap,
-        path: "/student-exams",
-      },
-      {
-        id: "roleExams",
-        label: "Role Examination",
-        icon: UserCog,
-        path: "/role-exams",
-      },
-      {
-        id: "goalExams",
-        label: "Goal Examination",
-        icon: Target,
-        path: "/goal-exams",
-      },
-    ],
-  },
+  // examinations: {
+  //   title: "Examinations",
+  //   icon: Award,
+  //   items: [
+  //     {
+  //       id: "allPastExams",
+  //       label: "All Past Examinations List",
+  //       icon: FileText,
+  //       path: "/all-past-exams",
+  //     },
+  //     {
+  //       id: "studentExams",
+  //       label: "Student Examinations",
+  //       icon: GraduationCap,
+  //       path: "/student-exams",
+  //     },
+  //     {
+  //       id: "roleExams",
+  //       label: "Role Examination",
+  //       icon: UserCog,
+  //       path: "/role-exams",
+  //     },
+  //     {
+  //       id: "goalExams",
+  //       label: "Goal Examination",
+  //       icon: Target,
+  //       path: "/goal-exams",
+  //     },
+  //   ],
+  // },
   branchManagement: {
     title: "Branch Management",
     icon: GitBranch,
@@ -277,132 +277,132 @@ const allSections = {
       },
     ],
   },
-  requestManagement: {
-    title: "All Request",
-    icon: ClipboardList,
-    items: [ 
-      {
-        id: "roleExamRequest",
-        label: "Role Exam Request",
-        icon: Award,
-        path: "/role-exam-request",
-      },
-      {
-        id: "goalExamRequest",
-        label: "Goal Exam Request",
-        icon: Target,
-        path: "/goal-exam-request",
-      },
-      {
-        id: "certificateRequestStatus",
-        label: "Certificate Request Status",
-        icon: FileCheck,
-        path: "/certificate-request-status",
-      },
-      {
-        id: "leaveRequest",
-        label: "Leave Request",
-        icon: Calendar,
-        path: "/leave-request",
-      },
-      {
-        id: "complaints",
-        label: "Complaints",
-        icon: AlertCircle,
-        path: "/complaints",
-      },
-    ],
-  },
-  attendance: {
-    title: "Mark Attendance",
-    icon: Calendar,
-    items: [
-      {
-        id: "markTeacherAttendance",
-        label: "Mark Teacher Attendance",
-        icon: Users,
-        path: "/mark-teacher-attendance",
-      },
-      {
-        id: "markStudentAttendance",
-        label: "Mark Student Attendance",
-        icon: GraduationCap,
-        path: "/mark-student-attendance",
-      },
-    ],
-  },
-  certificate: {
-    title: "Student Certificate",
-    icon: FileCheck,
-    items: [
-      {
-        id: "allCertificate",
-        label: "All Certificate",
-        icon: FileCheck,
-        path: "/all-certificate",
-      },
-    ],
-  },
-  config: {
-    title: "Config Information",
-    icon: Settings,
-    items: [
-      { id: "config", label: "Config", icon: Cog, path: "/config" },
-    ],
-  },
-  financial: {
-    title: "Financial Management",
-    icon: Wallet,
-    items: [
-      {
-        id: "category",
-        label: "Category",
-        icon: Grid,
-        path: "/financial-category",
-      },
-      {
-        id: "transactions",
-        label: "Transactions",
-        icon: CreditCard,
-        path: "/transactions",
-      },
-    ],
-  },
-  ecommerce: {
-    title: "Ecommerce",
-    icon: ShoppingCart,
-    items: [
-      {
-        id: "ecommerce",
-        label: "E-commerce",
-        icon: ShoppingCart,
-        path: "/ecommerce",
-      },
-      {
-        id: "myOrders",
-        label: "My Orders",
-        icon: ShoppingBag,
-        path: "/my-orders",
-      },
-      {
-        id: "contactUs",
-        label: "Contact Us",
-        icon: Phone,
-        path: "/contact-us",
-      },
-    ],
-  },
+  // requestManagement: {
+  //   title: "All Request",
+  //   icon: ClipboardList,
+  //   items: [ 
+  //     {
+  //       id: "roleExamRequest",
+  //       label: "Role Exam Request",
+  //       icon: Award,
+  //       path: "/role-exam-request",
+  //     },
+  //     {
+  //       id: "goalExamRequest",
+  //       label: "Goal Exam Request",
+  //       icon: Target,
+  //       path: "/goal-exam-request",
+  //     },
+  //     {
+  //       id: "certificateRequestStatus",
+  //       label: "Certificate Request Status",
+  //       icon: FileCheck,
+  //       path: "/certificate-request-status",
+  //     },
+  //     {
+  //       id: "leaveRequest",
+  //       label: "Leave Request",
+  //       icon: Calendar,
+  //       path: "/leave-request",
+  //     },
+  //     {
+  //       id: "complaints",
+  //       label: "Complaints",
+  //       icon: AlertCircle,
+  //       path: "/complaints",
+  //     },
+  //   ],
+  // },
+  // attendance: {
+  //   title: "Mark Attendance",
+  //   icon: Calendar,
+  //   items: [
+  //     {
+  //       id: "markTeacherAttendance",
+  //       label: "Mark Teacher Attendance",
+  //       icon: Users,
+  //       path: "/mark-teacher-attendance",
+  //     },
+  //     {
+  //       id: "markStudentAttendance",
+  //       label: "Mark Student Attendance",
+  //       icon: GraduationCap,
+  //       path: "/mark-student-attendance",
+  //     },
+  //   ],
+  // },
+  // certificate: {
+  //   title: "Student Certificate",
+  //   icon: FileCheck,
+  //   items: [
+  //     {
+  //       id: "allCertificate",
+  //       label: "All Certificate",
+  //       icon: FileCheck,
+  //       path: "/all-certificate",
+  //     },
+  //   ],
+  // },
+  // config: {
+  //   title: "Config Information",
+  //   icon: Settings,
+  //   items: [
+  //     { id: "config", label: "Config", icon: Cog, path: "/config" },
+  //   ],
+  // },
+  // financial: {
+  //   title: "Financial Management",
+  //   icon: Wallet,
+  //   items: [
+  //     {
+  //       id: "category",
+  //       label: "Category",
+  //       icon: Grid,
+  //       path: "/financial-category",
+  //     },
+  //     {
+  //       id: "transactions",
+  //       label: "Transactions",
+  //       icon: CreditCard,
+  //       path: "/transactions",
+  //     },
+  //   ],
+  // },
+  // ecommerce: {
+  //   title: "Ecommerce",
+  //   icon: ShoppingCart,
+  //   items: [
+  //     {
+  //       id: "ecommerce",
+  //       label: "E-commerce",
+  //       icon: ShoppingCart,
+  //       path: "/ecommerce",
+  //     },
+  //     {
+  //       id: "myOrders",
+  //       label: "My Orders",
+  //       icon: ShoppingBag,
+  //       path: "/my-orders",
+  //     },
+  //     {
+  //       id: "contactUs",
+  //       label: "Contact Us",
+  //       icon: Phone,
+  //       path: "/contact-us",
+  //     },
+  //   ],
+  // },
   
-  userManagement: {
-    title: "User Management",
-    icon: Users,
-    items: [
-      { id: "users", label: "Users", icon: Users, path: "/users" },
-      { id: "profile", label: "Profile", icon: User, path: "/profile" },
-      // { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
-      { id: "logout", label: "Logout", icon: LogOut, path: "/logout" },
-    ],
-  },
+  // userManagement: {
+  //   title: "User Management",
+  //   icon: Users,
+  //   items: [
+  //     { id: "users", label: "Users", icon: Users, path: "/users" },
+  //     { id: "profile", label: "Profile", icon: User, path: "/profile" },
+  //     // { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
+  //     { id: "logout", label: "Logout", icon: LogOut, path: "/logout" },
+  //   ],
+  // },
 };
 
 const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
