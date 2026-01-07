@@ -393,16 +393,16 @@ const allSections = {
   //   ],
   // },
   
-  // userManagement: {
-  //   title: "User Management",
-  //   icon: Users,
-  //   items: [
-  //     { id: "users", label: "Users", icon: Users, path: "/users" },
-  //     { id: "profile", label: "Profile", icon: User, path: "/profile" },
-  //     // { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
-  //     { id: "logout", label: "Logout", icon: LogOut, path: "/logout" },
-  //   ],
-  // },
+  userManagement: {
+    title: "User Management",
+    icon: Users,
+    items: [
+      { id: "users", label: "Users", icon: Users, path: "/users" },
+      { id: "profile", label: "Profile", icon: User, path: "/profile" },
+      // { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
+      { id: "logout", label: "Logout", icon: LogOut, path: "/logout" },
+    ],
+  },
 };
 
 const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
