@@ -277,42 +277,42 @@ const allSections = {
       },
     ],
   },
-  // requestManagement: {
-  //   title: "All Request",
-  //   icon: ClipboardList,
-  //   items: [ 
-  //     {
-  //       id: "roleExamRequest",
-  //       label: "Role Exam Request",
-  //       icon: Award,
-  //       path: "/role-exam-request",
-  //     },
-  //     {
-  //       id: "goalExamRequest",
-  //       label: "Goal Exam Request",
-  //       icon: Target,
-  //       path: "/goal-exam-request",
-  //     },
-  //     {
-  //       id: "certificateRequestStatus",
-  //       label: "Certificate Request Status",
-  //       icon: FileCheck,
-  //       path: "/certificate-request-status",
-  //     },
-  //     {
-  //       id: "leaveRequest",
-  //       label: "Leave Request",
-  //       icon: Calendar,
-  //       path: "/leave-request",
-  //     },
-  //     {
-  //       id: "complaints",
-  //       label: "Complaints",
-  //       icon: AlertCircle,
-  //       path: "/complaints",
-  //     },
-  //   ],
-  // },
+  requestManagement: {
+    title: "All Request",
+    icon: ClipboardList,
+    items: [ 
+      {
+        id: "roleExamRequest",
+        label: "Role Exam Request",
+        icon: Award,
+        path: "/role-exam-request",
+      },
+      {
+        id: "goalExamRequest",
+        label: "Goal Exam Request",
+        icon: Target,
+        path: "/goal-exam-request",
+      },
+      {
+        id: "certificateRequestStatus",
+        label: "Certificate Request Status",
+        icon: FileCheck,
+        path: "/certificate-request-status",
+      },
+      {
+        id: "leaveRequest",
+        label: "Leave Request",
+        icon: Calendar,
+        path: "/leave-request",
+      },
+      {
+        id: "complaints",
+        label: "Complaints",
+        icon: AlertCircle,
+        path: "/complaints",
+      },
+    ],
+  },
   // attendance: {
   //   title: "Mark Attendance",
   //   icon: Calendar,
