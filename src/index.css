@@ -2,9 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-body{
-   font-family: "Nunito", sans-serif;
-}
+
 
 .base-bg-color {
   background-color: #7038C4;

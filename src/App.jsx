@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
+// import { useSelector } from "react-redux";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Login from "./pages/Login/Login";
@@ -21,68 +24,39 @@ import TermsAnDCon from "./pages/WebsiteManagement/TermsConditions/page";
 import PrivacyPolicy from "./pages/WebsiteManagement/PrivacyPolicy/page";
 import CourseFAQEditor from "./pages/WebsiteManagement/CourseFaq/page";
 import ConfigDetailsForm from "./pages/WebsiteManagement/CompanyDetails/page";
-
-// Import existing Course Management components
-// import ExamGradeSystem from "./pages/ExamGradeSystem";
-// import Subjects from "./pages/Subjects";
-// import Languages from "./pages/Languages";
-// import CourseCategories from "./pages/CourseCategories";
-// import CourseAwardCategories from "./pages/CourseAwardCategories";
-
-// Import new Employee Management components
 import RoleManagement from "./pages/EmployeeManagement/RoleManagement";
 import GoalManagement from "./pages/EmployeeManagement/GoalManagement";
 import Designation from "./pages/EmployeeManagement/Designation";
 import Department from "./pages/EmployeeManagement/Department";
 import TeacherDirectory from "./pages/EmployeeManagement/TeacherDirectory";
-
-// Import new Branch Management components
 import BranchManagementNew from "./pages/BranchManagement/BranchManagement";
 import VisitorsBook from "./pages/BranchManagement/VisitorsBook";
 import ReferralAmount from "./pages/BranchManagement/ReferralAmount";
 import RoleGoalAssign from "./pages/BranchManagement/RoleGoalAssign";
-
-// Import new Course Management components
 import CourseList from "./pages/CourseManagement/CourseList";
 import CoursePlans from "./pages/CourseManagement/CoursePlans";
 import CourseBatches from "./pages/CourseManagement/CourseBatches";
 import InquirySource from "./pages/CourseManagement/InquirySource";
 import InquiryStatus from "./pages/CourseManagement/InquiryStatus";
 import ProductCategory from "./pages/CourseManagement/ProductCategory";
-
-// Import new Student Management components
 import Admission from "./pages/StudentManagement/Admission";
 import ReAdmission from "./pages/StudentManagement/ReAdmission";
 import Inquiry from "./pages/StudentManagement/Inquiry";
 import StudentFeeSummary from "./pages/StudentManagement/StudentFeeSummary";
-
-// Import new Request Management components
- import RoleExamRequest from "./pages/RequestManagement/RoleExamRequest";
+import RoleExamRequest from "./pages/RequestManagement/RoleExamRequest";
 import GoalExamRequest from "./pages/RequestManagement/GoalExamRequest";
 import CertificateRequestStatus from "./pages/RequestManagement/CertificateRequestStatus";
 import LeaveRequest from "./pages/RequestManagement/LeaveRequest";
 import Complaints from "./pages/RequestManagement/Complaints";
-
-// Import new Attendance Management components
 import MarkTeacherAttendance from "./pages/AttendanceManagement/MarkTeacherAttendance";
 import MarkStudentAttendance from "./pages/AttendanceManagement/MarkStudentAttendance";
-
-// Import new Certificate Management components
- import AllCertificate from "./pages/CertificateManagement/AllCertificate";
-
-// Import new Config Management components
- import Config from "./pages/ConfigManagement/Config";
-
-// Import new Financial Management components
+import AllCertificate from "./pages/CertificateManagement/AllCertificate";
+import Config from "./pages/ConfigManagement/Config";
 import Category from "./pages/FinancialManagement/Category";
 import Transactions from "./pages/FinancialManagement/Transactions";
-
-// Import new E-commerce Management components
 import Ecommerce from "./pages/EcommerceManagement/Ecommerce";
 import MyOrders from "./pages/EcommerceManagement/MyOrders";
 import ContactUs from "./pages/EcommerceManagement/ContactUs";
-
-// Import new User Management components
 import Users from "./pages/UserManagement/Users";
 import Profile from "./pages/UserManagement/Profile";
 import Settings from "./pages/UserManagement/Settings";
@@ -95,14 +69,14 @@ import AllPastExaminationsList from "./pages/ExaminationsManagement/AllPastExami
 import StudentExaminations from "./pages/ExaminationsManagement/StudentExaminations";
 import RoleExamination from "./pages/ExaminationsManagement/RoleExamination";
 import GoalExamination from "./pages/ExaminationsManagement/GoalExamination";
+import LandingPage from "./pages/LandingPage/LandingPage";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 
-// Generic components for other routes
 const Pages = () => <div>Pages</div>;
 const MediaLibrary = () => <div>Media Library</div>;
-const UserManagement = () => <div>User Management</div>;
 const WebsiteSettings = () => <div>Website Settings</div>;
 
-// Main Layout Component
 const MainLayout = ({
   children,
   onModeToggle,
@@ -128,7 +102,7 @@ const MainLayout = ({
           onLogout={onLogout}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>
@@ -136,166 +110,422 @@ const MainLayout = ({
   );
 };
 
-// Protected Route Wrapper
-const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  return isLoggedIn ? children : <Navigate to="/login" replace />;
-};
-
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => 
-    localStorage.getItem("isLoggedIn") === "true"
-  );
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [websiteMode, setWebsiteMode] = useState(false);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem("isLoggedIn", "true");
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setWebsiteMode(false);
-    localStorage.removeItem("isLoggedIn");
-  };
+  // const { isAuthenticated } = useSelector((state) => state.auth);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [websiteMode, setWebsiteMode] = React.useState(false);
 
   const toggleWebsiteMode = () => setWebsiteMode(!websiteMode);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Helper function to render protected routes
-  const renderProtectedRoute = (Component) => (
-    <ProtectedRoute>
-      <MainLayout
-        websiteMode={websiteMode}
-        onModeToggle={toggleWebsiteMode}
-        onLogout={handleLogout}
-        onSidebarToggle={toggleSidebar}
-        isSidebarOpen={isSidebarOpen}
-      >
-        <Component />
-      </MainLayout>
-    </ProtectedRoute>
+  const renderMainLayout = (Component) => (
+    <MainLayout
+      websiteMode={websiteMode}
+      onModeToggle={toggleWebsiteMode}
+      onLogout={() => {}}
+      onSidebarToggle={toggleSidebar}
+      isSidebarOpen={isSidebarOpen}
+    >
+      <Component />
+    </MainLayout>
   );
 
   return (
     <Router>
       <Routes>
-        {/* Login Route */}
-        <Route
-          path="/login"
-          element={
-            isLoggedIn ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Login onLogin={handleLogin} />
-            )
-          }
-        />
+        <Route path="/" element={<Navigate to="/welcome" replace />} />
+        
+        <Route path="/welcome" element={
+          <PublicRoute>
+            <LandingPage />
+          </PublicRoute>
+        } />
+        
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
+        
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            {renderMainLayout(Dashboard)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/blogs" element={
+          <ProtectedRoute>
+            {renderMainLayout(Blogs)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/branches" element={
+          <ProtectedRoute>
+            {renderMainLayout(BranchManagement)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/testimonials" element={
+          <ProtectedRoute>
+            {renderMainLayout(TestimonialManagement)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/language" element={
+          <ProtectedRoute>
+            {renderMainLayout(LanguageManagement)}
+          </ProtectedRoute>
+        } />
 
-        {/* Root redirect */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
-        {/* Dashboard */}
-        <Route path="/dashboard" element={renderProtectedRoute(Dashboard)} />
-        
-        {/* Existing Website Management Routes */}
-        <Route path="/blogs" element={renderProtectedRoute(Blogs)} />
-        <Route path="/branches" element={renderProtectedRoute(BranchManagement)} />
-        <Route path="/testimonials" element={renderProtectedRoute(TestimonialManagement)} />
-        <Route path="/language" element={renderProtectedRoute(LanguageManagement)} />
-        <Route path="/web-about" element={renderProtectedRoute(AboutUsEditor)} />
-        <Route path="/why-us" element={renderProtectedRoute(WhyUs)} />
-        <Route path="/terms-conditions" element={renderProtectedRoute(TermsAnDCon)} />
-        <Route path="/course-faq" element={renderProtectedRoute(CourseFAQEditor)} />
-        <Route path="/company-details" element={renderProtectedRoute(ConfigDetailsForm)} />
-        <Route path="/privacy-policy" element={renderProtectedRoute(PrivacyPolicy)} />
-        <Route path="/home-page" element={renderProtectedRoute(HomePage)} />
-        
-        {/* Existing Course Management Routes */}
-        {/* <Route path="/exam-grade-system" element={renderProtectedRoute(ExamGradeSystem)} />
-        <Route path="/subjects" element={renderProtectedRoute(Subjects)} />
-        <Route path="/languages" element={renderProtectedRoute(Languages)} />
-        <Route path="/course-categories" element={renderProtectedRoute(CourseCategories)} />
-        <Route path="/course-award-categories" element={renderProtectedRoute(CourseAwardCategories)} /> */}
-        <Route path="/website-dashboard" element={renderProtectedRoute(WebsiteDashboard)} />
-        <Route path="/pages" element={renderProtectedRoute(Pages)} />
-        <Route path="/media-library" element={renderProtectedRoute(MediaLibrary)} />
-        <Route path="/user-management" element={renderProtectedRoute(UserManagement)} />
-        <Route path="/website-settings" element={renderProtectedRoute(WebsiteSettings)} />
-        
-        {/* New Employee Management Routes */}
-        <Route path="/role" element={renderProtectedRoute(RoleManagement)} />
-        <Route path="/goal" element={renderProtectedRoute(GoalManagement)} />
-        <Route path="/designation" element={renderProtectedRoute(Designation)} />
-        <Route path="/department" element={renderProtectedRoute(Department)} />
-        <Route path="/teacher-directory" element={renderProtectedRoute(TeacherDirectory)} />
-        <Route path="/leave-type" element={renderProtectedRoute(LeaveType)} />
-        <Route path="/assign-task" element={renderProtectedRoute(AssignTask)} />
-        <Route path="/all-assign-task" element={renderProtectedRoute(AllAssignTask)} />
+        <Route path="/forgot-password" element={
+  <PublicRoute>
+    <ForgotPassword />
+  </PublicRoute>
+} />
 
+<Route path="/reset-password" element={
+  <PublicRoute>
+    <ResetPassword />
+  </PublicRoute>
+} />
         
-        {/* New Branch Management Routes */}
-        <Route path="/branch-management" element={renderProtectedRoute(BranchManagementNew)} />
-        <Route path="/visitors-book" element={renderProtectedRoute(VisitorsBook)} />
-        <Route path="/referral-amount" element={renderProtectedRoute(ReferralAmount)} />
-        <Route path="/role-goal-assign" element={renderProtectedRoute(RoleGoalAssign)} />
+        <Route path="/web-about" element={
+          <ProtectedRoute>
+            {renderMainLayout(AboutUsEditor)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Course Management Routes */}
-        <Route path="/course-list" element={renderProtectedRoute(CourseList)} />
-        <Route path="/course-categories" element={renderProtectedRoute(CourseCategory)} />
-        <Route path="/course-plans" element={renderProtectedRoute(CoursePlans)} />
-        <Route path="/course-batches" element={renderProtectedRoute(CourseBatches)} />
-        <Route path="/inquiry-source" element={renderProtectedRoute(InquirySource)} />
-        <Route path="/inquiry-status" element={renderProtectedRoute(InquiryStatus)} />
-        <Route path="/product-category" element={renderProtectedRoute(ProductCategory)} />
+        <Route path="/why-us" element={
+          <ProtectedRoute>
+            {renderMainLayout(WhyUs)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Student Information Routes */}
-        <Route path="/admission" element={renderProtectedRoute(Admission)} />
-        <Route path="/re-admission" element={renderProtectedRoute(ReAdmission)} />
-        <Route path="/inquiry" element={renderProtectedRoute(Inquiry)} />
-        <Route path="/student-fee-summary" element={renderProtectedRoute(StudentFeeSummary)} />
+        <Route path="/terms-conditions" element={
+          <ProtectedRoute>
+            {renderMainLayout(TermsAnDCon)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Request Management Routes */}
-        <Route path="/role-exam-request" element={renderProtectedRoute(RoleExamRequest)} />
-        <Route path="/goal-exam-request" element={renderProtectedRoute(GoalExamRequest)} />
-        <Route path="/certificate-request-status" element={renderProtectedRoute(CertificateRequestStatus)} />
-        <Route path="/leave-request" element={renderProtectedRoute(LeaveRequest)} />
-        <Route path="/complaints" element={renderProtectedRoute(Complaints)} />
+        <Route path="/course-faq" element={
+          <ProtectedRoute>
+            {renderMainLayout(CourseFAQEditor)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Attendance Routes */}
-        <Route path="/mark-teacher-attendance" element={renderProtectedRoute(MarkTeacherAttendance)} />
-        <Route path="/mark-student-attendance" element={renderProtectedRoute(MarkStudentAttendance)} />
+        <Route path="/company-details" element={
+          <ProtectedRoute>
+            {renderMainLayout(ConfigDetailsForm)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Certificate Routes */}
-        <Route path="/all-certificate" element={renderProtectedRoute(AllCertificate)} />
+        <Route path="/privacy-policy" element={
+          <ProtectedRoute>
+            {renderMainLayout(PrivacyPolicy)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Configuration Routes */}
-        <Route path="/config" element={renderProtectedRoute(Config)} />
+        <Route path="/home-page" element={
+          <ProtectedRoute>
+            {renderMainLayout(HomePage)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Financial Management Routes */}
-        <Route path="/financial-category" element={renderProtectedRoute(Category)} />
-        <Route path="/transactions" element={renderProtectedRoute(Transactions)} />
+        <Route path="/website-dashboard" element={
+          <ProtectedRoute>
+            {renderMainLayout(WebsiteDashboard)}
+          </ProtectedRoute>
+        } />
         
-        {/* New E-commerce Routes */}
-        <Route path="/ecommerce" element={renderProtectedRoute(Ecommerce)} />
-        <Route path="/my-orders" element={renderProtectedRoute(MyOrders)} />
-        <Route path="/contact-us" element={renderProtectedRoute(ContactUs)} />
+        <Route path="/pages" element={
+          <ProtectedRoute>
+            {renderMainLayout(Pages)}
+          </ProtectedRoute>
+        } />
         
-        {/* New User Management Routes */}
-        <Route path="/users" element={renderProtectedRoute(Users)} />
-        <Route path="/profile" element={renderProtectedRoute(Profile)} />
-        <Route path="/settings" element={renderProtectedRoute(Settings)} />
-        <Route path="/logout" element={renderProtectedRoute(Logout)} />
+        <Route path="/media-library" element={
+          <ProtectedRoute>
+            {renderMainLayout(MediaLibrary)}
+          </ProtectedRoute>
+        } />
         
-        {/* New Examination Routes */}
-        <Route path="/all-past-exams" element={renderProtectedRoute(AllPastExaminationsList)} />
-        <Route path="/student-exams" element={renderProtectedRoute(StudentExaminations)} />
-        <Route path="/role-exams" element={renderProtectedRoute(RoleExamination)} />
-        <Route path="/goal-exams" element={renderProtectedRoute(GoalExamination)} />
-
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/website-settings" element={
+          <ProtectedRoute>
+            {renderMainLayout(WebsiteSettings)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/role" element={
+          <ProtectedRoute>
+            {renderMainLayout(RoleManagement)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/goal" element={
+          <ProtectedRoute>
+            {renderMainLayout(GoalManagement)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/designation" element={
+          <ProtectedRoute>
+            {renderMainLayout(Designation)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/department" element={
+          <ProtectedRoute>
+            {renderMainLayout(Department)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher-directory" element={
+          <ProtectedRoute>
+            {renderMainLayout(TeacherDirectory)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/leave-type" element={
+          <ProtectedRoute>
+            {renderMainLayout(LeaveType)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/assign-task" element={
+          <ProtectedRoute>
+            {renderMainLayout(AssignTask)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/all-assign-task" element={
+          <ProtectedRoute>
+            {renderMainLayout(AllAssignTask)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/branch-management" element={
+          <ProtectedRoute>
+            {renderMainLayout(BranchManagementNew)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/visitors-book" element={
+          <ProtectedRoute>
+            {renderMainLayout(VisitorsBook)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/referral-amount" element={
+          <ProtectedRoute>
+            {renderMainLayout(ReferralAmount)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/role-goal-assign" element={
+          <ProtectedRoute>
+            {renderMainLayout(RoleGoalAssign)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/course-list" element={
+          <ProtectedRoute>
+            {renderMainLayout(CourseList)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/course-categories" element={
+          <ProtectedRoute>
+            {renderMainLayout(CourseCategory)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/course-plans" element={
+          <ProtectedRoute>
+            {renderMainLayout(CoursePlans)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/course-batches" element={
+          <ProtectedRoute>
+            {renderMainLayout(CourseBatches)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/inquiry-source" element={
+          <ProtectedRoute>
+            {renderMainLayout(InquirySource)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/inquiry-status" element={
+          <ProtectedRoute>
+            {renderMainLayout(InquiryStatus)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/product-category" element={
+          <ProtectedRoute>
+            {renderMainLayout(ProductCategory)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/admission" element={
+          <ProtectedRoute>
+            {renderMainLayout(Admission)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/re-admission" element={
+          <ProtectedRoute>
+            {renderMainLayout(ReAdmission)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/inquiry" element={
+          <ProtectedRoute>
+            {renderMainLayout(Inquiry)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student-fee-summary" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentFeeSummary)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/role-exam-request" element={
+          <ProtectedRoute>
+            {renderMainLayout(RoleExamRequest)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/goal-exam-request" element={
+          <ProtectedRoute>
+            {renderMainLayout(GoalExamRequest)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/certificate-request-status" element={
+          <ProtectedRoute>
+            {renderMainLayout(CertificateRequestStatus)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/leave-request" element={
+          <ProtectedRoute>
+            {renderMainLayout(LeaveRequest)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/complaints" element={
+          <ProtectedRoute>
+            {renderMainLayout(Complaints)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/mark-teacher-attendance" element={
+          <ProtectedRoute>
+            {renderMainLayout(MarkTeacherAttendance)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/mark-student-attendance" element={
+          <ProtectedRoute>
+            {renderMainLayout(MarkStudentAttendance)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/all-certificate" element={
+          <ProtectedRoute>
+            {renderMainLayout(AllCertificate)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/config" element={
+          <ProtectedRoute>
+            {renderMainLayout(Config)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/financial-category" element={
+          <ProtectedRoute>
+            {renderMainLayout(Category)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/transactions" element={
+          <ProtectedRoute>
+            {renderMainLayout(Transactions)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/ecommerce" element={
+          <ProtectedRoute>
+            {renderMainLayout(Ecommerce)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/my-orders" element={
+          <ProtectedRoute>
+            {renderMainLayout(MyOrders)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/contact-us" element={
+          <ProtectedRoute>
+            {renderMainLayout(ContactUs)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/users" element={
+          <ProtectedRoute>
+            {renderMainLayout(Users)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            {renderMainLayout(Profile)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            {renderMainLayout(Settings)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/logout" element={
+          <ProtectedRoute>
+            {renderMainLayout(Logout)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/all-past-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(AllPastExaminationsList)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentExaminations)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/role-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(RoleExamination)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/goal-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(GoalExamination)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="*" element={<Navigate to="/welcome" replace />} />
       </Routes>
     </Router>
   );

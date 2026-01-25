@@ -2,7 +2,7 @@ import React from "react";
 import { Menu, User, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Header = ({ isSidebarOpen, onSidebarToggle, websiteMode, onLogout }) => {
+const Header = ({ onSidebarToggle, websiteMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,12 +30,13 @@ const Header = ({ isSidebarOpen, onSidebarToggle, websiteMode, onLogout }) => {
   };
 
   const handleLogout = () => {
-    onLogout();
-    navigate("/login");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/welcome");
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30 h-16">
       <div className="px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -48,22 +49,10 @@ const Header = ({ isSidebarOpen, onSidebarToggle, websiteMode, onLogout }) => {
             </button>
 
             <div className="flex items-center gap-3">
-              <div
-                className={`w-2 h-8 rounded-full bg-gradient-to-b ${
-                  websiteMode
-                    ? "from-emerald-500 to-teal-600"
-                    : "from-blue-500 to-purple-600"
-                }`}
-              ></div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-800">
                   {getPageTitle()}
                 </h1>
-                <p className="text-sm text-gray-500 hidden sm:block">
-                  {websiteMode
-                    ? "Website Administration Panel"
-                    : "Course Management Panel"}
-                </p>
               </div>
             </div>
           </div>

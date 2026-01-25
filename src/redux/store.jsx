@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import AuthSlice from './slices/AuthSlice';
-import findPassPhrase from './slices/findPassPhraseSlice'
-import adminSlice from './slices/AdminSlice';
+ import adminSlice from './slices/AdminSlice';
+ import websiteSlice from './slices/website';
 
 export const store = configureStore({
   reducer: {
     auth:AuthSlice,
-    admin:adminSlice,
-    findPassPhrase:findPassPhrase
+    admin:adminSlice, 
+    website: websiteSlice
   },
 });
