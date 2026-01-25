@@ -96,8 +96,7 @@ export default function Login() {
         try {
             const loginPayload = {
                 email,
-                password,
-                userType: role || "student"
+                password
             };
             
             const res = await dispatch(login(loginPayload)).unwrap();
