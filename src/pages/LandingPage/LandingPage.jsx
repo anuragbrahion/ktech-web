@@ -72,6 +72,8 @@ const LandingPage = () => {
       if (response.data && response.data?.data) {
         const data = response.data.data;
         setData(data);
+
+        
         
         // Update stats from data if available
         // Note: You might need to adjust this based on actual API response
