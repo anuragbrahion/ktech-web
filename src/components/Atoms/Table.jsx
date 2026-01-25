@@ -1,34 +1,60 @@
-import React from 'react'
-import Pagination from '../Pagination/Pagination'
-import NotFound from './NotFound'
-const TableData = ({ tableHeadings = [], data, currentPage = 1, size = 10, handlePageChange, total = 10,}) => {
-  return (
-    <>
-    {/* {showDateFilter && (
+import Pagination from '../Pagination/Pagination';
+import NotFound from './NotFound';
 
-      <GlobalDateRangePicker onDateChange={handleDateChange} />
-    )
+const TableData = ({ 
+  tableHeadings = [], 
+  data, 
+  currentPage = 1, 
+  size = 10, 
+  handlePageChange, 
+  total = 0,
+  renderRow = null,
+  renderMobileRow = null
+}) => {
+  
+  // Default renderRow function if not provided
+  const defaultRenderRow = (row, index) => {
+    const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+    return (
+      <tr key={index} className={`${rowClass} border-b border-gray-200`}>
+        {row.map((cell, cellIndex) => (
+          <td key={cellIndex} className='px-6 py-4 whitespace-nowrap text-sm text-gray-900'>
+            {cell}
+          </td>
+        ))}
+      </tr>
+    );
+  };
 
-    }
-
-  {startDate && endDate && (
-    <div className='text-sm text-gray-700 mb-3 px-2 md:px-4'>
-      <span className='font-medium'>Filtered Date Range:</span>{' '}
-      {new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}
+  // Default mobile render function
+  const defaultRenderMobileRow = (row, index) => (
+    <div key={index} className='bg-white mb-4 rounded-lg shadow border border-gray-200'>
+      {row.map((cell, cellIndex) => (
+        <div key={cellIndex} className='flex justify-between items-center py-3 px-4 border-b border-gray-100'>
+          <div className='w-1/3'>
+            <p className='text-sm font-medium text-gray-700'>{tableHeadings[cellIndex]}:</p>
+          </div>
+          <div className='w-2/3'>
+            <p className='text-sm text-gray-900 break-words'>{cell}</p>
+          </div>
+        </div>
+      ))}
     </div>
-  )} */}
-    <div className='w-full md:border border border-[#DDDDDDDD]/80 bg-white rounded-md'>
-      
+  );
+
+  const renderFunction = renderRow || defaultRenderRow;
+  const renderMobileFunction = renderMobileRow || defaultRenderMobileRow;
+
+  return (
+    <div className='w-full border border-gray-200 bg-white rounded-lg'>
       <div className='overflow-x-auto'>
-        <div className='hidden xl:block'>
-          <table className='w-full rounded-full '>
-            <thead className='bg-[#D2D2D2] '>
+        {/* Desktop Table View */}
+        <div className='hidden md:block'>
+          <table className='w-full'>
+            <thead className='bg-gray-100'>
               <tr>
                 {tableHeadings.map((heading, index) => (
-                  <th
-                    key={index}
-                    className='px-5 py-3 text-md text-left font-bold text-black bg-[#F5F3FF] whitespace-nowrap'
-                  >
+                  <th key={index} className='px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider'>
                     {heading}
                   </th>
                 ))}
@@ -36,113 +62,47 @@ const TableData = ({ tableHeadings = [], data, currentPage = 1, size = 10, handl
             </thead>
             <tbody>
               {data && Array.isArray(data) && data.length > 0 ? (
-                data.map((row, index) => {
-                  const rowClass =
-                    index % 2 === 0 ? 'bg-[#FFFFFF]' : 'bg-[#FFFFFF]'
-                  return (
-                    <tr
-                      key={index}
-                      className={`${rowClass} border-b border-[#D2D2D2]`}
-                    >
-                      {row.map((cell, cellIndex) => (
-                        <td
-                          key={cellIndex}
-                          className='px-5 py-3 text-xs  text-[#475569] whitespace-nowrap'
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  )
-                })
+                data.map((row, index) => renderFunction(row, index))
               ) : (
                 <tr>
-                  <td
-                    colSpan={tableHeadings.length}
-                    className='px-4 py-3 text-center text-white'
-                  >
-                    <div className='flex justify-center items-center'>
-                      <NotFound heading={`Data not Available`} />
-                    </div>
+                  <td colSpan={tableHeadings.length} className='px-6 py-12 text-center'>
+                    <NotFound heading="No data available" />
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-
         </div>
 
-
         {/* Mobile Card View */}
-        <div className='block xl:hidden'>
+        <div className='block md:hidden'>
           {data && Array.isArray(data) && data.length > 0 ? (
-            data.map((row, index) => (
-              <div
-                key={index}
-                className='bg-[#FAFBFE]  mb-4 rounded-lg shadow-lg border border-[#E2E8F0] divide-y divide-white/10 '
-              >
-                {row.map((cell, cellIndex) => (
-                  <div
-                    key={cellIndex}
-                    className='flex justify-between items-center py-4 px-4'
-                  >
-                    <div className='w-full'>
-                      <p className='text-sm font-medium text-black'>
-                        {tableHeadings[cellIndex]} :
-                      </p>
-                    </div>
-                    <div className='w-full'>
-                      <p className='text-sm font-medium text-gray-600 break-all'>
-                        {cell}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))
+            data.map((row, index) => renderMobileFunction(row, index))
           ) : (
-            <div className='p-4 text-center bg-[#FAFBFE]  mb-4 rounded-lg shadow-lg border border-[#E2E8F0]'>
-              <div className='flex justify-center items-center text-black '>
-                <NotFound heading='Data not Available' />
-              </div>
+            <div className='p-6 text-center'>
+              <NotFound heading='No data available' />
             </div>
           )}
         </div>
       </div>
-      {/* <div className="flex justify-start items-center gap-4 text-md text-black p-2">
-                  <p>Total Records :</p>
-                  <p>{totalData}</p>
-                </div> */}
-      <div className='flex items-center justify-between px-4'>
-
-
-        {total > 0 && <div className='py-5 text-xs font-sm'>
-          {`Showing ${((currentPage - 1) * size) + 1} - ${Math.min(currentPage * size, total)} of ${total}`}
-        </div>}
-
-        <div>
+      
+      {/* Pagination */}
+      {total > 0 && (
+        <div className='flex flex-col md:flex-row md:items-center justify-between px-6 py-4 border-t border-gray-200'>
+          <div className='text-sm text-gray-600 mb-4 md:mb-0'>
+            Showing {Math.min(((currentPage - 1) * size) + 1, total)} - {Math.min(currentPage * size, total)} of {total} entries
+          </div>
           {Math.ceil(total / size) > 1 && (
-            <>
-
-              <Pagination
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                totalPages={Math.ceil(total / size)}
-              />
-            </>
-
-          )
-
-
-          }
-
+            <Pagination
+              currentPage={currentPage}
+              onPageChange={handlePageChange}
+              totalPages={Math.ceil(total / size)}
+            />
+          )}
         </div>
-      </div>
-
+      )}
     </div>
-    </>
+  );
+};
 
-  )
-}
-
-export default TableData
+export default TableData;

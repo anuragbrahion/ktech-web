@@ -72,6 +72,7 @@ import GoalExamination from "./pages/ExaminationsManagement/GoalExamination";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import BlogCategoryManagement from "./pages/WebsiteManagement/Blogs/BlogCategoryManagement";
 
 const Pages = () => <div>Pages</div>;
 const MediaLibrary = () => <div>Media Library</div>;
@@ -156,6 +157,12 @@ const App = () => {
         <Route path="/blogs" element={
           <ProtectedRoute>
             {renderMainLayout(Blogs)}
+          </ProtectedRoute>
+        } />
+
+        <Route path="/blogs-categrory" element={
+          <ProtectedRoute>
+            {renderMainLayout(BlogCategoryManagement)}
           </ProtectedRoute>
         } />
         
