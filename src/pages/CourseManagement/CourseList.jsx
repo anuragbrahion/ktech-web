@@ -1,420 +1,849 @@
-import React, { useState } from 'react';
-import UpdateCourseModal from '../../components/Atoms/UI/UpdateCourseModal';
-import AddCourseModal from '../../components/Atoms/UI/AddCourseModal';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Plus, Edit2, Trash2, Eye, Image as ImageIcon, Upload, X } from 'lucide-react';
+import { toast } from 'react-toastify';
+import axios from 'axios'; 
 import Table from '../../components/Atoms/TableData/TableData';
-
-const CourseList = () => {
-  const [courses, setCourses] = useState([
-    { 
-      id: 1, 
-      name: 'Digital Marketing', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Learn digital marketing strategies including SEO, SEM, social media marketing, and content marketing.',
-      actualPrice: '12000',
-      sellingPrice: '8999',
-      duration: '3',
-      totalLectures: '36',
-      language: 'English',
-      template: 'Marketing Template'
-    },
-    { 
-      id: 2, 
-      name: 'UI/UX Design', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Master user interface and user experience design principles for web and mobile applications.',
-      actualPrice: '15000',
-      sellingPrice: '11999',
-      duration: '4',
-      totalLectures: '48',
-      language: 'English',
-      template: 'Design Template'
-    },
-    { 
-      id: 3, 
-      name: 'Hindi/Gujarati Typing / Internet', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Learn Hindi and Gujarati typing skills along with basic internet usage.',
-      actualPrice: '8000',
-      sellingPrice: '5999',
-      duration: '2',
-      totalLectures: '24',
-      language: 'Hindi, Gujarati',
-      template: 'Basic Template'
-    },
-    { 
-      id: 4, 
-      name: 'Computer Hardware', 
-      category: 'Short term', 
-      status: 'inactive',
-      createdAt: '07/11/2025',
-      description: 'Comprehensive course on computer hardware components, assembly, and troubleshooting.',
-      actualPrice: '10000',
-      sellingPrice: '7499',
-      duration: '3',
-      totalLectures: '30',
-      language: 'English',
-      template: 'Technical Template'
-    },
-    { 
-      id: 5, 
-      name: 'C++', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Learn C++ programming language from basics to advanced concepts.',
-      actualPrice: '14000',
-      sellingPrice: '9999',
-      duration: '4',
-      totalLectures: '40',
-      language: 'English',
-      template: 'Programming Template'
-    },
-    { 
-      id: 6, 
-      name: 'C Language', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Foundation course in C programming language for beginners.',
-      actualPrice: '12000',
-      sellingPrice: '7999',
-      duration: '3',
-      totalLectures: '32',
-      language: 'English',
-      template: 'Programming Template'
-    },
-    { 
-      id: 7, 
-      name: 'Python', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Python programming for data science, web development, and automation.',
-      actualPrice: '16000',
-      sellingPrice: '11999',
-      duration: '4',
-      totalLectures: '44',
-      language: 'English',
-      template: 'Programming Template'
-    },
-    { 
-      id: 8, 
-      name: 'JavaScript', 
-      category: 'Short term', 
-      status: 'active',
-      createdAt: '07/11/2025',
-      description: 'Modern JavaScript for web development including ES6+ features and frameworks.',
-      actualPrice: '18000',
-      sellingPrice: '13999',
-      duration: '5',
-      totalLectures: '50',
-      language: 'English',
-      template: 'Web Development Template'
-    },
-  ]);
-
-  const [selectedCourse, setSelectedCourse] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filters, setFilters] = useState({
-    category: 'all',
-    status: 'all',
-    startDate: '',
-    endDate: ''
+import AlertModal from '../../components/Modal/AlertModal';
+import { updateCourses, coursesList,
+  enableDisableCourses,
+  deleteCourses,
+  createCourses, } from '../../redux/slices/course';
+import { websiteCategoryAllDocuments, websiteLanguagesAllDocuments } from '../../redux/slices/website';
+import { apiUrl } from '../../utils/axiosProvider';
+const CourseModal = ({ course, onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    courseName: '',
+    description: '',
+    template: '',
+    actualPrice: '',
+    sellingPrice: '',
+    duration: '',
+    totalLectures: '',
+    language: [],
+    category: []
   });
 
-  const handleAddCourse = (courseData) => {
-    const newCourse = {
-      id: courses.length + 1,
-      ...courseData,
-      createdAt: new Date().toLocaleDateString('en-GB'),
-      status: 'active'
-    };
-    setCourses([newCourse, ...courses]);
-    setShowAddModal(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [imageUrl, setImageUrl] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [languages, setLanguages] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const languagesData = useSelector(state => state.website?.websiteLanguagesAllDocumentsData);
+  const categoriesData = useSelector(state => state.website?.websiteCategoryAllDocumentsData);
+
+  useEffect(() => {
+    if (course) {
+      setFormData({
+        courseName: course.courseName || '',
+        description: course.description || '',
+        template: course.template || '',
+        actualPrice: course.actualPrice || '',
+        sellingPrice: course.sellingPrice || '',
+        duration: course.duration || '',
+        totalLectures: course.totalLectures || '',
+        language: course.language || [],
+        category: course.category || []
+      });
+      
+      if (course.mainImageUrl?.url) {
+        setImagePreview(course.mainImageUrl.url);
+        setImageUrl(course.mainImageUrl);
+      }
+    }
+  }, [course]);
+
+  useEffect(() => {
+    fetchLanguagesAndCategories();
+  }, []);
+
+  const fetchLanguagesAndCategories = () => {
+    setLoading(true);
+    Promise.all([
+      dispatch(websiteLanguagesAllDocuments()),
+      dispatch(websiteCategoryAllDocuments())
+    ]).then(() => {
+      setLoading(false);
+    });
   };
 
-  const handleUpdateCourse = (updatedData) => {
-    setCourses(courses.map(course => 
-      course.id === selectedCourse.id 
-        ? { ...course, ...updatedData }
-        : course
-    ));
-    setShowUpdateModal(false);
-    setSelectedCourse(null);
+  useEffect(() => {
+    if (languagesData?.data?.data) {
+      setLanguages(languagesData.data.data?.list);
+    }
+  }, [languagesData]);
+
+  useEffect(() => {
+    if (categoriesData?.data?.data) {
+      setCategories(categoriesData.data.data?.list);
+    }
+  }, [categoriesData]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleToggleStatus = (courseId) => {
-    setCourses(courses.map(course => 
-      course.id === courseId 
-        ? { ...course, status: course.status === 'active' ? 'inactive' : 'active' }
-        : course
-    ));
+  const handleMultiSelect = (field, value) => {
+    setFormData(prev => {
+      const currentValues = prev[field];
+      const isSelected = currentValues.includes(value);
+      
+      if (isSelected) {
+        return {
+          ...prev,
+          [field]: currentValues.filter(item => item !== value)
+        };
+      } else {
+        return {
+          ...prev,
+          [field]: [...currentValues, value]
+        };
+      }
+    });
   };
 
-  const handleDeleteCourse = (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
-      setCourses(courses.filter(course => course.id !== courseId));
+  const handleImageUpload = async (file) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('files', file);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${apiUrl}/files/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data && response.data.data) {
+        setImageUrl(response.data.data[0]);
+        setImagePreview(response.data.data[0].url);
+        toast.success('Image uploaded successfully');
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setUploading(false);
     }
   };
 
-  const handleViewDetails = (course) => {
-    setSelectedCourse(course);
-    setShowUpdateModal(true);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+      handleImageUpload(file);
+    }
   };
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = 
-      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = 
-      filters.category === 'all' || course.category.toLowerCase().includes(filters.category.toLowerCase());
-    
-    const matchesStatus = 
-      filters.status === 'all' || course.status === filters.status;
-    
-    const matchesDate = () => {
-      if (!filters.startDate && !filters.endDate) return true;
-      
-      const courseDate = new Date(course.createdAt.split('/').reverse().join('-'));
-      const startDate = filters.startDate ? new Date(filters.startDate) : null;
-      const endDate = filters.endDate ? new Date(filters.endDate) : null;
-      
-      if (startDate && endDate) {
-        return courseDate >= startDate && courseDate <= endDate;
-      }
-      if (startDate) return courseDate >= startDate;
-      if (endDate) return courseDate <= endDate;
-      
-      return true;
-    };
-    
-    return matchesSearch && matchesCategory && matchesStatus && matchesDate();
-  });
+  const removeImage = () => {
+    setImagePreview('');
+    setImageFile(null);
+    setImageUrl(null);
+  };
 
-  const categories = ['Short term', 'Long term', 'Crash course', 'Diploma', 'Certificate'];
-  const tableHeaders = ['Course Name', 'Categories', 'Status', 'Created At', 'Actions'];
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!formData.courseName || !formData.description || !imageUrl) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    const payload = {
+      courseName: formData.courseName,
+      description: formData.description,
+      template: formData.template,
+      mainImageUrl: imageUrl,
+      language: formData.language,
+      category: formData.category,
+      actualPrice: Number(formData.actualPrice),
+      sellingPrice: Number(formData.sellingPrice),
+      duration: Number(formData.duration),
+      totalLectures: Number(formData.totalLectures)
+    };
+
+    if (course) {
+      payload._id = course._id;
+    }
+
+    onSave(payload);
+  };
 
   return (
-    <div className="">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Course Management</h1>
-              <p className="text-black mt-2">Manage all courses and their details</p>
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-xl max-w-4xl max-h-[90vh] overflow-y-auto w-full">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {course ? 'Edit Course' : 'Add Course'}
+            </h2>
             <button
-              onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium flex items-center gap-2"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
-              <span className="text-xl">+</span>
-              Add Course
+              ×
             </button>
           </div>
-        </div>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Course Name *
+                </label>
+                <input
+                  type="text"
+                  name="courseName"
+                  value={formData.courseName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter course name"
+                  required
+                />
+              </div>
 
-        {/* <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Courses</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.total}</p>
-          </div>
-          <div className="bg-green-50 p-6 rounded-lg shadow border border-green-100">
-            <h3 className="text-lg font-semibold text-green-700">Active Courses</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.active}</p>
-          </div>
-          <div className="bg-red-50 p-6 rounded-lg shadow border border-red-100">
-            <h3 className="text-lg font-semibold text-red-700">Inactive Courses</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.inactive}</p>
-          </div>
-          <div className="bg-purple-50 p-6 rounded-lg shadow border border-purple-100">
-            <h3 className="text-lg font-semibold text-purple-700">Short Term</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.shortTerm}</p>
-          </div>
-          <div className="bg-yellow-50 p-6 rounded-lg shadow border border-yellow-100">
-            <h3 className="text-lg font-semibold text-yellow-700">Total Revenue</h3>
-            <p className="text-3xl font-bold text-black mt-2">₹{stats.totalRevenue}</p>
-          </div>
-          <div className="bg-blue-50 p-6 rounded-lg shadow border border-blue-100">
-            <h3 className="text-lg font-semibold text-blue-700">Avg. Price</h3>
-            <p className="text-3xl font-bold text-black mt-2">₹{stats.averagePrice}</p>
-          </div>
-        </div> */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all min-h-[120px] resize-none"
+                  placeholder="Enter course description"
+                  rows="4"
+                  required
+                />
+              </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div>
-              <select
-                value={filters.category}
-                onChange={(e) => setFilters({...filters, category: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              >
-                <option value="all">Select Category</option>
-                {categories.map((cat, index) => (
-                  <option key={index} value={cat.toLowerCase()}>{cat}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              >
-                <option value="all">Select Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            
-            <div>
-              <input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => setFilters({...filters, startDate: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-                placeholder="Start Date"
-              />
-            </div>
-            
-            <div>
-              <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => setFilters({...filters, endDate: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-                placeholder="End Date"
-              />
-            </div>
-            
-            <div>
-              <input
-                type="text"
-                placeholder="Search courses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              />
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <Table
-              headers={tableHeaders}
-              data={filteredCourses}
-              renderRow={(course, index) => (
-                <tr 
-                  key={course.id} 
-                  className={`hover:bg-sky-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                >
-                  <td className="py-4 px-4">
-                    <div className="font-medium text-black">{course.name}</div>
-                    <div className="text-sm text-gray-500 mt-1 truncate max-w-xs">
-                      {course.description}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Course Image *
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+                  {uploading ? (
+                    <div className="py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-sm text-gray-600 mt-3">Uploading...</p>
                     </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
-                      {course.category}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center">
-                      <span className={`w-3 h-3 rounded-full mr-2 ${
-                        course.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                      }`}></span>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        course.status === 'active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {course.status.charAt(0).toUpperCase() + course.status.slice(1)}
-                      </span>
+                  ) : imagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="Course"
+                        className="w-48 h-32 mx-auto object-cover rounded-lg border-4 border-white shadow-lg"
+                      />
+                      <div className="mt-4 flex gap-2 justify-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                          id="image-upload"
+                        />
+                        <label htmlFor="image-upload" className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                          Change
+                        </label>
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
-                  </td>
-                  <td className="py-4 px-4 text-black">{course.createdAt}</td>
-                  <td className="py-4 px-4">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleViewDetails(course)}
-                        className="text-sky-500 hover:text-sky-700 text-lg"
-                        title="View/Edit Course"
-                      >
-                        👁️
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(course.id)}
-                        className={`text-lg ${
-                          course.status === 'active' 
-                            ? 'text-yellow-500 hover:text-yellow-700' 
-                            : 'text-green-500 hover:text-green-700'
-                        }`}
-                        title={course.status === 'active' ? 'Deactivate Course' : 'Activate Course'}
-                      >
-                        {course.status === 'active' ? '⏸️' : '▶️'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCourse(course.id)}
-                        className="text-red-500 hover:text-red-700 text-lg"
-                        title="Delete Course"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            />
-          </div>
+                  ) : (
+                    <>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label htmlFor="image-upload" className="cursor-pointer block">
+                        <div className="space-y-3">
+                          <Upload className="w-12 h-12 text-gray-400 mx-auto" />
+                          <p className="text-gray-500">Click to upload course image</p>
+                          <p className="text-xs text-gray-400">Supported: JPG, PNG, WebP</p>
+                        </div>
+                      </label>
+                    </>
+                  )}
+                </div>
+              </div>
 
-          {filteredCourses.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">📚</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No courses found</h3>
-              <p className="text-gray-500 mb-6">
-                {searchTerm || filters.category !== 'all' || filters.status !== 'all' 
-                  ? "No courses match your search criteria" 
-                  : "No courses available. Add your first course!"}
-              </p>
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Languages
+                  </label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto p-2 border border-gray-300 rounded-xl">
+                    {loading ? (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mx-auto"></div>
+                      </div>
+                    ) : (
+                      languages.map((lang) => (
+                        <label key={lang._id} className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.language.includes(lang._id)}
+                            onChange={() => handleMultiSelect('language', lang._id)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-gray-700">{lang.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Categories
+                  </label>
+                  <div className="space-y-2 max-h-40 overflow-y-auto p-2 border border-gray-300 rounded-xl">
+                    {loading ? (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mx-auto"></div>
+                      </div>
+                    ) : (
+                      categories.map((cat) => (
+                        <label key={cat._id} className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.category.includes(cat._id)}
+                            onChange={() => handleMultiSelect('category', cat._id)}
+                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="text-gray-700">{cat.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Actual Price (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    name="actualPrice"
+                    value={formData.actualPrice}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    placeholder="Enter actual price"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Selling Price (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    name="sellingPrice"
+                    value={formData.sellingPrice}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    placeholder="Enter selling price"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Duration (hours) *
+                  </label>
+                  <input
+                    type="number"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    placeholder="Enter course duration"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Total Lectures *
+                  </label>
+                  <input
+                    type="number"
+                    name="totalLectures"
+                    value={formData.totalLectures}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    placeholder="Enter total lectures"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Template
+                </label>
+                <input
+                  type="text"
+                  name="template"
+                  value={formData.template}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter template identifier"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
               <button
-                onClick={() => setShowAddModal(true)}
-                className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
               >
-                Add First Course
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={uploading || loading || !formData.courseName || !formData.description || !imageUrl}
+              >
+                {uploading ? 'Uploading...' : course ? 'Update Course' : 'Create Course'}
               </button>
             </div>
-          )}
+          </form>
         </div>
       </div>
-
-      <AddCourseModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSubmit={handleAddCourse}
-        categories={categories}
-      />
-
-      <UpdateCourseModal
-        isOpen={showUpdateModal}
-        onClose={() => {
-          setShowUpdateModal(false);
-          setSelectedCourse(null);
-        }}
-        courseData={selectedCourse}
-        onSubmit={handleUpdateCourse}
-        categories={categories}
-      />
     </div>
   );
 };
 
-export default CourseList;
+export default function CourseManagement() {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [deletingCourse, setDeletingCourse] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    status: '',
+    startDate: '',
+    endDate: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const coursesListData = useSelector(state => state.course?.coursesListData);
+  const enableDisableData = useSelector(state => state.course?.enableDisableCoursesData);
+  const deleteData = useSelector(state => state.course?.deleteCoursesData);
+  const createData = useSelector(state => state.course?.createCoursesData);
+  const updateData = useSelector(state => state.course?.updateCoursesData);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  useEffect(() => {
+    if (!showModal) {
+      fetchCourses();
+    }
+  }, [currentPage, enableDisableData, deleteData, createData, updateData]);
+
+  const fetchCourses = () => {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      size: itemsPerPage,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.category && { category: filters.category }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.startDate && { startDate: filters.startDate }),
+      ...(filters.endDate && { endDate: filters.endDate })
+    };
+    
+    dispatch(coursesList(params)).then((action) => {
+      if (action.error) {
+        toast.error(action.payload || 'Failed to fetch courses');
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleAddCourseClick = () => {
+    setEditingCourse(null);
+    setShowModal(true);
+  };
+
+  const handleEditCourse = (course) => {
+    setEditingCourse(course);
+    setShowModal(true);
+  };
+
+  const handleDeleteClick = (course) => {
+    setDeletingCourse(course);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingCourse) {
+      setLoading(true);
+      dispatch(deleteCourses({ _id: deletingCourse._id })).then((action) => {
+        if (!action.error) {
+          toast.success('Course deleted successfully');
+          fetchCourses();
+        } else {
+          toast.error(action.payload || 'Failed to delete course');
+        }
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeletingCourse(null);
+      });
+    }
+  };
+
+  const handleStatusToggle = (course) => {
+    const newStatus = !course.status;
+    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this course?`)) {
+      setLoading(true);
+      const payload = {
+        _id: course._id,
+        status: newStatus
+      };
+      dispatch(enableDisableCourses(payload)).then((action) => {
+        if (!action.error) {
+          toast.success(`Course ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          fetchCourses();
+        } else {
+          toast.error(action.payload || 'Failed to update status');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const handleSaveCourse = (formData) => {
+    setLoading(true);
+    if (editingCourse) {
+      const payload = {
+        ...formData,
+        _id: editingCourse._id
+      };
+      dispatch(updateCourses(payload)).then((action) => {
+        if (!action.error) {
+          toast.success('Course updated successfully');
+          setShowModal(false);
+          setEditingCourse(null);
+          fetchCourses();
+        } else {
+          toast.error(action.payload || 'Failed to update course');
+        }
+        setLoading(false);
+      });
+    } else {
+      dispatch(createCourses(formData)).then((action) => {
+        if (!action.error) {
+          toast.success('Course created successfully');
+          setShowModal(false);
+          fetchCourses();
+        } else {
+          toast.error(action.payload || 'Failed to create course');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFilter = () => {
+    setCurrentPage(1);
+    fetchCourses();
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: '',
+      category: '',
+      status: '',
+      startDate: '',
+      endDate: ''
+    });
+    setCurrentPage(1);
+    fetchCourses();
+  };
+
+  const getStatusColor = (status) => {
+    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
+  const courses = coursesListData?.data?.data?.list || [];
+  const totalCourses = coursesListData?.data?.total || 0;
+  const totalPages = Math.ceil(totalCourses / itemsPerPage);
+
+  const tableHeaders = ['Course Name', 'Categories', 'Status', 'Created At', 'Actions'];
+  
+  const tableData = courses.map(course => [
+    <div className="flex items-center">
+      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold mr-3 overflow-hidden">
+        {course.mainImageUrl?.url ? (
+          <img src={course.mainImageUrl.url} alt={course.courseName} className="w-full h-full object-cover" />
+        ) : (
+          course.courseName?.charAt(0)
+        )}
+      </div>
+      <div>
+        <div className="font-medium text-gray-900">{course.courseName}</div>
+        <div className="text-sm text-gray-500 mt-1 truncate max-w-xs">
+          {course.description}
+        </div>
+      </div>
+    </div>,
+    <div className="flex flex-wrap gap-1">
+      {course.category?.map((catId, index) => (
+        <span key={index} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+          Category {index + 1}
+        </span>
+      ))}
+    </div>,
+    <div className="flex items-center">
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
+        {course.status ? 'Active' : 'Inactive'}
+      </span>
+      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+        <input
+          type="checkbox"
+          checked={course.status}
+          onChange={() => handleStatusToggle(course)}
+          className="sr-only"
+          id={`toggle-${course._id}`}
+          disabled={loading}
+        />
+        <label
+          htmlFor={`toggle-${course._id}`}
+          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${course.status ? 'bg-green-500' : 'bg-gray-300'}`}
+        >
+          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${course.status ? 'translate-x-4' : 'translate-x-0'}`} />
+        </label>
+      </div>
+    </div>,
+    new Date(course.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEditCourse(course)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        title="Edit"
+        disabled={loading}
+      >
+        <Edit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(course)}
+        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+        title="Delete"
+        disabled={loading}
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  ]);
+
+  return (
+    <div className="">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Course Management</h1>
+        <p className="text-gray-600 mt-2">Manage all courses and their details</p>
+      </div>
+
+      {/* <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Courses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Search courses..."
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
+            <input
+              type="text"
+              value={filters.category}
+              onChange={(e) => handleFilterChange('category', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Category ID"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Status
+            </label>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
+              disabled={loading}
+            >
+              <option value="">All Status</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={handleFilter}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Filter'}
+          </button>
+          <button
+            onClick={resetFilters}
+            className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
+            disabled={loading}
+          >
+            Reset
+          </button>
+        </div>
+      </div> */}
+
+      <div className="flex justify-end items-center mb-6">
+        <button
+          onClick={handleAddCourseClick}
+          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          disabled={loading}
+        >
+          <span>Add Course</span>
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading courses...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && (
+        <Table
+          headers={tableHeaders}
+          data={tableData}
+          currentPage={currentPage}
+          size={itemsPerPage}
+          handlePageChange={setCurrentPage}
+          total={totalCourses}
+          totalPages={totalPages}
+          renderRow={(row, index) => (
+            <tr 
+              key={index} 
+              className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+            >
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex} className="py-4 px-4">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          )}
+        />
+      )}
+
+      {showModal && (
+        <CourseModal
+          course={editingCourse}
+          onSave={handleSaveCourse}
+          onClose={() => {
+            setShowModal(false);
+            setEditingCourse(null);
+          }}
+        />
+      )}
+
+      {showDeleteModal && (
+        <AlertModal
+          isOpen={showDeleteModal}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setDeletingCourse(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Course"
+          description="Are you sure you want to delete this course? This action cannot be undone."
+          cancelLabel="Cancel"
+          confirmLabel="Yes, Delete"
+          confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
+          isVisibleCancelButton={true}
+          isVisibleConfirmButton={true}
+        />
+      )}
+    </div>
+  );
+}

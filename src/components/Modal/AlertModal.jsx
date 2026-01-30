@@ -81,7 +81,7 @@ const AlertModal = ({
 
         <div className='flex justify-end place-items-center gap-3 pt-5'>
 
-          {isVisibleCancelButton && <Button className={`w-full !bg-[#F5F5F5] cursor-pointer ${cancelClassNameButton}`} onClick={onCancel} variant='cancel'>
+          {isVisibleCancelButton && <Button className={`w-full !bg-[#F5F5F5] !text-black !hover:text-red-500 cursor-pointer ${cancelClassNameButton}`} onClick={onCancel} variant='cancel'>
             {cancelLabel}
           </Button>}
           {isVisibleConfirmButton && <Button onClick={onConfirm} variant='confirm' className={`w-full px-4 py-2 !bg-[#E93E3E] flex justify-center items-center text-white font-bold font-size:16px gap-1 rounded-md cursor-pointer ${confirmClassNameButton}`}>

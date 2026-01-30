@@ -1,236 +1,515 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Upload, Image as ImageIcon, FileText, Award, IdCard, Ticket, GraduationCap, DollarSign, BookOpen, Building, Type } from 'lucide-react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import {
+  getWebsiteConfigs,
+  postWebsiteConfigs,
+  getWebsiteConfigTemplates,
+  postWebsiteConfigTemplates
+} from '../../../redux/slices/website';
+import { apiUrl } from '../../../utils/axiosProvider';
 
-export default function ConfigDetailsForm() {
-  const [formData, setFormData] = useState({
-    companyName: 'k-tech computer class',
-    websiteName: 'www.ktechcomputer.com',
-    mobileNo: '9825161639',
-    address: 'Ring Road Surat',
+const ConfigDetailsForm = () => {
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState('company');
+
+  const [companyData, setCompanyData] = useState({
+    companyName: '',
+    websiteName: '',
+    companyPhoneNo: '',
+    companyAddress: '',
     facebook: '',
     twitter: '',
     instagram: '',
     youtube: '',
-    logo: null
+    companyLogo: []
   });
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  console.log(companyData,"companyData")
+
+  const [templatesData, setTemplatesData] = useState({
+    certificate: [],
+    idcard: [],
+    hallticket: [],
+    admission: [],
+    fees: [],
+    marksheet: [],
+    trainingCenter: [],
+    typing: []
+  });
+
+  const websiteConfigsData = useSelector(state => state.website?.websiteConfigsGetData);
+  const websiteConfigsPostData = useSelector(state => state.website?.websiteConfigsPostData);
+  const websiteConfigTemplatesData = useSelector(state => state.website?.websiteConfigTemplatesGetData);
+  const websiteConfigTemplatesPostData = useSelector(state => state.website?.websiteConfigTemplatesPostData);
+
+  useEffect(() => {
+    fetchCompanyData();
+    fetchTemplatesData();
+  }, []);
+
+  useEffect(() => {
+    if (websiteConfigsData?.data?.data) {
+      const data = websiteConfigsData.data.data;
+      setCompanyData({
+        companyName: data.companyName || '',
+        websiteName: data.websiteName || '',
+        companyPhoneNo: data.companyPhoneNo || '',
+        companyAddress: data.companyAddress || '',
+        facebook: data.facebook || '',
+        twitter: data.twitter || '',
+        instagram: data.instagram || '',
+        youtube: data.youtube || '',
+        companyLogo: data.companyLogo || []
+      });
+    }
+  }, [websiteConfigsData]);
+
+  useEffect(() => {
+    if (websiteConfigTemplatesData?.data?.data?.templates) {
+      setTemplatesData(websiteConfigTemplatesData.data.data.templates);
+    }
+  }, [websiteConfigTemplatesData]);
+
+  const fetchCompanyData = () => {
+    setLoading(true);
+    dispatch(getWebsiteConfigs()).then((action) => {
+      if (action.error) {
+        toast.error('Failed to fetch company data');
+      }
+      setLoading(false);
+    });
   };
 
-  const handleFileChange = (e) => {
+  const fetchTemplatesData = () => {
+    dispatch(getWebsiteConfigTemplates());
+  };
+
+  const handleCompanyChange = (field, value) => {
+    setCompanyData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleTemplateChange = (templateType, value) => {
+    setTemplatesData(prev => ({ ...prev, [templateType]: value }));
+  };
+
+  const handleImageUpload = async (file, type, templateType = null) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('files', file);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${apiUrl}/files/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.data && response.data.data) {
+        if (type === 'companyLogo') {
+          setCompanyData(prev => ({
+            ...prev,
+            companyLogo: [response.data.data[0]]
+          }));
+          toast.success('Company logo uploaded successfully');
+        } else if (type === 'template' && templateType) {
+          handleTemplateChange(templateType, [response.data.data]);
+          toast.success(`${templateType} template uploaded successfully`);
+        }
+      }
+    } catch (error) {
+      toast.error(error||'Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCompanyImageChange = (e) => {
     const file = e.target.files[0];
-    setFormData(prev => ({ ...prev, logo: file }));
+    if (file) {
+      handleImageUpload(file, 'companyLogo');
+    }
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
+  const handleTemplateImageChange = (e, templateType) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleImageUpload(file, 'template', templateType);
+    }
   };
+
+  const removeCompanyLogo = () => {
+    setCompanyData(prev => ({ ...prev, companyLogo: [] }));
+  };
+
+  const removeTemplate = (templateType) => {
+    handleTemplateChange(templateType, []);
+  };
+
+  const handleCompanySubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const payload = {
+      companyName: companyData.companyName,
+      websiteName: companyData.websiteName,
+      companyPhoneNo: companyData.companyPhoneNo,
+      companyAddress: companyData.companyAddress,
+      facebook: companyData.facebook,
+      twitter: companyData.twitter,
+      instagram: companyData.instagram,
+      youtube: companyData.youtube,
+      companyLogo: companyData.companyLogo
+    };
+
+    dispatch(postWebsiteConfigs(payload)).then((action) => {
+      if (!action.error) {
+        toast.success('Company configuration updated successfully');
+        fetchCompanyData();
+      } else {
+        toast.error(action.payload || 'Failed to update configuration');
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleTemplatesSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    const payload = {
+      templates: templatesData
+    };
+
+    dispatch(postWebsiteConfigTemplates(payload)).then((action) => {
+      if (!action.error) {
+        toast.success('Templates updated successfully');
+        fetchTemplatesData();
+      } else {
+        toast.error(action.payload || 'Failed to update templates');
+      }
+      setLoading(false);
+    });
+  };
+
+  const tabs = [
+    { id: 'company', label: 'Company Info', icon: Building },
+    { id: 'templates', label: 'Templates', icon: FileText }
+  ];
+
+  const templateTypes = [
+    { id: 'certificate', label: 'Certificate', icon: Award, description: 'Certificate template for student certificates' },
+    { id: 'idcard', label: 'ID Card', icon: IdCard, description: 'ID card template for student identification' },
+    { id: 'hallticket', label: 'Hall Ticket', icon: Ticket, description: 'Hall ticket template for examinations' },
+    { id: 'admission', label: 'Admission', icon: GraduationCap, description: 'Admission form template' },
+    { id: 'fees', label: 'Fees Receipt', icon: DollarSign, description: 'Fees receipt template' },
+    { id: 'marksheet', label: 'Marksheet', icon: BookOpen, description: 'Marksheet template for results' },
+    { id: 'trainingCenter', label: 'Training Center', icon: Building, description: 'Training center letterhead' },
+    { id: 'typing', label: 'Typing', icon: Type, description: 'Typing test certificate template' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+         <div className="">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900">Config Details</h1>
-            <p className="text-gray-600 mt-2">Update your company information and social links</p>
+            <h1 className="text-3xl font-bold text-gray-900">Configuration Management</h1>
+            <p className="text-gray-600 mt-2">Update company information and document templates</p>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-8">
-              {/* Basic Information Section */}
-              <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Basic Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.companyName}
-                      onChange={(e) => handleChange('companyName', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                      Website Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.websiteName}
-                      onChange={(e) => handleChange('websiteName', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                      Mobile Number
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.mobileNo}
-                      onChange={(e) => handleChange('mobileNo', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-800 mb-2">
-                      Company Address
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.address}
-                      onChange={(e) => handleChange('address', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Media Links Section */}
-              <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Social Media Links</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold">f</span>
-                      </div>
-                      <label className="block text-sm font-semibold text-gray-800">
-                        Facebook
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.facebook}
-                      onChange={(e) => handleChange('facebook', e.target.value)}
-                      placeholder="Enter facebook link..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.213c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                        </svg>
-                      </div>
-                      <label className="block text-sm font-semibold text-gray-800">
-                        Twitter
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.twitter}
-                      onChange={(e) => handleChange('twitter', e.target.value)}
-                      placeholder="Enter twitter link..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
-                        </svg>
-                      </div>
-                      <label className="block text-sm font-semibold text-gray-800">
-                        Instagram
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.instagram}
-                      onChange={(e) => handleChange('instagram', e.target.value)}
-                      placeholder="Enter instagram link..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-                        </svg>
-                      </div>
-                      <label className="block text-sm font-semibold text-gray-800">
-                        YouTube
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.youtube}
-                      onChange={(e) => handleChange('youtube', e.target.value)}
-                      placeholder="Enter youtube link..."
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Logo Upload Section */}
-              <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Company Logo</h2>
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50">
-                    {formData.logo ? (
-                      <div className="text-center p-4">
-                        <div className="text-blue-600 font-medium truncate max-w-[120px]">
-                          {formData.logo.name}
-                        </div>
-                        <div className="text-sm text-gray-500 mt-1">
-                          {(formData.logo.size / 1024).toFixed(1)} KB
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <div className="text-4xl mb-2">🏢</div>
-                        <div className="text-gray-500">No logo uploaded</div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1">
-                    <label className="px-6 py-3 bg-black text-white rounded-xl cursor-pointer hover:bg-gray-800 transition-all shadow-md hover:shadow-lg inline-flex items-center gap-2 mb-3">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                      </svg>
-                      Upload Logo
-                      <input
-                        type="file"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        accept="image/*"
-                      />
-                    </label>
-                    <p className="text-sm text-gray-500">
-                      Recommended: PNG or JPG format, max 5MB
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-center pt-6">
+          <div className="border-b border-gray-200 mb-8">
+            <div className="flex space-x-1">
+              {tabs.map((tab) => (
                 <button
-                  type="submit"
-                  className="px-10 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl font-semibold text-lg"
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-3 text-sm font-medium border-b-2 transition ${
+                    activeTab === tab.id
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  Update Configuration
+                  <span className="flex items-center gap-2">
+                    <tab.icon className="w-4 h-4" />
+                    {tab.label}
+                  </span>
                 </button>
-              </div>
+              ))}
             </div>
-          </form>
+          </div>
+
+          {loading && !uploading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <span className="ml-3 text-gray-600">Loading...</span>
+            </div>
+          )}
+
+          {!loading && activeTab === 'company' && (
+            <form onSubmit={handleCompanySubmit}>
+              <div className="space-y-8">
+                <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Company Information</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        Company Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={companyData.companyName}
+                        onChange={(e) => handleCompanyChange('companyName', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required
+                        disabled={uploading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        Website Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={companyData.websiteName}
+                        onChange={(e) => handleCompanyChange('websiteName', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required
+                        disabled={uploading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        Mobile Number *
+                      </label>
+                      <input
+                        type="text"
+                        value={companyData.companyPhoneNo}
+                        onChange={(e) => handleCompanyChange('companyPhoneNo', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required
+                        disabled={uploading}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-800 mb-2">
+                        Company Address *
+                      </label>
+                      <input
+                        type="text"
+                        value={companyData.companyAddress}
+                        onChange={(e) => handleCompanyChange('companyAddress', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        required
+                        disabled={uploading}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Social Media Links</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {[
+                      { id: 'facebook', label: 'Facebook', color: 'bg-blue-600' },
+                      { id: 'twitter', label: 'Twitter', color: 'bg-blue-400' },
+                      { id: 'instagram', label: 'Instagram', color: 'bg-gradient-to-r from-purple-600 to-pink-500' },
+                      { id: 'youtube', label: 'YouTube', color: 'bg-red-600' }
+                    ].map((social) => (
+                      <div key={social.id}>
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className={`w-8 h-8 ${social.color} rounded-lg flex items-center justify-center`}>
+                            <span className="text-white font-bold">
+                              {social.id === 'facebook' ? 'f' : 
+                               social.id === 'twitter' ? '𝕏' :
+                               social.id === 'instagram' ? 'IG' : 'YT'}
+                            </span>
+                          </div>
+                          <label className="block text-sm font-semibold text-gray-800">
+                            {social.label}
+                          </label>
+                        </div>
+                        <input
+                          type="text"
+                          value={companyData[social.id]}
+                          onChange={(e) => handleCompanyChange(social.id, e.target.value)}
+                          placeholder={`Enter ${social.label} link...`}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
+                          disabled={uploading}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Company Logo</h2>
+                  <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 overflow-hidden">
+                      {uploading ? (
+                        <div className="text-center p-4">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                          <p className="text-sm text-gray-600 mt-2">Uploading...</p>
+                        </div>
+                      ) : companyData.companyLogo[0]?.url ? (
+                        <div className="relative w-full h-full">
+                          <img
+                            src={companyData.companyLogo[0].url}
+                            alt="Company Logo"
+                            className="w-full h-full object-contain p-2"
+                          />
+                          <button
+                            type="button"
+                            onClick={removeCompanyLogo}
+                            className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                          <div className="text-gray-500">No logo uploaded</div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1">
+                      <label className="px-6 py-3 bg-black text-white rounded-xl cursor-pointer hover:bg-gray-800 transition-all shadow-md hover:shadow-lg inline-flex items-center gap-2 mb-3 disabled:opacity-50">
+                        <Upload className="w-5 h-5" />
+                        {companyData.companyLogo[0]?.url ? 'Change Logo' : 'Upload Logo'}
+                        <input
+                          type="file"
+                          onChange={handleCompanyImageChange}
+                          className="hidden"
+                          accept="image/*"
+                          disabled={uploading}
+                        />
+                      </label>
+                      <p className="text-sm text-gray-500">
+                        Recommended: PNG or JPG format, max 5MB
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-center pt-6">
+                  <button
+                    type="submit"
+                    className="px-10 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={uploading || loading}
+                  >
+                    {uploading ? 'Uploading...' : 'Update Company Configuration'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
+
+          {!loading && activeTab === 'templates' && (
+            <form onSubmit={handleTemplatesSubmit}>
+              <div className="space-y-8">
+                <div className="bg-gradient-to-r from-blue-50 to-gray-50 p-6 rounded-xl border border-blue-100">
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Document Templates</h2>
+                  <p className="text-gray-600 mb-8">Upload templates for various documents and certificates</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {templateTypes.map((template) => (
+                      <div key={template.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <template.icon className="w-5 h-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-gray-900">{template.label}</h3>
+                            <p className="text-sm text-gray-500">{template.description}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                          {uploading ? (
+                            <div className="py-4">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                              <p className="text-sm text-gray-600 mt-2">Uploading...</p>
+                            </div>
+                          ) : templatesData[template.id]?.[0]?.url ? (
+                            <div className="space-y-3">
+                              <div className="relative">
+                                <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                                  <img
+                                    src={templatesData[template.id][0].url}
+                                    alt={template.label}
+                                    className="max-h-full max-w-full object-contain"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeTemplate(template.id)}
+                                  className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 hover:bg-red-700"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                              <input
+                                type="file"
+                                onChange={(e) => handleTemplateImageChange(e, template.id)}
+                                className="hidden"
+                                id={`${template.id}-upload`}
+                                accept="image/*"
+                              />
+                              <label htmlFor={`${template.id}-upload`} className="block px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer text-sm">
+                                Change Template
+                              </label>
+                            </div>
+                          ) : (
+                            <>
+                              <input
+                                type="file"
+                                onChange={(e) => handleTemplateImageChange(e, template.id)}
+                                className="hidden"
+                                id={`${template.id}-upload`}
+                                accept="image/*"
+                              />
+                              <label htmlFor={`${template.id}-upload`} className="cursor-pointer block">
+                                <div className="space-y-2 py-4">
+                                  <Upload className="w-8 h-8 text-gray-400 mx-auto" />
+                                  <p className="text-gray-500 text-sm">Click to upload template</p>
+                                  <p className="text-xs text-gray-400">PNG, JPG, WebP</p>
+                                </div>
+                              </label>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-center pt-6">
+                  <button
+                    type="submit"
+                    className="px-10 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={uploading || loading}
+                  >
+                    {uploading ? 'Uploading...' : 'Save All Templates'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
         </div>
-      </div>
-    </div>
+    
   );
-}
+};
+
+export default ConfigDetailsForm;

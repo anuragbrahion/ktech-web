@@ -1,178 +1,137 @@
-import React, { useState } from 'react';
-import AddBatchModal from '../../components/Atoms/UI/AddBatchModal';
-import ViewBatchModal from '../../components/Atoms/UI/ViewBatchModal';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Plus, Edit2, Trash2, Eye, Clock, Users, Calendar } from 'lucide-react';
+import { toast } from 'react-toastify';
+import {
+  courseBatchesList,
+  enableDisableCourseBatches,
+  deleteCourseBatches,
+  createCourseBatches,
+  updateCourseBatches,
+  coursesAllDocuments
+} from '../../redux/slices/course';
 import Table from '../../components/Atoms/TableData/TableData';
 
-const CourseBatches = () => {
-  const [batches, setBatches] = useState([
-    { 
-      id: 1, 
-      startTime: '11:00 AM', 
-      endTime: '11:59 AM', 
-      totalSeats: 10,
-      availableSeats: 10,
-      courses: 'Digital Marketing, UI/UX Design, Hindi/gujrati typing / internet, computer hardware, C++, c language, python java script, php, Java, CSS, Digital Print Textile Design, embroidery design, Spoken English, Adobe illustrator HTML, Tripta relly CorelDraw, Photoshop, Tally accounting, ms office',
-      status: 'active',
-      createdAt: '18/11/2025'
-    },
-    { 
-      id: 2, 
-      startTime: '10:00 AM', 
-      endTime: '11:00 AM', 
-      totalSeats: 10,
-      availableSeats: 10,
-      courses: 'Digital Marketing, UI/UX Design, Hindi/gujrati typing / internet, computer hardware, C++, c language, python java script, php, Java, CSS, Digital Print Textile Design, embroidery design, Spoken English, Adobe illustrator HTML, Tripta relly CorelDraw, Photoshop, Tally accounting, ms office',
-      status: 'active',
-      createdAt: '18/11/2025'
-    },
-    { 
-      id: 3, 
-      startTime: '02:00 PM', 
-      endTime: '03:30 PM', 
-      totalSeats: 15,
-      availableSeats: 8,
-      courses: 'Python, JavaScript, Web Development',
-      status: 'active',
-      createdAt: '20/11/2025'
-    },
-    { 
-      id: 4, 
-      startTime: '06:00 PM', 
-      endTime: '08:00 PM', 
-      totalSeats: 20,
-      availableSeats: 5,
-      courses: 'Data Science, Machine Learning, AI',
-      status: 'active',
-      createdAt: '22/11/2025'
-    },
-    { 
-      id: 5, 
-      startTime: '09:00 AM', 
-      endTime: '10:30 AM', 
-      totalSeats: 12,
-      availableSeats: 12,
-      courses: 'Mobile App Development, Flutter, React Native',
-      status: 'inactive',
-      createdAt: '25/11/2025'
-    },
-    { 
-      id: 6, 
-      startTime: '04:00 PM', 
-      endTime: '06:00 PM', 
-      totalSeats: 25,
-      availableSeats: 3,
-      courses: 'Cloud Computing, AWS, DevOps',
-      status: 'active',
-      createdAt: '28/11/2025'
-    },
-    { 
-      id: 7, 
-      startTime: '01:00 PM', 
-      endTime: '03:00 PM', 
-      totalSeats: 18,
-      availableSeats: 15,
-      courses: 'Cyber Security, Ethical Hacking',
-      status: 'active',
-      createdAt: '30/11/2025'
-    },
-  ]);
-
-  const [selectedBatch, setSelectedBatch] = useState(null);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [filters, setFilters] = useState({
-    startTime: 'all',
-    endTime: 'all',
-    status: 'all',
-    startDate: '',
-    endDate: ''
+const BatchModal = ({ batch, onSave, onClose, mode = 'add' }) => {
+  const [formData, setFormData] = useState({
+    startTime: '',
+    endTime: '',
+    totalSeat: '',
+    courses: []
   });
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const handleAddBatch = (batchData) => {
-    const newBatch = {
-      id: batches.length + 1,
-      ...batchData,
-      createdAt: new Date().toLocaleDateString('en-GB'),
-      status: 'active'
-    };
-    setBatches([newBatch, ...batches]);
-    setShowAddModal(false);
-  };
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleViewBatch = (batch) => {
-    setSelectedBatch(batch);
-    setShowViewModal(true);
-  };
+  const dispatch = useDispatch();
+  const coursesData = useSelector(state => state.course?.coursesAllDocumentsData);
 
-  const handleToggleStatus = (batchId) => {
-    setBatches(batches.map(batch => 
-      batch.id === batchId 
-        ? { ...batch, status: batch.status === 'active' ? 'inactive' : 'active' }
-        : batch
-    ));
-  };
-
-  const handleDeleteBatch = (batchId) => {
-    if (window.confirm('Are you sure you want to delete this batch?')) {
-      setBatches(batches.filter(batch => batch.id !== batchId));
+  useEffect(() => {
+    if (batch && mode === 'edit') {
+      setFormData({
+        startTime: batch.startTime || '',
+        endTime: batch.endTime || '',
+        totalSeat: batch.totalSeat || '',
+        courses: batch.courses || []
+      });
     }
+  }, [batch, mode]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = () => {
+    setLoading(true);
+    dispatch(coursesAllDocuments()).then(() => {
+      setLoading(false);
+    });
   };
 
-  const filteredBatches = batches.filter(batch => {
-    const matchesSearch = 
-      batch.courses.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      batch.startTime.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStartTime = filters.startTime === 'all' || true;
-    const matchesEndTime = filters.endTime === 'all' || true;
-    const matchesStatus = filters.status === 'all' || batch.status === filters.status;
-    
-    const matchesDate = () => {
-      if (!filters.startDate && !filters.endDate) return true;
-      
-      const batchDate = new Date(batch.createdAt.split('/').reverse().join('-'));
-      const startDate = filters.startDate ? new Date(filters.startDate) : null;
-      const endDate = filters.endDate ? new Date(filters.endDate) : null;
-      
-      if (startDate && endDate) {
-        return batchDate >= startDate && batchDate <= endDate;
-      }
-      if (startDate) return batchDate >= startDate;
-      if (endDate) return batchDate <= endDate;
-      
-      return true;
-    };
-    
-    return matchesSearch && matchesStartTime && matchesEndTime && matchesStatus && matchesDate();
-  });
+  useEffect(() => {
+    if (coursesData?.data?.data) {
+       setCourses(coursesData.data.data?.list);
+    }
+  }, [coursesData]);
 
-  const courses = [
-    'Digital Marketing',
-    'UI/UX Design',
-    'Hindi/gujrati typing / internet',
-    'computer hardware',
-    'C++',
-    'c language',
-    'python',
-    'java script',
-    'php',
-    'Java',
-    'CSS',
-    'Digital Print Textile Design',
-    'embroidery design',
-    'Spoken English',
-    'Adobe illustrator HTML',
-    'Tripta relly CorelDraw',
-    'Photoshop',
-    'Tally accounting',
-    'ms office',
-    'Web Development',
-    'Data Science',
-    'Mobile App Development',
-    'Cloud Computing',
-    'Cyber Security'
-  ];
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleTimeChange = (field, value) => {
+     const time24 = convertTo24Hour(value);
+    setFormData(prev => ({ ...prev, [field]: time24 }));
+  };
+
+  const convertTo24Hour = (time12h) => {
+    if (!time12h) return '';
+    
+    // If already in 24-hour format, return as is
+    if (time12h.includes(':')) {
+      const [time, period] = time12h.split(' ');
+      if (!period) return time; // Already 24-hour
+      
+      let [hours, minutes] = time.split(':').map(Number);
+      
+      if (period === 'PM' && hours < 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
+    return time12h;
+  };
+
+  const formatTimeForDisplay = (time24) => {
+    if (!time24) return '';
+    
+    const [hours, minutes] = time24.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
+  const handleMultiSelect = (value) => {
+    setFormData(prev => {
+      const currentValues = prev.courses;
+      const isSelected = currentValues.includes(value);
+      
+      if (isSelected) {
+        return {
+          ...prev,
+          courses: currentValues.filter(item => item !== value)
+        };
+      } else {
+        return {
+          ...prev,
+          courses: [...currentValues, value]
+        };
+      }
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!formData.startTime || !formData.endTime || !formData.totalSeat || formData.courses.length === 0) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    const payload = {
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      totalSeat: Number(formData.totalSeat),
+      courses: formData.courses
+    };
+
+    if (batch) {
+      payload._id = batch._id;
+    }
+
+    onSave(payload);
+  };
 
   const timeSlots = [
     '06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
@@ -180,228 +139,706 @@ const CourseBatches = () => {
     '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM'
   ];
 
-  const tableHeaders = ['Start Time', 'End Time', 'Total Seat', 'Available Seat', 'Courses', 'Status', 'Created At', 'Actions'];
+  const getCourseNames = (courseIds) => {
+    if (!courseIds || courseIds.length === 0) return 'No courses';
+    
+    const courseNames = courseIds.map(courseId => {
+      const course = courses.find(c => c._id === courseId);
+      return course ? course.courseName : 'Unknown Course';
+    });
+    
+    return courseNames.slice(0, 3).join(', ') + (courseNames.length > 3 ? ` +${courseNames.length - 3} more` : '');
+  };
 
   return (
-    <div className="">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Course Batches</h1>
-              <p className="text-black mt-2">Manage all course batches and schedules</p>
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {mode === 'view' ? 'Batch Details' : batch ? 'Edit Batch' : 'Add Batch'}
+            </h2>
             <button
-              onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium flex items-center gap-2"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
-              <span className="text-xl">+</span>
-              Add Batch
+              ×
             </button>
           </div>
-        </div>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {mode === 'view' ? 'Time Schedule' : 'Start Time & End Time'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Start Time *
+                    </label>
+                    {mode === 'view' ? (
+                      <div className="px-4 py-3 border border-gray-300 rounded-xl bg-gray-50">
+                        {formatTimeForDisplay(formData.startTime)}
+                      </div>
+                    ) : (
+                      <select
+                        value={formatTimeForDisplay(formData.startTime)}
+                        onChange={(e) => handleTimeChange('startTime', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        required
+                        disabled={mode === 'view'}
+                      >
+                        <option value="">--:-- --</option>
+                        {timeSlots.map((time, index) => (
+                          <option key={index} value={time}>{time}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div>
-              <select
-                value={filters.startTime}
-                onChange={(e) => setFilters({...filters, startTime: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              >
-                <option value="all">Select Batch Start Time</option>
-                {timeSlots.map((time, index) => (
-                  <option key={index} value={time}>{time}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <select
-                value={filters.endTime}
-                onChange={(e) => setFilters({...filters, endTime: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              >
-                <option value="all">Select Batch End Time</option>
-                {timeSlots.map((time, index) => (
-                  <option key={index} value={time}>{time}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({...filters, status: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              >
-                <option value="all">Select Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            
-            <div>
-              <input
-                type="date"
-                value={filters.startDate}
-                onChange={(e) => setFilters({...filters, startDate: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-                placeholder="Start Date"
-              />
-            </div>
-            
-            <div>
-              <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => setFilters({...filters, endDate: e.target.value})}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-                placeholder="End Date"
-              />
-            </div>
-          </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      End Time *
+                    </label>
+                    {mode === 'view' ? (
+                      <div className="px-4 py-3 border border-gray-300 rounded-xl bg-gray-50">
+                        {formatTimeForDisplay(formData.endTime)}
+                      </div>
+                    ) : (
+                      <select
+                        value={formatTimeForDisplay(formData.endTime)}
+                        onChange={(e) => handleTimeChange('endTime', e.target.value)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        required
+                        disabled={mode === 'view'}
+                      >
+                        <option value="">--:-- --</option>
+                        {timeSlots.map((time, index) => (
+                          <option key={index} value={time}>{time}</option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search by courses or time..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              />
-            </div>
-            <div className="text-sm text-gray-600 ml-4">
-              Showing {filteredBatches.length} of {batches.length} batches
-            </div>
-          </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {mode === 'view' ? 'Seat Information' : 'Total Seats'}
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Total Seats *
+                  </label>
+                  {mode === 'view' ? (
+                    <div className="px-4 py-3 border border-gray-300 rounded-xl bg-gray-50">
+                      {formData.totalSeat}
+                    </div>
+                  ) : (
+                    <input
+                      type="number"
+                      name="totalSeat"
+                      value={formData.totalSeat}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      placeholder="Enter total seats"
+                      required
+                      disabled={mode === 'view'}
+                    />
+                  )}
+                </div>
+              </div>
 
-          <div className="overflow-x-auto">
-            <Table
-              headers={tableHeaders}
-              data={filteredBatches}
-              renderRow={(batch, index) => (
-                <tr 
-                  key={batch.id} 
-                  className={`hover:bg-sky-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  {mode === 'view' ? 'Included Courses' : 'Courses'}
+                </h3>
+                {mode === 'view' ? (
+                  <div className="space-y-2">
+                    {loading ? (
+                      <div className="text-center py-4">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mx-auto"></div>
+                      </div>
+                    ) : (
+                      <div className="border border-gray-300 rounded-xl p-4 bg-gray-50">
+                        <p className="text-gray-700">
+                          {getCourseNames(formData.courses)}
+                        </p>
+                        {formData.courses && formData.courses.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-sm text-gray-600 mb-2">Selected courses:</p>
+                            <div className="space-y-1 max-h-40 overflow-y-auto">
+                              {formData.courses.map((courseId, index) => {
+                                const course = courses.find(c => c._id === courseId);
+                                return (
+                                  <div key={index} className="text-sm text-gray-700 bg-white p-2 rounded border">
+                                    {course ? course.courseName : `Course ID: ${courseId}`}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Courses for this batch *
+                    </label>
+                    <div className="space-y-2 max-h-60 overflow-y-auto p-2 border border-gray-300 rounded-xl">
+                      {loading ? (
+                        <div className="text-center py-4">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mx-auto"></div>
+                        </div>
+                      ) : courses.length === 0 ? (
+                        <div className="text-center py-4 text-gray-500">
+                          No courses available
+                        </div>
+                      ) : (
+                        courses.map((course) => (
+                          <label key={course._id} className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={formData.courses.includes(course._id)}
+                              onChange={() => handleMultiSelect(course._id)}
+                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <span className="text-gray-700">{course.courseName}</span>
+                          </label>
+                        ))
+                      )}
+                    </div>
+                    {formData.courses.length > 0 && (
+                      <div className="mt-2 text-sm text-gray-500">
+                        Selected: {formData.courses.length} course(s)
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {mode !== 'view' && (
+              <div className="flex gap-3 mt-8">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
                 >
-                  <td className="py-4 px-4">
-                    <span className="font-bold text-black text-lg">{batch.startTime}</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="font-bold text-black text-lg">{batch.endTime}</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center">
-                      <span className="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-800 rounded-full text-lg font-bold">
-                        {batch.totalSeats}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center">
-                      <span className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-lg font-bold ${
-                        batch.availableSeats > 0 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {batch.availableSeats}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="text-black max-w-xs truncate">
-                      {batch.courses}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex items-center">
-                      <span className={`w-3 h-3 rounded-full mr-2 ${
-                        batch.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                      }`}></span>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        batch.status === 'active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {batch.status.charAt(0).toUpperCase() + batch.status.slice(1)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4 text-black">{batch.createdAt}</td>
-                  <td className="py-4 px-4">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleViewBatch(batch)}
-                        className="text-sky-500 hover:text-sky-700 text-lg"
-                        title="View Batch Details"
-                      >
-                        👁️
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(batch.id)}
-                        className={`text-lg ${
-                          batch.status === 'active' 
-                            ? 'text-yellow-500 hover:text-yellow-700' 
-                            : 'text-green-500 hover:text-green-700'
-                        }`}
-                        title={batch.status === 'active' ? 'Deactivate Batch' : 'Activate Batch'}
-                      >
-                        {batch.status === 'active' ? '⏸️' : '▶️'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBatch(batch.id)}
-                        className="text-red-500 hover:text-red-700 text-lg"
-                        title="Delete Batch"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            />
-          </div>
-
-          {filteredBatches.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">🕐</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No batches found</h3>
-              <p className="text-gray-500 mb-6">
-                {searchTerm || Object.values(filters).some(f => f !== 'all' && f !== '') 
-                  ? "No batches match your search criteria" 
-                  : "No course batches available. Add your first batch!"}
-              </p>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
-              >
-                Add First Batch
-              </button>
-            </div>
-          )}
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading || !formData.startTime || !formData.endTime || !formData.totalSeat || formData.courses.length === 0}
+                >
+                  {batch ? 'Update Batch' : 'Create Batch'}
+                </button>
+              </div>
+            )}
+          </form>
         </div>
       </div>
-
-      <AddBatchModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSubmit={handleAddBatch}
-        courses={courses}
-        timeSlots={timeSlots}
-      />
-
-      <ViewBatchModal
-        isOpen={showViewModal}
-        onClose={() => {
-          setShowViewModal(false);
-          setSelectedBatch(null);
-        }}
-        batchData={selectedBatch}
-      />
     </div>
   );
 };
 
-export default CourseBatches;
+export default function CourseBatchesManagement() {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedBatch, setSelectedBatch] = useState(null);
+  const [modalMode, setModalMode] = useState('add'); // 'add', 'edit', 'view'
+  const [deletingBatch, setDeletingBatch] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [filters, setFilters] = useState({
+    search: '',
+    startTime: '',
+    endTime: '',
+    status: '',
+    startDate: '',
+    endDate: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const batchesListData = useSelector(state => state.course?.courseBatchesListData);
+  const enableDisableData = useSelector(state => state.course?.enableDisableCourseBatchesData);
+  const deleteData = useSelector(state => state.course?.deleteCourseBatchesData);
+  const createData = useSelector(state => state.course?.createCourseBatchesData);
+  const updateData = useSelector(state => state.course?.updateCourseBatchesData);
+
+  const coursesData = useSelector(state => state.course?.coursesAllDocumentsData);
+
+  useEffect(() => {
+    fetchBatches();
+  }, []);
+
+  useEffect(() => {
+    if (!showModal) {
+      fetchBatches();
+    }
+  }, [currentPage, enableDisableData, deleteData, createData, updateData]);
+
+  const fetchBatches = () => {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      size: itemsPerPage,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.startTime && { startTime: filters.startTime }),
+      ...(filters.endTime && { endTime: filters.endTime }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.startDate && { startDate: filters.startDate }),
+      ...(filters.endDate && { endDate: filters.endDate })
+    };
+    
+    dispatch(courseBatchesList(params)).then((action) => {
+      if (action.error) {
+        toast.error(action.payload || 'Failed to fetch batches');
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleAddBatchClick = () => {
+    setSelectedBatch(null);
+    setModalMode('add');
+    setShowModal(true);
+  };
+
+  const handleViewBatch = (batch) => {
+    setSelectedBatch(batch);
+    setModalMode('view');
+    setShowModal(true);
+  };
+
+  const handleEditBatch = (batch) => {
+    setSelectedBatch(batch);
+    setModalMode('edit');
+    setShowModal(true);
+  };
+
+  const handleDeleteClick = (batch) => {
+    setDeletingBatch(batch);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingBatch) {
+      setLoading(true);
+      dispatch(deleteCourseBatches({ _id: deletingBatch._id })).then((action) => {
+        if (!action.error) {
+          toast.success('Batch deleted successfully');
+          fetchBatches();
+        } else {
+          toast.error(action.payload || 'Failed to delete batch');
+        }
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeletingBatch(null);
+      });
+    }
+  };
+
+  const handleStatusToggle = (batch) => {
+    const newStatus = !batch.status;
+    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this batch?`)) {
+      setLoading(true);
+      const payload = {
+        _id: batch._id,
+        status: newStatus
+      };
+      dispatch(enableDisableCourseBatches(payload)).then((action) => {
+        if (!action.error) {
+          toast.success(`Batch ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          fetchBatches();
+        } else {
+          toast.error(action.payload || 'Failed to update status');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const handleSaveBatch = (formData) => {
+    setLoading(true);
+    if (modalMode === 'edit' && selectedBatch) {
+      const payload = {
+        ...formData,
+        _id: selectedBatch._id
+      };
+      dispatch(updateCourseBatches(payload)).then((action) => {
+        if (!action.error) {
+          toast.success('Batch updated successfully');
+          setShowModal(false);
+          setSelectedBatch(null);
+          fetchBatches();
+        } else {
+          toast.error(action.payload || 'Failed to update batch');
+        }
+        setLoading(false);
+      });
+    } else {
+      dispatch(createCourseBatches(formData)).then((action) => {
+        if (!action.error) {
+          toast.success('Batch created successfully');
+          setShowModal(false);
+          fetchBatches();
+        } else {
+          toast.error(action.payload || 'Failed to create batch');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFilter = () => {
+    setCurrentPage(1);
+    fetchBatches();
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: '',
+      startTime: '',
+      endTime: '',
+      status: '',
+      startDate: '',
+      endDate: ''
+    });
+    setCurrentPage(1);
+    fetchBatches();
+  };
+
+  const formatTimeForDisplay = (time24) => {
+    if (!time24) return '';
+    
+    const [hours, minutes] = time24.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    
+    return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  };
+
+  const getStatusColor = (status) => {
+    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
+  const getCourseNames = (courseIds) => {
+    if (!courseIds || courseIds.length === 0) return 'No courses';
+    
+    const courses = coursesData?.data?.data?.list || [];
+    const courseNames = courseIds.map(courseId => {
+      const course = courses.find(c => c._id === courseId);
+      return course ? course.courseName : 'Unknown Course';
+    });
+    
+    return courseNames.slice(0, 3).join(', ') + (courseNames.length > 3 ? ` +${courseNames.length - 3} more` : '');
+  };
+
+  const getAvailableSeats = (batch) => {
+    // You might want to calculate this based on actual enrollments
+    // For now, using totalSeat as availableSeats
+    return batch.totalSeat || 0;
+  };
+
+  const batches = batchesListData?.data?.data?.list || [];
+  const totalBatches = batchesListData?.data?.total || 0;
+  const totalPages = Math.ceil(totalBatches / itemsPerPage);
+
+  const timeSlots = [
+    '06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
+    '11:00 AM', '12:00 PM', '01:00 PM', '02:00 PM', '03:00 PM',
+    '04:00 PM', '05:00 PM', '06:00 PM', '07:00 PM', '08:00 PM'
+  ];
+
+  const tableHeaders = ['Start Time', 'End Time', 'Total Seats', 'Available Seats', 'Courses', 'Status', 'Created At', 'Actions'];
+  
+  const tableData = batches.map(batch => [
+    <div className="flex items-center">
+      <Clock className="w-4 h-4 text-gray-400 mr-2" />
+      <span className="font-bold text-gray-900">{formatTimeForDisplay(batch.startTime)}</span>
+    </div>,
+    <div className="flex items-center">
+      <Clock className="w-4 h-4 text-gray-400 mr-2" />
+      <span className="font-bold text-gray-900">{formatTimeForDisplay(batch.endTime)}</span>
+    </div>,
+    <div className="flex items-center">
+      <Users className="w-4 h-4 text-blue-500 mr-2" />
+      <span className="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-800 rounded-full text-lg font-bold">
+        {batch.totalSeat}
+      </span>
+    </div>,
+    <div className="flex items-center">
+      <Users className="w-4 h-4 text-green-500 mr-2" />
+      <span className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-lg font-bold ${
+        getAvailableSeats(batch) > 0 
+          ? 'bg-green-100 text-green-800' 
+          : 'bg-red-100 text-red-800'
+      }`}>
+        {getAvailableSeats(batch)}
+      </span>
+    </div>,
+    <div className="max-w-xs text-gray-700">
+      {getCourseNames(batch.courses)}
+    </div>,
+    <div className="flex items-center">
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(batch.status)}`}>
+        {batch.status ? 'Active' : 'Inactive'}
+      </span>
+      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+        <input
+          type="checkbox"
+          checked={batch.status}
+          onChange={() => handleStatusToggle(batch)}
+          className="sr-only"
+          id={`toggle-batch-${batch._id}`}
+          disabled={loading}
+        />
+        <label
+          htmlFor={`toggle-batch-${batch._id}`}
+          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${batch.status ? 'bg-green-500' : 'bg-gray-300'}`}
+        >
+          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${batch.status ? 'translate-x-4' : 'translate-x-0'}`} />
+        </label>
+      </div>
+    </div>,
+    <div className="flex items-center">
+      <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+      {new Date(batch.createdAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })}
+    </div>,
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleViewBatch(batch)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        title="View Details"
+        disabled={loading}
+      >
+        <Eye className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleEditBatch(batch)}
+        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+        title="Edit"
+        disabled={loading}
+      >
+        <Edit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(batch)}
+        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+        title="Delete"
+        disabled={loading}
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  ]);
+
+  return (
+    <div className="">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Course Batches</h1>
+        <p className="text-gray-600 mt-2">Manage all course batches and schedules</p>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Batches</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => handleFilterChange('search', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              placeholder="Search courses..."
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Start Time
+            </label>
+            <select
+              value={filters.startTime}
+              onChange={(e) => handleFilterChange('startTime', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              disabled={loading}
+            >
+              <option value="">All Start Times</option>
+              {timeSlots.map((time, index) => (
+                <option key={index} value={time}>{time}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              End Time
+            </label>
+            <select
+              value={filters.endTime}
+              onChange={(e) => handleFilterChange('endTime', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              disabled={loading}
+            >
+              <option value="">All End Times</option>
+              {timeSlots.map((time, index) => (
+                <option key={index} value={time}>{time}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Status
+            </label>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
+              disabled={loading}
+            >
+              <option value="">All Status</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            onClick={handleFilter}
+            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Filter'}
+          </button>
+          <button
+            onClick={resetFilters}
+            className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
+            disabled={loading}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div className="flex justify-end items-center mb-6">
+        <button
+          onClick={handleAddBatchClick}
+          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          disabled={loading}
+        >
+          <span>Add Batch</span>
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading batches...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && (
+        <Table
+          headers={tableHeaders}
+          data={tableData}
+          currentPage={currentPage}
+          size={itemsPerPage}
+          handlePageChange={setCurrentPage}
+          total={totalBatches}
+          totalPages={totalPages}
+          renderRow={(row, index) => (
+            <tr 
+              key={index} 
+              className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+            >
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex} className="py-4 px-4">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          )}
+        />
+      )}
+
+      {showModal && (
+        <BatchModal
+          batch={selectedBatch}
+          onSave={handleSaveBatch}
+          onClose={() => {
+            setShowModal(false);
+            setSelectedBatch(null);
+          }}
+          mode={modalMode}
+        />
+      )}
+
+      {showDeleteModal && (
+        <AlertModal
+          isOpen={showDeleteModal}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setDeletingBatch(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Batch"
+          description="Are you sure you want to delete this batch? This action cannot be undone."
+          cancelLabel="Cancel"
+          confirmLabel="Yes, Delete"
+          confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
+          isVisibleCancelButton={true}
+          isVisibleConfirmButton={true}
+        />
+      )}
+    </div>
+  );
+}

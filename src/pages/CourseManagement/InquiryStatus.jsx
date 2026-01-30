@@ -1,374 +1,513 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Plus, Edit2, Trash2, Search, Filter, Tag } from 'lucide-react';
+import { toast } from 'react-toastify';
+import {
+  inquiryStatusList,
+  enableDisableInquiryStatus,
+  deleteInquiryStatus,
+  createInquiryStatus,
+  updateInquiryStatus
+} from '../../redux/slices/branch';
 import Table from '../../components/Atoms/TableData/TableData';
-import StatusModal from '../../components/Atoms/UI/StatusModal';
+import AlertModal from '../../components/Modal/AlertModal';
 
-const InquiryStatus = () => {
-  const [statuses, setStatuses] = useState([
-    { 
-      id: 1, 
-      name: 'Deative', 
-      type: 'inactive',
-      createdAt: '15/11/2025',
-      description: 'Inactive or deactivated inquiries'
-    },
-    { 
-      id: 2, 
-      name: 'Cancelled', 
-      type: 'cancelled',
-      createdAt: '12/11/2025',
-      description: 'Cancelled inquiries'
-    },
-    { 
-      id: 3, 
-      name: 'Pending......', 
-      type: 'pending',
-      createdAt: '10/11/2025',
-      description: 'Inquiries pending review or follow-up'
-    },
-    { 
-      id: 4, 
-      name: 'Active', 
-      type: 'active',
-      createdAt: '08/11/2025',
-      description: 'Active and ongoing inquiries'
-    },
-    { 
-      id: 5, 
-      name: 'Converted', 
-      type: 'converted',
-      createdAt: '05/11/2025',
-      description: 'Inquiries converted to admissions'
-    },
-    { 
-      id: 6, 
-      name: 'Follow-up', 
-      type: 'followup',
-      createdAt: '01/11/2025',
-      description: 'Inquiries requiring follow-up'
-    },
-    { 
-      id: 7, 
-      name: 'Not Interested', 
-      type: 'not_interested',
-      createdAt: '28/10/2025',
-      description: 'Inquiries marked as not interested'
-    },
-    { 
-      id: 8, 
-      name: 'Enrolled', 
-      type: 'enrolled',
-      createdAt: '25/10/2025',
-      description: 'Inquiries that have enrolled'
-    },
-  ]);
-
-  const [selectedStatus, setSelectedStatus] = useState(null);
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typeFilter, setTypeFilter] = useState('all');
-
-  const handleAddStatus = () => {
-    setModalMode('add');
-    setSelectedStatus(null);
-    setShowStatusModal(true);
-  };
-
-  const handleEditStatus = (status) => {
-    setModalMode('edit');
-    setSelectedStatus(status);
-    setShowStatusModal(true);
-  };
-
-  const handleSaveStatus = (statusData) => {
-    if (modalMode === 'add') {
-      const newStatus = {
-        id: statuses.length + 1,
-        ...statusData,
-        type: getStatusType(statusData.name),
-        createdAt: new Date().toLocaleDateString('en-GB'),
-        description: statusData.description || ''
-      };
-      setStatuses([newStatus, ...statuses]);
-    } else {
-      const updatedStatus = {
-        ...statusData,
-        type: getStatusType(statusData.name)
-      };
-      setStatuses(statuses.map(status => 
-        status.id === selectedStatus.id 
-          ? { ...status, ...updatedStatus }
-          : status
-      ));
-    }
-    setShowStatusModal(false);
-    setSelectedStatus(null);
-  };
-
-  const getStatusType = (name) => {
-    const nameLower = name.toLowerCase();
-    if (nameLower.includes('active')) return 'active';
-    if (nameLower.includes('cancel')) return 'cancelled';
-    if (nameLower.includes('deative') || nameLower.includes('inactive')) return 'inactive';
-    if (nameLower.includes('pending')) return 'pending';
-    if (nameLower.includes('convert')) return 'converted';
-    if (nameLower.includes('follow')) return 'followup';
-    if (nameLower.includes('enroll')) return 'enrolled';
-    if (nameLower.includes('not interested')) return 'not_interested';
-    return 'other';
-  };
-
-  const getStatusColor = (type) => {
-    switch(type) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200';
-      case 'inactive': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      case 'converted': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'followup': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'enrolled': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'not_interested': return 'bg-pink-100 text-pink-800 border-pink-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const handleToggleStatus = (statusId) => {
-    setStatuses(statuses.map(status => 
-      status.id === statusId 
-        ? { 
-            ...status, 
-            type: status.type === 'active' ? 'inactive' : 'active',
-            name: status.type === 'active' ? `Inactive - ${status.name}` : status.name.replace('Inactive - ', '')
-          }
-        : status
-    ));
-  };
-
-  const handleDeleteStatus = (statusId) => {
-    if (window.confirm('Are you sure you want to delete this status?')) {
-      setStatuses(statuses.filter(status => status.id !== statusId));
-    }
-  };
-
-  const filteredStatuses = statuses.filter(status => {
-    const matchesSearch = 
-      status.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (status.description && status.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesType = 
-      typeFilter === 'all' || status.type === typeFilter;
-    
-    return matchesSearch && matchesType;
+const StatusModal = ({ status, onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: ''
   });
 
-  const tableHeaders = ['Status', 'Type', 'Created At', 'Description', 'Actions'];
+  useEffect(() => {
+    if (status) {
+      setFormData({
+        name: status.name || ''
+      });
+    }
+  }, [status]);
 
-  const statusTypes = [
-    { value: 'all', label: 'All Types' },
-    { value: 'active', label: 'Active' },
-    { value: 'inactive', label: 'Inactive' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'cancelled', label: 'Cancelled' },
-    { value: 'converted', label: 'Converted' },
-    { value: 'followup', label: 'Follow-up' },
-    { value: 'enrolled', label: 'Enrolled' },
-    { value: 'not_interested', label: 'Not Interested' }
-  ];
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!formData.name) {
+      toast.error('Please enter status name');
+      return;
+    }
+
+    const payload = {
+      name: formData.name
+    };
+
+    if (status) {
+      payload._id = status._id;
+    }
+
+    onSave(payload);
+  };
 
   return (
-    <div className="">
-      <div className="container mx-auto">
-        <div className="mb-8">
-          <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Status Management</h1>
-              <p className="text-black mt-2">Manage inquiry statuses and their configurations</p>
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {status ? 'Edit Status' : 'Add Status'}
+            </h2>
             <button
-              onClick={handleAddStatus}
-              className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium flex items-center gap-2"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
-              <span className="text-xl">+</span>
-              Add Status
+              ×
             </button>
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1 md:w-64">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              >
-                {statusTypes.map((type, index) => (
-                  <option key={index} value={type.value}>{type.label}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search statuses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-              />
-            </div>
-            
-            <div className="md:w-32">
-              <button className="w-full px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600">
-                Filter
-              </button>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <Table
-              headers={tableHeaders}
-              data={filteredStatuses}
-              renderRow={(status, index) => (
-                <tr 
-                  key={status.id} 
-                  className={`hover:bg-sky-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                >
-                  <td className="py-4 px-4">
-                    <div className="font-medium text-black text-lg">{status.name}</div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className={`px-3 py-1.5 rounded-full text-sm font-medium border ${getStatusColor(status.type)}`}>
-                      {status.type.charAt(0).toUpperCase() + status.type.slice(1).replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-black">{status.createdAt}</td>
-                  <td className="py-4 px-4">
-                    <div className="text-sm text-gray-600 max-w-xs">
-                      {status.description}
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEditStatus(status)}
-                        className="text-sky-500 hover:text-sky-700 text-lg"
-                        title="Edit Status"
-                      >
-                        👁️
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(status.id)}
-                        className={`text-lg ${
-                          status.type === 'active' || status.type === 'converted' || status.type === 'enrolled'
-                            ? 'text-yellow-500 hover:text-yellow-700' 
-                            : 'text-green-500 hover:text-green-700'
-                        }`}
-                        title={status.type === 'active' ? 'Deactivate' : 'Activate'}
-                      >
-                        {status.type === 'active' || status.type === 'converted' || status.type === 'enrolled' ? '⏸️' : '▶️'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStatus(status.id)}
-                        className="text-red-500 hover:text-red-700 text-lg"
-                        title="Delete Status"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            />
-          </div>
-
-          {filteredStatuses.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-4xl mb-4">🏷️</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No statuses found</h3>
-              <p className="text-gray-500 mb-6">
-                {searchTerm || typeFilter !== 'all' 
-                  ? "No statuses match your search criteria" 
-                  : "No statuses available. Add your first status!"}
-              </p>
-              <button
-                onClick={handleAddStatus}
-                className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
-              >
-                Add First Status
-              </button>
-            </div>
-          )}
-
-          {filteredStatuses.length > 0 && (
-            <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
-              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                Previous
-              </button>
-              <div className="text-sm text-gray-600">
-                Page 1 of {Math.ceil(filteredStatuses.length / 10)}
+          
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter status name"
+                  required
+                />
               </div>
-              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                Next
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!formData.name}
+              >
+                {status ? 'Update Status' : 'Create Status'}
               </button>
             </div>
-          )}
-        </div>
-
-        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-sky-700 mb-4">Status Color Guide</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-              <span className="text-black text-sm">Active</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
-              <span className="text-black text-sm">Pending</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
-              <span className="text-black text-sm">Cancelled</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
-              <span className="text-black text-sm">Inactive</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-              <span className="text-black text-sm">Converted</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
-              <span className="text-black text-sm">Follow-up</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-indigo-500 mr-2"></span>
-              <span className="text-black text-sm">Enrolled</span>
-            </div>
-            <div className="flex items-center">
-              <span className="w-3 h-3 rounded-full bg-pink-500 mr-2"></span>
-              <span className="text-black text-sm">Not Interested</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Status colors help quickly identify the state of inquiries in the system.
-          </p>
+          </form>
         </div>
       </div>
-
-      <StatusModal
-        isOpen={showStatusModal}
-        onClose={() => {
-          setShowStatusModal(false);
-          setSelectedStatus(null);
-        }}
-        statusData={selectedStatus}
-        mode={modalMode}
-        onSubmit={handleSaveStatus}
-      />
     </div>
   );
 };
 
-export default InquiryStatus;
+export default function InquiryStatusManagement() {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editingStatus, setEditingStatus] = useState(null);
+  const [deletingStatus, setDeletingStatus] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [filters, setFilters] = useState({
+    search: '',
+    status: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const statusListData = useSelector(state => state.branch?.inquiryStatusListData);
+  const enableDisableData = useSelector(state => state.branch?.enableDisableInquiryStatusData);
+  const deleteData = useSelector(state => state.branch?.deleteInquiryStatusData);
+  const createData = useSelector(state => state.branch?.createInquiryStatusData);
+  const updateData = useSelector(state => state.branch?.updateInquiryStatusData);
+
+  useEffect(() => {
+    fetchStatuses();
+  }, []);
+
+  useEffect(() => {
+    if (!showModal) {
+      fetchStatuses();
+    }
+  }, [currentPage, enableDisableData, deleteData, createData, updateData]);
+
+  const fetchStatuses = () => {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      size: itemsPerPage,
+      ...(filters.search && { search: filters.search }),
+      ...(filters.status && { status: filters.status })
+    };
+    
+    dispatch(inquiryStatusList(params)).then((action) => {
+      if (action.error) {
+        toast.error(action.payload || 'Failed to fetch statuses');
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleAddStatusClick = () => {
+    setEditingStatus(null);
+    setShowModal(true);
+  };
+
+  const handleEditStatus = (status) => {
+    setEditingStatus(status);
+    setShowModal(true);
+  };
+
+  const handleDeleteClick = (status) => {
+    setDeletingStatus(status);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deletingStatus) {
+      setLoading(true);
+      dispatch(deleteInquiryStatus({ _id: deletingStatus._id })).then((action) => {
+        if (!action.error) {
+          toast.success('Status deleted successfully');
+          fetchStatuses();
+        } else {
+          toast.error(action.payload || 'Failed to delete status');
+        }
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeletingStatus(null);
+      });
+    }
+  };
+
+  const handleStatusToggle = (status) => {
+    const newStatus = !status.status;
+    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this status?`)) {
+      setLoading(true);
+      const payload = {
+        _id: status._id,
+        status: newStatus
+      };
+      dispatch(enableDisableInquiryStatus(payload)).then((action) => {
+        if (!action.error) {
+          toast.success(`Status ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          fetchStatuses();
+        } else {
+          toast.error(action.payload || 'Failed to update status');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const handleSaveStatus = (formData) => {
+    setLoading(true);
+    if (editingStatus) {
+      const payload = {
+        ...formData,
+        _id: editingStatus._id
+      };
+      dispatch(updateInquiryStatus(payload)).then((action) => {
+        if (!action.error) {
+          toast.success('Status updated successfully');
+          setShowModal(false);
+          setEditingStatus(null);
+          fetchStatuses();
+        } else {
+          toast.error(action.payload || 'Failed to update status');
+        }
+        setLoading(false);
+      });
+    } else {
+      dispatch(createInquiryStatus(formData)).then((action) => {
+        if (!action.error) {
+          toast.success('Status created successfully');
+          setShowModal(false);
+          fetchStatuses();
+        } else {
+          toast.error(action.payload || 'Failed to create status');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const handleFilterChange = (field, value) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFilter = () => {
+    setCurrentPage(1);
+    fetchStatuses();
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: '',
+      status: ''
+    });
+    setCurrentPage(1);
+    fetchStatuses();
+  };
+
+  const getStatusColor = (status) => {
+    const statusLower = status.name.toLowerCase();
+    
+    if (statusLower.includes('active') || statusLower.includes('active')) return 'bg-green-100 text-green-800 border-green-200';
+    if (statusLower.includes('inactive') || statusLower.includes('deative')) return 'bg-gray-100 text-gray-800 border-gray-200';
+    if (statusLower.includes('pending')) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    if (statusLower.includes('cancel')) return 'bg-red-100 text-red-800 border-red-200';
+    if (statusLower.includes('convert')) return 'bg-blue-100 text-blue-800 border-blue-200';
+    if (statusLower.includes('follow')) return 'bg-purple-100 text-purple-800 border-purple-200';
+    if (statusLower.includes('enroll')) return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+    if (statusLower.includes('not') || statusLower.includes('interested')) return 'bg-pink-100 text-pink-800 border-pink-200';
+    return 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  const getStatusText = (status) => {
+    return status.status ? 'Active' : 'Inactive';
+  };
+
+  const statuses = statusListData?.data?.data?.list || [];
+  const totalStatuses = statusListData?.data?.total || 0;
+  const totalPages = Math.ceil(totalStatuses / itemsPerPage);
+
+  const tableHeaders = ['Status Name', 'System Status', 'Created At', 'Actions'];
+  
+  const tableData = statuses.map(status => [
+    <div className="font-medium text-gray-900 text-lg">{status.name}</div>,
+    <div className="flex items-center">
+      <span className={`px-3 py-1.5 rounded-full text-sm font-medium border ${getStatusColor(status)}`}>
+        {getStatusText(status)}
+      </span>
+      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+        <input
+          type="checkbox"
+          checked={status.status}
+          onChange={() => handleStatusToggle(status)}
+          className="sr-only"
+          id={`toggle-status-${status._id}`}
+          disabled={loading}
+        />
+        <label
+          htmlFor={`toggle-status-${status._id}`}
+          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${status.status ? 'bg-green-500' : 'bg-gray-300'}`}
+        >
+          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${status.status ? 'translate-x-4' : 'translate-x-0'}`} />
+        </label>
+      </div>
+    </div>,
+    new Date(status.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEditStatus(status)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        title="Edit"
+        disabled={loading}
+      >
+        <Edit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(status)}
+        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+        title="Delete"
+        disabled={loading}
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  ]);
+
+  return (
+    <div className="">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Status Management</h1>
+        <p className="text-gray-600 mt-2">Manage inquiry statuses and their configurations</p>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Statuses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                placeholder="Search statuses..."
+                disabled={loading}
+              />
+              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              System Status
+            </label>
+            <select
+              value={filters.status}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
+              disabled={loading}
+            >
+              <option value="">--- no select ---</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+
+          <div className="flex items-end gap-2">
+            <button
+              onClick={handleFilter}
+              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
+              disabled={loading}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Filter className="w-4 h-4" />
+                {loading ? 'Loading...' : 'Filter'}
+              </div>
+            </button>
+            <button
+              onClick={resetFilters}
+              className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
+              disabled={loading}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end items-center mb-6">
+        <button
+          onClick={handleAddStatusClick}
+          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          disabled={loading}
+        >
+          <span>Add Status</span>
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading statuses...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && (
+        <Table
+          headers={tableHeaders}
+          data={tableData}
+          currentPage={currentPage}
+          size={itemsPerPage}
+          handlePageChange={setCurrentPage}
+          total={totalStatuses}
+          totalPages={totalPages}
+          renderRow={(row, index) => (
+            <tr 
+              key={index} 
+              className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+            >
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex} className="py-4 px-4">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          )}
+        />
+      )}
+
+      <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mt-8">
+        <h3 className="text-lg font-semibold text-blue-700 mb-4 flex items-center gap-2">
+          <Tag className="w-5 h-5" />
+          Status Color Guide
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+            <span className="text-black text-sm">Active</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+            <span className="text-black text-sm">Pending</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+            <span className="text-black text-sm">Cancelled</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
+            <span className="text-black text-sm">Inactive</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+            <span className="text-black text-sm">Converted</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+            <span className="text-black text-sm">Follow-up</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-indigo-500 mr-2"></span>
+            <span className="text-black text-sm">Enrolled</span>
+          </div>
+          <div className="flex items-center">
+            <span className="w-3 h-3 rounded-full bg-pink-500 mr-2"></span>
+            <span className="text-black text-sm">Not Interested</span>
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 mt-4">
+          Status colors are determined automatically based on status name keywords.
+        </p>
+      </div>
+
+      {showModal && (
+        <StatusModal
+          status={editingStatus}
+          onSave={handleSaveStatus}
+          onClose={() => {
+            setShowModal(false);
+            setEditingStatus(null);
+          }}
+        />
+      )}
+
+      {showDeleteModal && (
+        <AlertModal
+          isOpen={showDeleteModal}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setDeletingStatus(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Status"
+          description="Are you sure you want to delete this status? This action cannot be undone."
+          cancelLabel="Cancel"
+          confirmLabel="Yes, Delete"
+          confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
+          isVisibleCancelButton={true}
+          isVisibleConfirmButton={true}
+        />
+      )}
+    </div>
+  );
+}

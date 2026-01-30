@@ -1,297 +1,395 @@
-// components/DepartmentModal/DepartmentModal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Plus, Edit2, Trash2, Building } from 'lucide-react';
+import { toast } from 'react-toastify'; 
+import { departmentsList,
+  enableDisableDepartments,
+  deleteDepartments,
+  createDepartments,
+  updateDepartments } from '../../redux/slices/employee';
+import AlertModal from '../../components/Modal/AlertModal';
 import Table from '../../components/Atoms/TableData/TableData';
 
-const DepartmentModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
-  const [department, setDepartment] = useState(
-    initialData?.department || [{ name: '' }, { name: '' }]
-  );
+const DepartmentModal = ({ department, onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: ''
+  });
 
-  const addDepartmentField = () => {
-    setDepartment([...department, { name: '' }]);
-  };
-
-  const removeDepartmentField = (index) => {
-    if (department.length > 2) {
-      const newDepartment = [...department];
-      newDepartment.splice(index, 1);
-      setDepartment(newDepartment);
+  useEffect(() => {
+    if (department) {
+      setFormData({
+        name: department.name || ''
+      });
     }
-  };
+  }, [department]);
 
-  const handleChange = (index, value) => {
-    const newDepartment = [...department];
-    newDepartment[index].name = value;
-    setDepartment(newDepartment);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const filteredDepartment = department.filter(
-      dept => dept.name.trim() !== ''
-    );
-    onSubmit(filteredDepartment);
-    onClose();
+    
+    if (!formData.name) {
+      toast.error('Please enter department name');
+      return;
+    }
+
+    const payload = {
+      name: formData.name
+    };
+
+    if (department) {
+      payload._id = department._id;
+    }
+
+    onSave(payload);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-        <div className="bg-sky-500 text-white p-4 rounded-t-lg">
-          <h2 className="text-xl font-semibold">
-            {initialData ? 'Edit Department' : 'Add Department'}
-          </h2>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-black mb-4">Department</h3>
-            <div className="space-y-4">
-              {department.map((dept, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={dept.name}
-                      onChange={(e) => handleChange(index, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-                      placeholder={`Department ${index + 1}`}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeDepartmentField(index)}
-                    className="text-red-500 hover:text-red-700"
-                    disabled={department.length <= 2}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {department ? 'Edit Department' : 'Add Department'}
+            </h2>
             <button
-              type="button"
-              onClick={addDepartmentField}
-              className="mt-4 text-sky-500 hover:text-sky-700 text-sm font-medium"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
-              + Add more department fields
+              ×
             </button>
           </div>
           
-          <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-black rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600"
-            >
-              Create Department
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Department Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter department name"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!formData.name}
+              >
+                {department ? 'Update Department' : 'Create Department'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
-const Department = () => {
-  const [departments, setDepartments] = useState([
-    { id: 1, name: 'Deviopers Team', status: 'Active' },
-    { id: 2, name: 'Reception Team', status: 'Active' },
-    { id: 3, name: 'Backoffice Team', status: 'Active' },
-    { id: 4, name: 'Teachers Team', status: 'Active' },
-    { id: 5, name: 'Sales Team', status: 'Active' },
-  ]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function DepartmentManagement() {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
-  const itemsPerPage = 10;
+  const [deletingDepartment, setDeletingDepartment] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
 
-  const handleAddDepartment = () => {
+  const departmentsListData = useSelector(state => state.employee?.departmentsListData);
+  const enableDisableData = useSelector(state => state.employee?.enableDisableDepartmentsData);
+  const deleteData = useSelector(state => state.employee?.deleteDepartmentsData);
+  const createData = useSelector(state => state.employee?.createDepartmentsData);
+  const updateData = useSelector(state => state.employee?.updateDepartmentsData);
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  useEffect(() => {
+    if (!showModal) {
+      fetchDepartments();
+    }
+  }, [currentPage, enableDisableData, deleteData, createData, updateData]);
+
+  const fetchDepartments = () => {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      size: itemsPerPage
+    };
+    
+    dispatch(departmentsList(params)).then((action) => {
+      if (action.error) {
+        toast.error(action.payload || 'Failed to fetch departments');
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleAddDepartmentClick = () => {
     setEditingDepartment(null);
-    setIsModalOpen(true);
+    setShowModal(true);
   };
 
-  const handleEditDepartment = (dept) => {
-    setEditingDepartment(dept);
-    setIsModalOpen(true);
+  const handleEditDepartment = (department) => {
+    setEditingDepartment(department);
+    setShowModal(true);
   };
 
-  const handleDeleteDepartment = (id) => {
-    setDepartments(departments.filter(dept => dept.id !== id));
+  const handleDeleteClick = (department) => {
+    setDeletingDepartment(department);
+    setShowDeleteModal(true);
   };
 
-  const handleSubmitDepartment = (newDepartments) => {
-    if (editingDepartment) {
-      const updated = departments.map(dept => 
-        dept.id === editingDepartment.id 
-          ? { ...dept, name: newDepartments[0]?.name || dept.name }
-          : dept
-      );
-      setDepartments(updated);
-    } else {
-      const ids = departments.map(d => d.id);
-      const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-      
-      const newDept = newDepartments.map((dept, index) => ({
-        id: maxId + index + 1,
-        name: dept.name,
-        status: 'Active'
-      }));
-      
-      setDepartments([...departments, ...newDept]);
+  const handleDeleteConfirm = () => {
+    if (deletingDepartment) {
+      setLoading(true);
+      dispatch(deleteDepartments({ _id: deletingDepartment._id })).then((action) => {
+        if (!action.error) {
+          toast.success('Department deleted successfully');
+          fetchDepartments();
+        } else {
+          toast.error(action.payload || 'Failed to delete department');
+        }
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeletingDepartment(null);
+      });
     }
   };
 
-  const toggleStatus = (id) => {
-    setDepartments(departments.map(dept => 
-      dept.id === id 
-        ? { ...dept, status: dept.status === 'Active' ? 'Inactive' : 'Active' }
-        : dept
-    ));
+  const handleStatusToggle = (department) => {
+    const newStatus = !department.status;
+    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this department?`)) {
+      setLoading(true);
+      const payload = {
+        _id: department._id,
+        status: newStatus
+      };
+      dispatch(enableDisableDepartments(payload)).then((action) => {
+        if (!action.error) {
+          toast.success(`Department ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          fetchDepartments();
+        } else {
+          toast.error(action.payload || 'Failed to update status');
+        }
+        setLoading(false);
+      });
+    }
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDepartments = departments.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(departments.length / itemsPerPage);
+  const handleSaveDepartment = (formData) => {
+    setLoading(true);
+    if (editingDepartment) {
+      const payload = {
+        ...formData,
+        _id: editingDepartment._id
+      };
+      dispatch(updateDepartments(payload)).then((action) => {
+        if (!action.error) {
+          toast.success('Department updated successfully');
+          setShowModal(false);
+          setEditingDepartment(null);
+          fetchDepartments();
+        } else {
+          toast.error(action.payload || 'Failed to update department');
+        }
+        setLoading(false);
+      });
+    } else {
+      dispatch(createDepartments(formData)).then((action) => {
+        if (!action.error) {
+          toast.success('Department created successfully');
+          setShowModal(false);
+          fetchDepartments();
+        } else {
+          toast.error(action.payload || 'Failed to create department');
+        }
+        setLoading(false);
+      });
+    }
+  };
 
-  const tableHeaders = ['Department', 'Status', 'Actions'];
+  const getStatusColor = (status) => {
+    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
+  const departments = departmentsListData?.data?.data?.list || [];
+  const totalDepartments = departmentsListData?.data?.total || 0;
+  const totalPages = Math.ceil(totalDepartments / itemsPerPage);
+
+  const tableHeaders = ['Department Name', 'Status', 'Created At', 'Actions'];
+  
+  const tableData = departments.map(department => [
+    <div className="flex items-center">
+      <Building className="w-4 h-4 text-gray-400 mr-2" />
+      <div className="font-medium text-gray-900">{department.name}</div>
+    </div>,
+    <div className="flex items-center">
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(department.status)}`}>
+        {department.status ? 'Active' : 'Inactive'}
+      </span>
+      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+        <input
+          type="checkbox"
+          checked={department.status}
+          onChange={() => handleStatusToggle(department)}
+          className="sr-only"
+          id={`toggle-department-${department._id}`}
+          disabled={loading}
+        />
+        <label
+          htmlFor={`toggle-department-${department._id}`}
+          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${department.status ? 'bg-green-500' : 'bg-gray-300'}`}
+        >
+          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${department.status ? 'translate-x-4' : 'translate-x-0'}`} />
+        </label>
+      </div>
+    </div>,
+    new Date(department.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEditDepartment(department)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        title="Edit"
+        disabled={loading}
+      >
+        <Edit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(department)}
+        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+        title="Delete"
+        disabled={loading}
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  ]);
+
+  const activeDepartments = departments.filter(dept => dept.status).length;
+  const inactiveDepartments = departments.filter(dept => !dept.status).length;
 
   return (
     <div className="">
-      <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-black">Department</h1>
-            <p className="text-black mt-2">Manage all departments in the organization</p>
-          </div>
-          <button
-            onClick={handleAddDepartment}
-           className="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-6 rounded-lg transition duration-300"
-          >
-            Add Department
-          </button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Department</h1>
+        <p className="text-gray-600 mt-2">Manage all departments in the organization</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-700">Total Departments</h3>
+          <p className="text-3xl font-bold text-black mt-2">{departments.length}</p>
         </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="mb-4">
-            <h2 className="text-xl font-bold text-black">Department ({departments.length})</h2>
-          </div>
-          
-          <Table
-            headers={tableHeaders}
-            data={currentDepartments}
-            renderRow={(dept, index) => (
-              <tr 
-                key={dept.id} 
-                className={`hover:bg-sky-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-              >
-                <td className="py-4 px-4 text-black font-medium">{dept.name}</td>
-                <td className="py-4 px-4">
-                  <button
-                    onClick={() => toggleStatus(dept.id)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      dept.status === 'Active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {dept.status}
-                  </button>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleEditDepartment(dept)}
-                      className="text-sky-500 hover:text-sky-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDepartment(dept.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )}
-          />
-
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-md ${
-                  currentPage === 1 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-sky-50 text-sky-600 hover:bg-sky-100'
-                }`}
-              >
-                Previous
-              </button>
-              
-              <span className="text-black">
-                Page {currentPage} of {totalPages}
-              </span>
-              
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-md ${
-                  currentPage === totalPages 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-sky-50 text-sky-600 hover:bg-sky-100'
-                }`}
-              >
-                Next
-              </button>
-            </div>
-          )}
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-700">Active</h3>
+          <p className="text-3xl font-bold text-black mt-2">{activeDepartments}</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Departments</h3>
-            <p className="text-3xl font-bold text-black mt-2">{departments.length}</p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Active</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {departments.filter(d => d.status === 'Active').length}
-            </p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Inactive</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {departments.filter(d => d.status === 'Inactive').length}
-            </p>
-          </div>
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-700">Inactive</h3>
+          <p className="text-3xl font-bold text-black mt-2">{inactiveDepartments}</p>
         </div>
       </div>
 
-      <DepartmentModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingDepartment(null);
-        }}
-        onSubmit={handleSubmitDepartment}
-        initialData={editingDepartment}
-      />
+      <div className="flex justify-end items-center mb-6">
+        <button
+          onClick={handleAddDepartmentClick}
+          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          disabled={loading}
+        >
+          <span>Add Department</span>
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading departments...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Department ({departments.length})</h2>
+          <Table
+            headers={tableHeaders}
+            data={tableData}
+            currentPage={currentPage}
+            size={itemsPerPage}
+            handlePageChange={setCurrentPage}
+            total={totalDepartments}
+            totalPages={totalPages}
+            renderRow={(row, index) => (
+              <tr 
+                key={index} 
+                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+              >
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className="py-4 px-4">
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            )}
+          />
+        </div>
+      )}
+
+      {showModal && (
+        <DepartmentModal
+          department={editingDepartment}
+          onSave={handleSaveDepartment}
+          onClose={() => {
+            setShowModal(false);
+            setEditingDepartment(null);
+          }}
+        />
+      )}
+
+      {showDeleteModal && (
+        <AlertModal
+          isOpen={showDeleteModal}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setDeletingDepartment(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Department"
+          description="Are you sure you want to delete this department? This action cannot be undone."
+          cancelLabel="Cancel"
+          confirmLabel="Yes, Delete"
+          confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
+          isVisibleCancelButton={true}
+          isVisibleConfirmButton={true}
+        />
+      )}
     </div>
   );
-};
-
-export default Department;
+}

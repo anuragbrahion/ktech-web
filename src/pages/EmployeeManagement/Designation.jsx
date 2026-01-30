@@ -1,268 +1,417 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { Plus, Edit2, Trash2, DollarSign } from 'lucide-react';
+import { toast } from 'react-toastify';
+import {
+  designationsList,
+  enableDisableDesignations,
+  deleteDesignations,
+  createDesignations,
+  updateDesignations
+} from '../../redux/slices/employee';
+import AlertModal from '../../components/Modal/AlertModal';
 import Table from '../../components/Atoms/TableData/TableData';
 
-const DesignationModal = ({ isOpen, onClose, onSubmit, initialData = null }) => {
-  const [designations, setDesignations] = useState(
-    initialData?.designations || [{ name: '', salary: '' }, { name: '', salary: '' }]
-  );
+const DesignationModal = ({ designation, onSave, onClose }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    salary: ''
+  });
 
-  const addDesignationField = () => {
-    setDesignations([...designations, { name: '', salary: '' }]);
-  };
-
-  const removeDesignationField = (index) => {
-    if (designations.length > 2) {
-      const newDesignations = [...designations];
-      newDesignations.splice(index, 1);
-      setDesignations(newDesignations);
+  useEffect(() => {
+    if (designation) {
+      setFormData({
+        name: designation.name || '',
+        salary: designation.salary || ''
+      });
     }
-  };
+  }, [designation]);
 
-  const handleChange = (index, field, value) => {
-    const newDesignations = [...designations];
-    newDesignations[index][field] = value;
-    setDesignations(newDesignations);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const filteredDesignations = designations.filter(
-      des => des.name.trim() !== '' && des.salary.trim() !== ''
-    );
-    onSubmit(filteredDesignations);
-    onClose();
+    
+    if (!formData.name || !formData.salary) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    const payload = {
+      name: formData.name,
+      salary: Number(formData.salary)
+    };
+
+    if (designation) {
+      payload._id = designation._id;
+    }
+
+    onSave(payload);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-        <div className="bg-sky-500 text-white p-4 rounded-t-lg">
-          <h2 className="text-xl font-semibold">
-            {initialData ? 'Edit Designation' : 'Add Designation'}
-          </h2>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-black mb-4">Designation</h3>
-            <div className="space-y-4">
-              {designations.map((des, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={des.name}
-                      onChange={(e) => handleChange(index, 'name', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      placeholder={`Designation ${index + 1}`}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      type="number"
-                      value={des.salary}
-                      onChange={(e) => handleChange(index, 'salary', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                      placeholder="Salary"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeDesignationField(index)}
-                    className="text-red-500 hover:text-red-700"
-                    disabled={designations.length <= 2}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+        <div className="p-8">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {designation ? 'Edit Designation' : 'Add Designation'}
+            </h2>
             <button
-              type="button"
-              onClick={addDesignationField}
-              className="mt-4 text-sky-500 hover:text-sky-700 text-sm font-medium"
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl"
             >
-              + Add more designation fields
+              ×
             </button>
           </div>
           
-          <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-black rounded-md hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600"
-            >
-              Create Designation
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Designation Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  placeholder="Enter designation name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Salary (₹) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    name="salary"
+                    value={formData.salary}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all pl-12"
+                    placeholder="Enter salary"
+                    required
+                  />
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                    <DollarSign className="w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-8">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!formData.name || !formData.salary}
+              >
+                {designation ? 'Update Designation' : 'Create Designation'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
-
-const DesignationManagement = () => {
-  const [designations, setDesignations] = useState([
-    { id: 1, name: 'CEO', salary: '100000', status: 'Active' },
-    { id: 2, name: 'Franchise Partner & Share Holder', salary: '5000', status: 'Active' },
-    { id: 3, name: 'Managing Director', salary: '18000', status: 'Active' },
-    { id: 4, name: 'Assistant Manager', salary: '14000', status: 'Active' },
-    { id: 5, name: 'Senior Manager & Branch Manager', salary: '11000', status: 'Active' },
-    { id: 6, name: 'Junior Manager', salary: '8000', status: 'Active' },
-    { id: 7, name: 'Branch in Charge & Marketing Person', salary: '7000', status: 'Active' },
-    { id: 8, name: 'Quality Maintenance & Lab in Charna', salary: '6000', status: 'Active' },
-  ]);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function DesignationManagement() {
+  const dispatch = useDispatch();
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingDesignation, setEditingDesignation] = useState(null);
+  const [deletingDesignation, setDeletingDesignation] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [loading, setLoading] = useState(false);
 
-  const handleAddDesignation = () => {
+  const designationsListData = useSelector(state => state.employee?.designationsListData);
+  const enableDisableData = useSelector(state => state.employee?.enableDisableDesignationsData);
+  const deleteData = useSelector(state => state.employee?.deleteDesignationsData);
+  const createData = useSelector(state => state.employee?.createDesignationsData);
+  const updateData = useSelector(state => state.employee?.updateDesignationsData);
+
+  useEffect(() => {
+    fetchDesignations();
+  }, []);
+
+  useEffect(() => {
+    if (!showModal) {
+      fetchDesignations();
+    }
+  }, [currentPage, enableDisableData, deleteData, createData, updateData]);
+
+  const fetchDesignations = () => {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      size: itemsPerPage
+    };
+    
+    dispatch(designationsList(params)).then((action) => {
+      if (action.error) {
+        toast.error(action.payload || 'Failed to fetch designations');
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleAddDesignationClick = () => {
     setEditingDesignation(null);
-    setIsModalOpen(true);
+    setShowModal(true);
   };
 
   const handleEditDesignation = (designation) => {
     setEditingDesignation(designation);
-    setIsModalOpen(true);
+    setShowModal(true);
   };
 
-  const handleDeleteDesignation = (id) => {
-    setDesignations(designations.filter(des => des.id !== id));
+  const handleDeleteClick = (designation) => {
+    setDeletingDesignation(designation);
+    setShowDeleteModal(true);
   };
 
-  const handleSubmitDesignation = (newDesignations) => {
-    if (editingDesignation) {
-      const updated = designations.map(des => 
-        des.id === editingDesignation.id 
-          ? { ...des, name: newDesignations[0]?.name || des.name, salary: newDesignations[0]?.salary || des.salary }
-          : des
-      );
-      setDesignations(updated);
-    } else {
-      const ids = designations.map(d => d.id);
-      const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-      
-      const newDes = newDesignations.map((des, index) => ({
-        id: maxId + index + 1,
-        name: des.name,
-        salary: des.salary,
-        status: 'Active'
-      }));
-      
-      setDesignations([...designations, ...newDes]);
+  const handleDeleteConfirm = () => {
+    if (deletingDesignation) {
+      setLoading(true);
+      dispatch(deleteDesignations({ _id: deletingDesignation._id })).then((action) => {
+        if (!action.error) {
+          toast.success('Designation deleted successfully');
+          fetchDesignations();
+        } else {
+          toast.error(action.payload || 'Failed to delete designation');
+        }
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeletingDesignation(null);
+      });
     }
   };
 
-  const toggleStatus = (id) => {
-    setDesignations(designations.map(des => 
-      des.id === id 
-        ? { ...des, status: des.status === 'Active' ? 'Inactive' : 'Active' }
-        : des
-    ));
+  const handleStatusToggle = (designation) => {
+    const newStatus = !designation.status;
+    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this designation?`)) {
+      setLoading(true);
+      const payload = {
+        _id: designation._id,
+        status: newStatus
+      };
+      dispatch(enableDisableDesignations(payload)).then((action) => {
+        if (!action.error) {
+          toast.success(`Designation ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          fetchDesignations();
+        } else {
+          toast.error(action.payload || 'Failed to update status');
+        }
+        setLoading(false);
+      });
+    }
   };
 
-  const tableHeaders = ['Designation', 'Salary', 'Status', 'Actions'];
+  const handleSaveDesignation = (formData) => {
+    setLoading(true);
+    if (editingDesignation) {
+      const payload = {
+        ...formData,
+        _id: editingDesignation._id
+      };
+      dispatch(updateDesignations(payload)).then((action) => {
+        if (!action.error) {
+          toast.success('Designation updated successfully');
+          setShowModal(false);
+          setEditingDesignation(null);
+          fetchDesignations();
+        } else {
+          toast.error(action.payload || 'Failed to update designation');
+        }
+        setLoading(false);
+      });
+    } else {
+      dispatch(createDesignations(formData)).then((action) => {
+        if (!action.error) {
+          toast.success('Designation created successfully');
+          setShowModal(false);
+          fetchDesignations();
+        } else {
+          toast.error(action.payload || 'Failed to create designation');
+        }
+        setLoading(false);
+      });
+    }
+  };
+
+  const getStatusColor = (status) => {
+    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
+  const designations = designationsListData?.data?.data?.list || [];
+  const totalDesignations = designationsListData?.data?.total || 0;
+  const totalPages = Math.ceil(totalDesignations / itemsPerPage);
+
+  const tableHeaders = ['Designation', 'Salary', 'Status', 'Created At', 'Actions'];
+  
+  const tableData = designations.map(designation => [
+    <div className="font-medium text-gray-900">{designation.name}</div>,
+    <div className="font-bold text-green-600">₹{designation.salary}</div>,
+    <div className="flex items-center">
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(designation.status)}`}>
+        {designation.status ? 'Active' : 'Inactive'}
+      </span>
+      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+        <input
+          type="checkbox"
+          checked={designation.status}
+          onChange={() => handleStatusToggle(designation)}
+          className="sr-only"
+          id={`toggle-designation-${designation._id}`}
+          disabled={loading}
+        />
+        <label
+          htmlFor={`toggle-designation-${designation._id}`}
+          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${designation.status ? 'bg-green-500' : 'bg-gray-300'}`}
+        >
+          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${designation.status ? 'translate-x-4' : 'translate-x-0'}`} />
+        </label>
+      </div>
+    </div>,
+    new Date(designation.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleEditDesignation(designation)}
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        title="Edit"
+        disabled={loading}
+      >
+        <Edit2 className="w-4 h-4" />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(designation)}
+        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+        title="Delete"
+        disabled={loading}
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
+  ]);
+
+  const activeDesignations = designations.filter(des => des.status).length;
+  const totalSalary = designations.reduce((total, des) => total + (Number(des.salary) || 0), 0);
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-black">Designation</h1>
-            <p className="text-gray-600 mt-2">Manage designations and their salaries</p>
-          </div>
-          <button
-            onClick={handleAddDesignation}
-           className="bg-black hover:bg-gray-900 text-white font-semibold py-2 px-6 rounded-lg transition duration-300"
-          >
-            Add Designation
-          </button>
-        </div>
+    <div className="">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Designation</h1>
+        <p className="text-gray-600 mt-2">Manage designations and their salaries</p>
+      </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-700">Total Designations</h3>
+          <p className="text-3xl font-bold text-black mt-2">{designations.length}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-700">Active</h3>
+          <p className="text-3xl font-bold text-black mt-2">{activeDesignations}</p>
+        </div>
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-700">Total Salary</h3>
+          <p className="text-3xl font-bold text-black mt-2">₹{totalSalary}</p>
+        </div>
+      </div>
+
+      <div className="flex justify-end items-center mb-6">
+        <button
+          onClick={handleAddDesignationClick}
+          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          disabled={loading}
+        >
+          <span>Add Designation</span>
+          <Plus className="w-5 h-5" />
+        </button>
+      </div>
+
+      {loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">Loading designations...</span>
+          </div>
+        </div>
+      )}
+
+      {!loading && (
+        <div className="bg-white rounded-2xl shadow-lg p-6">
           <Table
             headers={tableHeaders}
-            data={designations}
-            renderRow={(des, index) => (
+            data={tableData}
+            currentPage={currentPage}
+            size={itemsPerPage}
+            handlePageChange={setCurrentPage}
+            total={totalDesignations}
+            totalPages={totalPages}
+            renderRow={(row, index) => (
               <tr 
-                key={des.id} 
-                className={`hover:bg-sky-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+                key={index} 
+                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
               >
-                <td className="py-4 px-4 text-black font-medium">{des.name}</td>
-                <td className="py-4 px-4 text-black">{des.salary} ₽</td>
-                <td className="py-4 px-4">
-                  <button
-                    onClick={() => toggleStatus(des.id)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      des.status === 'Active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {des.status}
-                  </button>
-                </td>
-                <td className="py-4 px-4">
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleEditDesignation(des)}
-                      className="text-sky-500 hover:text-sky-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDesignation(des.id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className="py-4 px-4">
+                    {cell}
+                  </td>
+                ))}
               </tr>
             )}
           />
         </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Designations</h3>
-            <p className="text-3xl font-bold text-black mt-2">{designations.length}</p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Active</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {designations.filter(d => d.status === 'Active').length}
-            </p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Salary</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {designations.reduce((total, des) => total + parseInt(des.salary || 0), 0)} ₽
-            </p>
-          </div>
-        </div>
-      </div>
+      {showModal && (
+        <DesignationModal
+          designation={editingDesignation}
+          onSave={handleSaveDesignation}
+          onClose={() => {
+            setShowModal(false);
+            setEditingDesignation(null);
+          }}
+        />
+      )}
 
-      <DesignationModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingDesignation(null);
-        }}
-        onSubmit={handleSubmitDesignation}
-        initialData={editingDesignation}
-      />
+      {showDeleteModal && (
+        <AlertModal
+          isOpen={showDeleteModal}
+          onCancel={() => {
+            setShowDeleteModal(false);
+            setDeletingDesignation(null);
+          }}
+          onConfirm={handleDeleteConfirm}
+          title="Delete Designation"
+          description="Are you sure you want to delete this designation? This action cannot be undone."
+          cancelLabel="Cancel"
+          confirmLabel="Yes, Delete"
+          confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
+          isVisibleCancelButton={true}
+          isVisibleConfirmButton={true}
+        />
+      )}
     </div>
   );
-};
-
-export default DesignationManagement;
+}

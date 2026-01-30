@@ -599,7 +599,7 @@ const Blogs = () => {
   };
 
   const navigateToCategories = () => {
-    navigate('/categories');
+    navigate('/blogs-categrory');
   };
 
   const blogs = blogsListData?.data?.data?.list || [];

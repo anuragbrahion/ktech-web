@@ -102,25 +102,37 @@ const allSections = {
     title: "Courses",
     icon: BookOpen,
     items: [
+      // {
+      //   id: "exam",
+      //   label: "Exam Grade System",
+      //   icon: Award,
+      //   path: "/exam-grade-system",
+      // },
+      // { id: "subjects", label: "Subjects", icon: BookOpen, path: "/subjects" },
+      // { id: "languages", label: "Languages", icon: Globe, path: "/languages" },
+      // {
+      //   id: "categories",
+      //   label: "Course Categories",
+      //   icon: Grid,
+      //   path: "/course-categories",
+      // },
       {
-        id: "exam",
-        label: "Exam Grade System",
-        icon: Award,
-        path: "/exam-grade-system",
-      },
-      { id: "subjects", label: "Subjects", icon: BookOpen, path: "/subjects" },
-      { id: "languages", label: "Languages", icon: Globe, path: "/languages" },
-      {
-        id: "categories",
-        label: "Course Categories",
+        id: "courseList",
+        label: "Course",
         icon: Grid,
-        path: "/course-categories",
+        path: "/course-list",
+      },
+       {
+        id: "coursePlans",
+        label: "Course Plans",
+        icon: Grid,
+        path: "/course-plans",
       },
       {
-        id: "awards",
-        label: "Course Award Categories",
+        id: "batches",
+        label: "Course Batches",
         icon: Grid,
-        path: "/course-award-categories",
+        path: "/course-batches",
       },
     ],
   },
@@ -193,36 +205,36 @@ const allSections = {
       },
     ],
   },
-  // examinations: {
-  //   title: "Examinations",
-  //   icon: Award,
-  //   items: [
-  //     {
-  //       id: "allPastExams",
-  //       label: "All Past Examinations List",
-  //       icon: FileText,
-  //       path: "/all-past-exams",
-  //     },
-  //     {
-  //       id: "studentExams",
-  //       label: "Student Examinations",
-  //       icon: GraduationCap,
-  //       path: "/student-exams",
-  //     },
-  //     {
-  //       id: "roleExams",
-  //       label: "Role Examination",
-  //       icon: UserCog,
-  //       path: "/role-exams",
-  //     },
-  //     {
-  //       id: "goalExams",
-  //       label: "Goal Examination",
-  //       icon: Target,
-  //       path: "/goal-exams",
-  //     },
-  //   ],
-  // },
+  examinations: {
+    title: "Examinations",
+    icon: Award,
+    items: [
+      {
+        id: "allPastExams",
+        label: "All Past Examinations List",
+        icon: FileText,
+        path: "/all-past-exams",
+      },
+      {
+        id: "studentExams",
+        label: "Student Examinations",
+        icon: GraduationCap,
+        path: "/student-exams",
+      },
+      {
+        id: "roleExams",
+        label: "Role Examination",
+        icon: UserCog,
+        path: "/role-exams",
+      },
+      {
+        id: "goalExams",
+        label: "Goal Examination",
+        icon: Target,
+        path: "/goal-exams",
+      },
+    ],
+  },
   branchManagement: {
     title: "Branch Management",
     icon: GitBranch,
@@ -313,85 +325,85 @@ const allSections = {
       },
     ],
   },
-  // attendance: {
-  //   title: "Mark Attendance",
-  //   icon: Calendar,
-  //   items: [
-  //     {
-  //       id: "markTeacherAttendance",
-  //       label: "Mark Teacher Attendance",
-  //       icon: Users,
-  //       path: "/mark-teacher-attendance",
-  //     },
-  //     {
-  //       id: "markStudentAttendance",
-  //       label: "Mark Student Attendance",
-  //       icon: GraduationCap,
-  //       path: "/mark-student-attendance",
-  //     },
-  //   ],
-  // },
-  // certificate: {
-  //   title: "Student Certificate",
-  //   icon: FileCheck,
-  //   items: [
-  //     {
-  //       id: "allCertificate",
-  //       label: "All Certificate",
-  //       icon: FileCheck,
-  //       path: "/all-certificate",
-  //     },
-  //   ],
-  // },
-  // config: {
-  //   title: "Config Information",
-  //   icon: Settings,
-  //   items: [
-  //     { id: "config", label: "Config", icon: Cog, path: "/config" },
-  //   ],
-  // },
-  // financial: {
-  //   title: "Financial Management",
-  //   icon: Wallet,
-  //   items: [
-  //     {
-  //       id: "category",
-  //       label: "Category",
-  //       icon: Grid,
-  //       path: "/financial-category",
-  //     },
-  //     {
-  //       id: "transactions",
-  //       label: "Transactions",
-  //       icon: CreditCard,
-  //       path: "/transactions",
-  //     },
-  //   ],
-  // },
-  // ecommerce: {
-  //   title: "Ecommerce",
-  //   icon: ShoppingCart,
-  //   items: [
-  //     {
-  //       id: "ecommerce",
-  //       label: "E-commerce",
-  //       icon: ShoppingCart,
-  //       path: "/ecommerce",
-  //     },
-  //     {
-  //       id: "myOrders",
-  //       label: "My Orders",
-  //       icon: ShoppingBag,
-  //       path: "/my-orders",
-  //     },
-  //     {
-  //       id: "contactUs",
-  //       label: "Contact Us",
-  //       icon: Phone,
-  //       path: "/contact-us",
-  //     },
-  //   ],
-  // },
+  attendance: {
+    title: "Mark Attendance",
+    icon: Calendar,
+    items: [
+      {
+        id: "markTeacherAttendance",
+        label: "Mark Teacher Attendance",
+        icon: Users,
+        path: "/mark-teacher-attendance",
+      },
+      {
+        id: "markStudentAttendance",
+        label: "Mark Student Attendance",
+        icon: GraduationCap,
+        path: "/mark-student-attendance",
+      },
+    ],
+  },
+  certificate: {
+    title: "Student Certificate",
+    icon: FileCheck,
+    items: [
+      {
+        id: "allCertificate",
+        label: "All Certificate",
+        icon: FileCheck,
+        path: "/all-certificate",
+      },
+    ],
+  },
+  config: {
+    title: "Config Information",
+    icon: Settings,
+    items: [
+      { id: "config", label: "Config", icon: Cog, path: "/config" },
+    ],
+  },
+  financial: {
+    title: "Financial Management",
+    icon: Wallet,
+    items: [
+      {
+        id: "category",
+        label: "Category",
+        icon: Grid,
+        path: "/financial-category",
+      },
+      {
+        id: "transactions",
+        label: "Transactions",
+        icon: CreditCard,
+        path: "/transactions",
+      },
+    ],
+  },
+  ecommerce: {
+    title: "Ecommerce",
+    icon: ShoppingCart,
+    items: [
+      {
+        id: "ecommerce",
+        label: "E-commerce",
+        icon: ShoppingCart,
+        path: "/ecommerce",
+      },
+      {
+        id: "myOrders",
+        label: "My Orders",
+        icon: ShoppingBag,
+        path: "/my-orders",
+      },
+      {
+        id: "contactUs",
+        label: "Contact Us",
+        icon: Phone,
+        path: "/contact-us",
+      },
+    ],
+  },
   
   userManagement: {
     title: "User Management",

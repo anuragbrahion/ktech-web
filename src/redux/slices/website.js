@@ -36,6 +36,41 @@ const initialState = {
   deleteWebsiteBranchesData: {},
   createWebsiteBranchesData: {},
   updateWebsiteBranchesData: {},
+
+  // Website Testimonials
+  websiteTestimonialsListData: {},
+  websiteTestimonialsAllDocumentsData: {},
+  enableDisableWebsiteTestimonialsData: {},
+  deleteWebsiteTestimonialsData: {},
+  createWebsiteTestimonialsData: {},
+  updateWebsiteTestimonialsData: {},
+
+  // Website Configs
+  websiteConfigsGetData: {},
+  websiteConfigsPostData: {},
+
+  // Website Config Templates
+  websiteConfigTemplatesGetData: {},
+  websiteConfigTemplatesPostData: {},
+
+  getWebsiteCourseFaqData: {},
+  postWebsiteCourseFaqData: {},
+
+  // Website CMS Pages
+  websiteAboutUsGetData: {},
+  websiteAboutUsPostData: {},
+
+  websiteTermsGetData: {},
+  websiteTermsPostData: {},
+
+  websitePrivacyGetData: {},
+  websitePrivacyPostData: {},
+
+  websiteWhyUsGetData: {},
+  websiteWhyUsPostData: {},
+
+  websiteRefundGetData: {},
+  websiteRefundPostData: {},
 };
 
 export const websiteLanguagesList = createApiThunkPrivate(
@@ -192,6 +227,139 @@ export const updateWebsiteBranches = createApiThunkPrivate(
   "/website/branches/update",
 );
 
+/* =========================
+   Website Testimonials
+========================= */
+
+export const websiteTestimonialsList = createApiThunkPrivate(
+  "websiteTestimonialsList",
+  "/website/testimonials/list",
+  "GET",
+);
+
+export const websiteTestimonialsAllDocuments = createApiThunkPrivate(
+  "websiteTestimonialsAllDocuments",
+  "/website/testimonials/all-documents",
+  "GET",
+);
+
+export const enableDisableWebsiteTestimonials = createApiThunkPrivate(
+  "enableDisableWebsiteTestimonials",
+  "/website/testimonials/enable-disable",
+);
+
+export const deleteWebsiteTestimonials = createApiThunkPrivate(
+  "deleteWebsiteTestimonials",
+  "/website/testimonials/soft-delete",
+  "DELETE",
+);
+
+export const createWebsiteTestimonials = createApiThunkPrivate(
+  "createWebsiteTestimonials",
+  "/website/testimonials/create",
+);
+
+export const updateWebsiteTestimonials = createApiThunkPrivate(
+  "updateWebsiteTestimonials",
+  "/website/testimonials/update",
+);
+
+/* =========================
+   Website Configs
+========================= */
+
+export const getWebsiteConfigs = createApiThunkPrivate(
+  "getWebsiteConfigs",
+  "/website/configs",
+  "GET",
+);
+
+export const postWebsiteConfigs = createApiThunkPrivate(
+  "postWebsiteConfigs",
+  "/website/configs",
+);
+
+/* =========================
+   Website Config Templates
+========================= */
+
+export const getWebsiteConfigTemplates = createApiThunkPrivate(
+  "getWebsiteConfigTemplates",
+  "/website/configs/templates",
+  "GET",
+);
+
+export const postWebsiteConfigTemplates = createApiThunkPrivate(
+  "postWebsiteConfigTemplates",
+  "/website/configs/templates",
+);
+
+export const getWebsiteCourseFaq = createApiThunkPrivate(
+  "getWebsiteCourseFaq",
+  "/website/course-faq",
+  "GET",
+);
+
+export const postWebsiteCourseFaq = createApiThunkPrivate(
+  "postWebsiteCourseFaq",
+  "/website/course-faq",
+);
+
+// About Us
+export const getWebsiteAboutUs = createApiThunkPublic(
+  "getWebsiteAboutUs",
+  "/website/about-us",
+  "GET",
+);
+export const postWebsiteAboutUs = createApiThunkPrivate(
+  "postWebsiteAboutUs",
+  "/website/about-us",
+);
+
+// Terms & Conditions
+export const getWebsiteTerms = createApiThunkPublic(
+  "getWebsiteTerms",
+  "/website/terms-and-conditions",
+  "GET",
+);
+export const postWebsiteTerms = createApiThunkPrivate(
+  "postWebsiteTerms",
+  "/website/terms-and-conditions",
+);
+
+// Privacy Policy
+export const getWebsitePrivacy = createApiThunkPublic(
+  "getWebsitePrivacy",
+  "/website/privacy-policy",
+  "GET",
+);
+export const postWebsitePrivacy = createApiThunkPrivate(
+  "postWebsitePrivacy",
+  "/website/privacy-policy",
+);
+
+// Why Us
+export const getWebsiteWhyUs = createApiThunkPublic(
+  "getWebsiteWhyUs",
+  "/website/why-us",
+  "GET",
+);
+export const postWebsiteWhyUs = createApiThunkPrivate(
+  "postWebsiteWhyUs",
+  "/website/why-us",
+);
+
+// Refund Policy
+export const getWebsiteRefund = createApiThunkPublic(
+  "getWebsiteRefund",
+  "/website/refund-policy",
+  "GET",
+);
+export const postWebsiteRefund = createApiThunkPrivate(
+  "postWebsiteRefund",
+  "/website/refund-policy",
+);
+
 export const websiteSlice = createSlice({
   name: "website",
   initialState,
@@ -320,6 +488,109 @@ export const websiteSlice = createSlice({
       builder,
       updateWebsiteBranches,
       "updateWebsiteBranchesData",
+    );
+
+    // Testimonials
+    createExtraReducersForThunk(
+      builder,
+      websiteTestimonialsList,
+      "websiteTestimonialsListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      websiteTestimonialsAllDocuments,
+      "websiteTestimonialsAllDocumentsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      enableDisableWebsiteTestimonials,
+      "enableDisableWebsiteTestimonialsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      deleteWebsiteTestimonials,
+      "deleteWebsiteTestimonialsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      createWebsiteTestimonials,
+      "createWebsiteTestimonialsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      updateWebsiteTestimonials,
+      "updateWebsiteTestimonialsData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      getWebsiteCourseFaq,
+      "getWebsiteCourseFaqData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      postWebsiteCourseFaq,
+      "postWebsiteCourseFaqData",
+    );
+
+    // About Us
+    createExtraReducersForThunk(
+      builder,
+      getWebsiteAboutUs,
+      "websiteAboutUsGetData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      postWebsiteAboutUs,
+      "websiteAboutUsPostData",
+    );
+
+    // Terms
+    createExtraReducersForThunk(
+      builder,
+      getWebsiteTerms,
+      "websiteTermsGetData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      postWebsiteTerms,
+      "websiteTermsPostData",
+    );
+
+    // Privacy
+    createExtraReducersForThunk(
+      builder,
+      getWebsitePrivacy,
+      "websitePrivacyGetData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      postWebsitePrivacy,
+      "websitePrivacyPostData",
+    );
+
+    // Why Us
+    createExtraReducersForThunk(
+      builder,
+      getWebsiteWhyUs,
+      "websiteWhyUsGetData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      postWebsiteWhyUs,
+      "websiteWhyUsPostData",
+    );
+
+    // Refund
+    createExtraReducersForThunk(
+      builder,
+      getWebsiteRefund,
+      "websiteRefundGetData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      postWebsiteRefund,
+      "websiteRefundPostData",
     );
   },
 });
