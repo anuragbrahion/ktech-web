@@ -1,153 +1,289 @@
-import React, { useState } from 'react';
-import Table from '../../components/Atoms/TableData/TableData';
-import AddVisitorModal from '../../components/Atoms/UI/AddVisitorModal';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import Table from "../../components/Atoms/TableData/TableData";
+import AddVisitorModal from "../../components/Atoms/UI/AddVisitorModal";
+import EditVisitorModal from "../../components/Atoms/UI/EditVisitorModal";
+import AlertModal from "../../components/Modal/AlertModal";
+import {
+  visitorsList,
+  createVisitor,
+  updateVisitor,
+  deleteVisitor,
+  followUpVisitor,
+} from "../../redux/slices/inquires";
+import FollowUpModal from "../../components/Atoms/UI/FollowUpModal";
+import moment from "moment-timezone";
 
 const VisitorsBook = () => {
-  const [visitors, setVisitors] = useState([
-    { 
-      id: 1, 
-      name: 'John Doe', 
-      phoneNo: '9876543210', 
-      meetingWith: 'Principal', 
-      date: '2025-01-15', 
-      followUpDate: '2025-01-22', 
-      purpose: 'Admission Inquiry', 
-      totalPersons: 2, 
-      inTime: '10:30 AM', 
-      outTime: '11:15 AM' 
-    },
-    { 
-      id: 2, 
-      name: 'Jane Smith', 
-      phoneNo: '9123456789', 
-      meetingWith: 'Administrator', 
-      date: '2025-01-16', 
-      followUpDate: '2025-01-23', 
-      purpose: 'Fee Payment', 
-      totalPersons: 1, 
-      inTime: '02:15 PM', 
-      outTime: '02:45 PM' 
-    },
-    { 
-      id: 3, 
-      name: 'Robert Johnson', 
-      phoneNo: '9988776655', 
-      meetingWith: 'Teacher', 
-      date: '2025-01-14', 
-      followUpDate: '2025-01-21', 
-      purpose: 'Student Progress', 
-      totalPersons: 2, 
-      inTime: '09:45 AM', 
-      outTime: '10:30 AM' 
-    },
-    { 
-      id: 4, 
-      name: 'Sarah Williams', 
-      phoneNo: '8899776655', 
-      meetingWith: 'Coordinator', 
-      date: '2025-01-17', 
-      followUpDate: '2025-01-24', 
-      purpose: 'Course Information', 
-      totalPersons: 3, 
-      inTime: '11:00 AM', 
-      outTime: '11:45 AM' 
-    },
-    { 
-      id: 5, 
-      name: 'Michael Brown', 
-      phoneNo: '7766554433', 
-      meetingWith: 'Principal', 
-      date: '2025-01-13', 
-      followUpDate: '2025-01-20', 
-      purpose: 'Interview', 
-      totalPersons: 1, 
-      inTime: '03:30 PM', 
-      outTime: '04:15 PM' 
-    },
-    { 
-      id: 6, 
-      name: 'Emily Davis', 
-      phoneNo: '8877665544', 
-      meetingWith: 'Administrator', 
-      date: '2025-01-18', 
-      followUpDate: '2025-01-25', 
-      purpose: 'Document Submission', 
-      totalPersons: 1, 
-      inTime: '01:00 PM', 
-      outTime: '01:30 PM' 
-    },
-  ]);
+  const dispatch = useDispatch();
 
   const [showAddModal, setShowAddModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterDate, setFilterDate] = useState('');
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFollowUpModal, setShowFollowUpModal] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [editingVisitor, setEditingVisitor] = useState(null);
+  const [deletingVisitor, setDeletingVisitor] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [resData, setResData] = useState([]);
+  const [filters, setFilters] = useState({
+    name: "",
+    meetingWith: "",
+    purpose: "",
+    date: "",
+    followUpDate: "",
+  });
+  const visitorsListData = useSelector(
+    (state) => state.inquires?.visitorsListData,
+  );
+  const createVisitorData = useSelector(
+    (state) => state.inquires?.createVisitorData,
+  );
+  const updateVisitorData = useSelector(
+    (state) => state.inquires?.updateVisitorData,
+  );
+  const deleteVisitorData = useSelector(
+    (state) => state.inquires?.deleteVisitorData,
+  );
+  const visitors = visitorsListData?.data?.data?.list || [];
+  const totalVisitors = visitorsListData?.data?.data?.total || 0;
+  const totalPages = Math.ceil(totalVisitors / itemsPerPage);
 
-  const handleAddVisitor = (visitorData) => {
-    const newVisitor = {
-      id: visitors.length + 1,
-      ...visitorData,
-      inTime: formatTime(visitorData.inTime),
-      outTime: formatTime(visitorData.outTime),
-      date: formatDate(visitorData.date),
-      followUpDate: formatDate(visitorData.followUpDate)
+  useEffect(() => {
+    fetchVisitors();
+  }, [currentPage, createVisitorData, updateVisitorData, deleteVisitorData]);
+
+  const fetchVisitors = () => {
+    setLoading(true);
+    const params = {
+      page: currentPage,
+      size: itemsPerPage,
+      ...(filters.name && { name: filters.name }),
+      ...(filters.meetingWith && { meetingWith: filters.meetingWith }),
+      ...(filters.purpose && { purpose: filters.purpose }),
+      ...(filters.date && { date: filters.date }),
+      ...(filters.followUpDate && { followUpDate: filters.followUpDate }),
     };
-    setVisitors([newVisitor, ...visitors]);
-    setShowAddModal(false);
-  };
 
-  const formatTime = (time) => {
-    if (!time) return '';
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const formattedHour = hour % 12 || 12;
-    return `${formattedHour}:${minutes} ${ampm}`;
-  };
-
-  const formatDate = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: '2-digit', 
-      day: '2-digit' 
+    dispatch(visitorsList(params)).then((action) => {
+      if (action.error) {
+        toast.error(action.payload || "Failed to fetch visitors");
+      }
+      setLoading(false);
     });
   };
 
-  const filteredVisitors = visitors.filter(visitor => {
-    const matchesSearch = 
-      visitor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visitor.phoneNo.includes(searchTerm) ||
-      visitor.meetingWith.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visitor.purpose.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesDate = !filterDate || visitor.date === filterDate;
-    
+  const handleAddVisitor = (visitorData) => {
+    setLoading(true);
+    dispatch(createVisitor(visitorData)).then((action) => {
+      if (!action.error) {
+        toast.success("Visitor added successfully");
+        setShowAddModal(false);
+      } else {
+        toast.error(action.payload || "Failed to add visitor");
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleEditVisitor = (visitorData) => {
+    if (!editingVisitor) return;
+
+    setLoading(true);
+    const payload = {
+      _id: editingVisitor._id,
+      ...visitorData,
+      date: formatDateForAPI(visitorData.date),
+      followUpDate: visitorData.followUpDate
+        ? formatDateForAPI(visitorData.followUpDate)
+        : undefined,
+    };
+
+    dispatch(updateVisitor(payload)).then((action) => {
+      if (!action.error) {
+        toast.success("Visitor updated successfully");
+        setShowEditModal(false);
+        setEditingVisitor(null);
+      } else {
+        toast.error(action.payload || "Failed to update visitor");
+      }
+      setLoading(false);
+    });
+  };
+
+  const handleDeleteClick = (visitor) => {
+    setDeletingVisitor(visitor);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (!deletingVisitor) return;
+
+    setLoading(true);
+    dispatch(deleteVisitor({ _id: deletingVisitor._id })).then((action) => {
+      if (!action.error) {
+        toast.success("Visitor deleted successfully");
+      } else {
+        toast.error(action.payload || "Failed to delete visitor");
+      }
+      setLoading(false);
+      setShowDeleteModal(false);
+      setDeletingVisitor(null);
+    });
+  };
+
+  const handleEditClick = (visitor) => {
+    setEditingVisitor(visitor);
+    setShowEditModal(true);
+  };
+  const fetchVisitorFollowUpData = (visitorId) => {
+    setLoading(true);
+    dispatch(followUpVisitor({ _id: visitorId })).then((action) => {
+      if (action) {
+        setResData(action?.payload?.data);
+        setShowFollowUpModal(true);
+      }
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    fetchVisitorFollowUpData();
+  }, []);
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      name: "",
+      meetingWith: "",
+      purpose: "",
+      date: "",
+      followUpDate: "",
+    });
+    setSearchTerm("");
+    setFilterDate("");
+    setCurrentPage(1);
+    fetchVisitors();
+  };
+
+  const formatDateForAPI = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const filteredVisitors = visitors.filter((visitor) => {
+    const matchesSearch =
+      (visitor.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+      (visitor.phoneNo || "").includes(searchTerm) ||
+      (visitor.meetingWith?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase(),
+      ) ||
+      (visitor.purpose?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+    const matchesDate =
+      !filterDate ||
+      (visitor.date &&
+        moment(visitor.date).format("DD MM YYYY") === moment(filterDate).format("DD MM YYYY"));
     return matchesSearch && matchesDate;
   });
 
-  // const stats = {
-  //   total: visitors.length,
-  //   today: visitors.filter(v => v.date === new Date().toLocaleDateString('en-US')).length,
-  //   upcomingFollowups: visitors.filter(v => {
-  //     const followUp = new Date(v.followUpDate);
-  //     const today = new Date();
-  //     const nextWeek = new Date(today);
-  //     nextWeek.setDate(today.getDate() + 7);
-  //     return followUp >= today && followUp <= nextWeek;
-  //   }).length,
-  //   pending: 2 // You can calculate this based on your logic
-  // };
+  const tableData = filteredVisitors.map((visitor) => [
+    visitor.name || "N/A",
+    visitor.phoneNo || "N/A",
+    visitor.meetingWith || "N/A",
+    moment(visitor.date).format("DD MM YYYY"),
+    moment(visitor.followUpDate).format("DD MM YYYY"),
+    visitor.purpose || "N/A",
+    visitor.totalPerson || 1,
+    visitor._id,
+  ]);
+
+  const renderRow = (row, index) => {
+    const [
+      name,
+      phoneNo,
+      meetingWith,
+      date,
+      followUpDate,
+      purpose,
+      totalPerson,
+      visitorId,
+    ] = row;
+    const visitor = filteredVisitors[index];
+    const isFollowUpOverdue =
+      visitor.followUpDate &&
+      new Date(moment(visitor.followUpDate).format("DD MM YYYY")) < new Date();
+
+    return (
+      <tr
+        key={visitorId}
+        className={`hover:bg-sky-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+      >
+        <td className="py-4 px-4 text-black font-medium">{name}</td>
+        <td className="py-4 px-4 text-black">
+          <a href={`tel:${phoneNo}`} className="hover:text-blue-600">
+            {phoneNo}
+          </a>
+        </td>
+        <td className="py-4 px-4 text-black">{meetingWith}</td>
+        <td className="py-4 px-4 text-black">{date}</td>
+        <td className="py-4 px-4 text-black">
+          <span
+            className={`${isFollowUpOverdue ? "text-red-600" : "text-green-600"} font-medium`}
+          >
+            {followUpDate}
+          </span>
+        </td>
+        <td className="py-4 px-4 text-black">{purpose}</td>
+        <td className="py-4 px-4 text-black text-center">
+          <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full">
+            {totalPerson}
+          </span>
+        </td>
+        <td className="py-4 px-4">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => handleEditClick(visitor)}
+              className="text-sky-500 hover:text-sky-700 p-1"
+              title="Edit"
+              disabled={loading}
+            >
+              ✏️
+            </button>
+            <button
+              onClick={() => handleDeleteClick(visitor)}
+              className="text-red-500 hover:text-red-700 p-1"
+              title="Delete"
+              disabled={loading}
+            >
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    );
+  };
 
   const tableHeaders = [
-    'Visitor Name',
-    'Phone No',
-    'Meeting With',
-    'Date',
-    'Follow Up Date',
-    'Purpose',
-    'Total Persons',
-    'Actions'
+    "Visitor Name",
+    "Phone No",
+    "Meeting With",
+    "Date",
+    "Follow Up Date",
+    "Purpose",
+    "Total Persons",
+    "Actions",
   ];
 
   return (
@@ -156,12 +292,17 @@ const VisitorsBook = () => {
         <div className="mb-8">
           <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-black">Visitor's Book List</h1>
-              <p className="text-black mt-2">Manage and track all visitor records</p>
+              <h1 className="text-3xl font-bold text-black">
+                Visitor's Book List
+              </h1>
+              <p className="text-black mt-2">
+                Manage and track all visitor records
+              </p>
             </div>
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium flex items-center gap-2"
+              className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium flex items-center gap-2 disabled:opacity-50"
+              disabled={loading}
             >
               <span className="text-xl">+</span>
               Add Visitor
@@ -169,118 +310,79 @@ const VisitorsBook = () => {
           </div>
         </div>
 
-        {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Visitors</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.total}</p>
-          </div>
-          <div className="bg-green-50 p-6 rounded-lg shadow border border-green-100">
-            <h3 className="text-lg font-semibold text-green-700">Today's Visitors</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.today}</p>
-          </div>
-          <div className="bg-purple-50 p-6 rounded-lg shadow border border-purple-100">
-            <h3 className="text-lg font-semibold text-purple-700">Upcoming Follow-ups</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.upcomingFollowups}</p>
-          </div>
-          <div className="bg-yellow-50 p-6 rounded-lg shadow border border-yellow-100">
-            <h3 className="text-lg font-semibold text-yellow-700">Pending Actions</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.pending}</p>
-          </div>
-        </div> */}
-
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-              <div className="flex-1 md:flex-none">
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mt-4 flex justify-between items-center">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Name
+                </label>
                 <input
                   type="text"
-                  placeholder="Search visitors..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
+                  value={filters.name}
+                  onChange={(e) => handleFilterChange("name", e.target.value)}
+                  placeholder="Search by name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                 />
               </div>
-              <div className="flex-1 md:flex-none">
-                <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="w-full md:w-48 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
-                />
+              <div className="flex gap-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={fetchVisitors}
+                    className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600"
+                    disabled={loading}
+                  >
+                    Apply Filters
+                  </button>
+                  <button
+                    onClick={resetFilters}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    disabled={loading}
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div>
+                  <button
+                    onClick={() => fetchVisitorFollowUpData()}
+                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                    title="View Follow-up"
+                    disabled={loading}
+                  >
+                    View Follow-up
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="text-sm text-gray-600">
-              Showing {filteredVisitors.length} of {visitors.length} visitors
             </div>
           </div>
-
           {filteredVisitors.length > 0 ? (
             <Table
               headers={tableHeaders}
-              data={filteredVisitors}
-              renderRow={(visitor, index) => (
-                <tr 
-                  key={visitor.id} 
-                  className={`hover:bg-sky-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-                >
-                  <td className="py-4 px-4 text-black font-medium">{visitor.name}</td>
-                  <td className="py-4 px-4 text-black">{visitor.phoneNo}</td>
-                  <td className="py-4 px-4 text-black">
-                    <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                      {visitor.meetingWith}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-black">{visitor.date}</td>
-                  <td className="py-4 px-4 text-black">
-                    <span className={`py-1 rounded-full text-sm ${
-                      new Date(visitor.followUpDate) < new Date() 
-                        ? 'text-red-800' 
-                        : ' text-green-800'
-                    }`}>
-                      {visitor.followUpDate}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4 text-black">{visitor.purpose}</td>
-                  <td className="py-4 px-4 text-black">
-                      {visitor.totalPersons}
-                  </td>
-                  <td className="py-4 px-4">
-                    <div className="flex space-x-2">
-                      <button
-                        className="text-sky-500 hover:text-sky-700"
-                        title="Edit"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="text-green-500 hover:text-green-700"
-                        title="Follow-up"
-                      >
-                        🔄
-                      </button>
-                      <button
-                        className="text-red-500 hover:text-red-700"
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}
+              data={tableData}
+              renderRow={renderRow}
+              currentPage={currentPage}
+              size={itemsPerPage}
+              handlePageChange={setCurrentPage}
+              total={totalVisitors}
+              totalPages={totalPages}
             />
           ) : (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">📋</div>
-              <h3 className="text-xl font-semibold text-gray-600 mb-2">No visitors found</h3>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                {loading ? "Loading visitors..." : "No visitors found"}
+              </h3>
               <p className="text-gray-500 mb-6">
-                {searchTerm || filterDate 
-                  ? "No visitors match your search criteria" 
+                {searchTerm ||
+                filterDate ||
+                Object.values(filters).some((f) => f)
+                  ? "No visitors match your search criteria"
                   : "No visitor records available. Add your first visitor!"}
               </p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
+                disabled={loading}
               >
                 Add First Visitor
               </button>
@@ -293,6 +395,47 @@ const VisitorsBook = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSubmit={handleAddVisitor}
+        loading={loading}
+      />
+
+      {showEditModal && editingVisitor && (
+        <EditVisitorModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingVisitor(null);
+          }}
+          onSubmit={handleEditVisitor}
+          visitor={editingVisitor}
+          loading={loading}
+        />
+      )}
+
+      {showFollowUpModal && (
+        <FollowUpModal
+          isOpen={showFollowUpModal}
+          onClose={() => {
+            setShowFollowUpModal(false);
+          }}
+          visitor={resData}
+          loading={loading}
+        />
+      )}
+
+      <AlertModal
+        isOpen={showDeleteModal}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setDeletingVisitor(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Visitor"
+        description="Are you sure you want to delete this visitor record? This action cannot be undone."
+        cancelLabel="Cancel"
+        confirmLabel="Yes, Delete"
+        confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
+        isVisibleCancelButton={true}
+        isVisibleConfirmButton={true}
       />
     </div>
   );

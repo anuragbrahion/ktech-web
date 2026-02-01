@@ -59,6 +59,15 @@ const initialState = {
   deleteLeaveTypesData: {},
   createLeaveTypesData: {},
   updateLeaveTypesData: {},
+
+  /* =========================
+   Teachers
+========================= */
+  teachersListData: {},
+  teachersAllDocumentsData: {},
+   enableDisableTeachersData: {},
+    updateTeachersData: {},
+    updateTeachersPasswordData: {},
 };
 
 /* =========================
@@ -277,6 +286,37 @@ export const updateLeaveTypes = createApiThunkPrivate(
 );
 
 /* =========================
+   Teachers APIs
+========================= */
+
+export const teachersList = createApiThunkPrivate(
+  "teachersList",
+  "/employee/teachers/list",
+  "GET",
+);
+
+export const teachersAllDocuments = createApiThunkPrivate(
+  "teachersAllDocuments",
+  "/employee/teachers/all-documents",
+  "GET",
+);
+
+export const enableDisableTeachers = createApiThunkPrivate(
+  "enableDisableTeachers",
+  "/employee/teachers/enable-disable",
+);
+
+export const updateTeachers = createApiThunkPrivate(
+  "updateTeachers",
+  "/employee/teachers/update",
+);
+
+export const updateTeachersPassword = createApiThunkPrivate(
+  "updateTeachersPassword",
+  "/employee/teachers/update-password",
+);
+
+/* =========================
    Slice
 ========================= */
 
@@ -285,7 +325,11 @@ export const employeeSlice = createSlice({
   initialState,
   extraReducers: (builder) => {
     // Departments
-    createExtraReducersForThunk(builder, departmentsList, "departmentsListData");
+    createExtraReducersForThunk(
+      builder,
+      departmentsList,
+      "departmentsListData",
+    );
     createExtraReducersForThunk(
       builder,
       departmentsAllDocuments,
@@ -318,7 +362,11 @@ export const employeeSlice = createSlice({
     );
 
     // Designations
-    createExtraReducersForThunk(builder, designationsList, "designationsListData");
+    createExtraReducersForThunk(
+      builder,
+      designationsList,
+      "designationsListData",
+    );
     createExtraReducersForThunk(
       builder,
       designationsAllDocuments,
@@ -393,11 +441,7 @@ export const employeeSlice = createSlice({
     createExtraReducersForThunk(builder, updateGoals, "updateGoalsData");
 
     // Leave Types
-    createExtraReducersForThunk(
-      builder,
-      leaveTypesList,
-      "leaveTypesListData",
-    );
+    createExtraReducersForThunk(builder, leaveTypesList, "leaveTypesListData");
     createExtraReducersForThunk(
       builder,
       leaveTypesAllDocuments,
@@ -428,6 +472,25 @@ export const employeeSlice = createSlice({
       updateLeaveTypes,
       "updateLeaveTypesData",
     );
+
+    // Teachers
+    createExtraReducersForThunk(builder, teachersList, "teachersListData");
+    createExtraReducersForThunk(
+      builder,
+      teachersAllDocuments,
+      "teachersAllDocumentsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      enableDisableTeachers,
+      "enableDisableTeachersData",
+    );
+    createExtraReducersForThunk(builder, updateTeachers, "updateTeachersData");
+    createExtraReducersForThunk(
+  builder,
+  updateTeachersPassword,
+  "updateTeachersPasswordData",
+);
   },
 });
 

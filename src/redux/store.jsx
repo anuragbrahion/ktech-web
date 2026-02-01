@@ -5,6 +5,7 @@ import AuthSlice from './slices/AuthSlice';
  import courseSlice from './slices/course';
  import branchSlice from './slices/branch';
  import employeeSlice from './slices/employee';
+ import inquiresSlice  from './slices/inquires';
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     website: websiteSlice,
     course:courseSlice,
     branch:branchSlice,
-    employee:employeeSlice
+    employee:employeeSlice,
+    inquires:inquiresSlice
   },
 });

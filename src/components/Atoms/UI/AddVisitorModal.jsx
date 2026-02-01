@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
+const AddVisitorModal = ({ isOpen, onClose, onSubmit, loading }) => {
   const [formData, setFormData] = useState({
     name: '',
     phoneNo: '',
@@ -8,7 +8,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
     date: '',
     followUpDate: '',
     purpose: '',
-    totalPersons: '1',
+    totalPerson: '1',
     inTime: '',
     outTime: ''
   });
@@ -23,18 +23,34 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({
-      name: '',
-      phoneNo: '',
-      meetingWith: '',
-      date: '',
-      followUpDate: '',
-      purpose: '',
-      totalPersons: '1',
-      inTime: '',
-      outTime: ''
-    });
+    
+    // Format the data to match API payload
+    const formattedData = {
+      name: formData.name,
+      meetingWith: formData.meetingWith,
+      phoneNo: formData.phoneNo,
+      totalPerson: parseInt(formData.totalPerson, 10), // Note: API expects 'totalPerson' not 'totalPerson'
+      date: formatDateForAPI(formData.date), // Format date as DD-MM-YYYY
+      followUpDate: formData.followUpDate ? formatDateForAPI(formData.followUpDate) : undefined,
+      inTime: formData.inTime || undefined,
+      outTime: formData.outTime || undefined,
+      purpose: formData.purpose
+    };
+    
+    onSubmit(formattedData);
+    
+    // Reset form only if submission is successful
+    // (Reset will be handled by parent component after successful API call)
+  };
+
+  // Format date from YYYY-MM-DD to DD-MM-YYYY for API
+  const formatDateForAPI = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
   if (!isOpen) return null;
@@ -48,6 +64,8 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 text-2xl"
+              type="button"
+              disabled={loading}
             >
               &times;
             </button>
@@ -57,7 +75,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Name
+                  Name *
                 </label>
                 <input
                   type="text"
@@ -67,12 +85,13 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   placeholder="Enter visitor name"
                   required
+                  disabled={loading}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone No
+                  Phone No *
                 </label>
                 <input
                   type="tel"
@@ -82,12 +101,13 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   placeholder="Enter phone number"
                   required
+                  disabled={loading}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meeting With
+                  Meeting With *
                 </label>
                 <select
                   name="meetingWith"
@@ -95,6 +115,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   required
+                  disabled={loading}
                 >
                   <option value="">Select person</option>
                   <option value="Principal">Principal</option>
@@ -102,13 +123,14 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   <option value="Teacher">Teacher</option>
                   <option value="Coordinator">Coordinator</option>
                   <option value="Reception">Reception</option>
+                  <option value="Admissions Team">Admissions Team</option>
                   <option value="Others">Others</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date
+                  Date *
                 </label>
                 <input
                   type="date"
@@ -117,6 +139,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -130,19 +153,21 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   value={formData.followUpDate}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
+                  disabled={loading}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Total Persons
+                  Total Persons *
                 </label>
                 <select
-                  name="totalPersons"
-                  value={formData.totalPersons}
+                  name="totalPerson"
+                  value={formData.totalPerson}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   required
+                  disabled={loading}
                 >
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                     <option key={num} value={num}>{num}</option>
@@ -152,7 +177,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Purpose
+                  Purpose *
                 </label>
                 <select
                   name="purpose"
@@ -160,9 +185,11 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   required
+                  disabled={loading}
                 >
                   <option value="">Select purpose</option>
                   <option value="Admission Inquiry">Admission Inquiry</option>
+                  <option value="Course enquiry">Course enquiry</option>
                   <option value="Fee Payment">Fee Payment</option>
                   <option value="Student Progress">Student Progress</option>
                   <option value="Course Information">Course Information</option>
@@ -176,7 +203,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  In Time
+                  In Time *
                 </label>
                 <input
                   type="time"
@@ -185,6 +212,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -198,6 +226,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
                   value={formData.outTime}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -206,15 +235,17 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit }) => {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                disabled={loading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium"
+                className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium disabled:opacity-50"
+                disabled={loading}
               >
-                Create Visitor
+                {loading ? 'Creating...' : 'Create Visitor'}
               </button>
             </div>
           </form>
