@@ -280,13 +280,7 @@ const allSections = {
         label: "Inquiry Status",
         icon: Activity,
         path: "/inquiry-status",
-      },
-      {
-        id: "productCategory",
-        label: "Product Category",
-        icon: Package,
-        path: "/product-category",
-      },
+      }
     ],
   },
   requestManagement: {
@@ -384,6 +378,12 @@ const allSections = {
     title: "Ecommerce",
     icon: ShoppingCart,
     items: [
+      {
+        id: "productCategory",
+        label: "Product Category",
+        icon: Package,
+        path: "/product-category",
+      },
       {
         id: "ecommerce",
         label: "E-commerce",

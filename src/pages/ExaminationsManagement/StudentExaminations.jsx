@@ -1,34 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import ExamModalStudent from '../../components/Atoms/UI/ExamModalStudent';
-import Table from '../../components/Atoms/TableData/TableData';
+import Table from '../../components/Atoms/TableData/TableData'; 
+import { createExaminationStudent, examinationsList, updateExaminationStudent } from '../../redux/slices/examination';
+import { courseBatchesAllDocuments, coursesAllDocuments } from '../../redux/slices/course';
 
 const StudentExaminations = () => {
-  const [exams, setExams] = useState([
-    { 
-      id: 1, 
-      batch: '07:00 - 08:00', 
-      course: 'MS Office Basics', 
-      examTitle: 'husen1 exam', 
-      examTime: '24/11/2025, 21:28:00', 
-      examDuration: '0 hr : 4 Min', 
-      passingPercentage: 34, 
-      createdAt: '24/11/2025',
-      questions: [
-        {
-          id: 1,
-          text: 'Question 1',
-          options: {
-            A: 'option_A',
-            B: 'option_B',
-            C: 'option_C',
-            D: 'option_D'
-          },
-          correctAnswer: 'A'
-        }
-      ]
-    }
-  ]);
-
+  const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -37,6 +15,28 @@ const StudentExaminations = () => {
     courseName: '',
     batch: ''
   });
+
+  const examinationsListData = useSelector(state => state.examination.examinationsListData);
+  const createExaminationStudentData = useSelector(state => state.examination.createExaminationStudentData);
+  const updateExaminationStudentData = useSelector(state => state.examination.updateExaminationStudentData);
+  const coursesData = useSelector(state => state.course.coursesAllDocumentsData);
+  const batchesData = useSelector(state => state.batch.courseBatchesAllDocumentsData);
+
+  const exams = examinationsListData?.data?.filter(exam => exam.type === 'Student') || [];
+
+  useEffect(() => {
+    dispatch(examinationsList());
+    dispatch(coursesAllDocuments());
+    dispatch(courseBatchesAllDocuments());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (createExaminationStudentData?.success || updateExaminationStudentData?.success) {
+      dispatch(examinationsList());
+      setShowModal(false);
+      setSelectedExam(null);
+    }
+  }, [createExaminationStudentData, updateExaminationStudentData, dispatch]);
 
   const handleAddExam = () => {
     setSelectedExam(null);
@@ -51,22 +51,37 @@ const StudentExaminations = () => {
   };
 
   const handleSaveExam = (examData) => {
+    const formattedQuestions = examData.questions.map(q => ({
+      question: q.text,
+      option_1: q.options.A,
+      option_2: q.options.B,
+      option_3: q.options.C,
+      option_4: q.options.D,
+      answer: q.correctAnswer
+    }));
+
+    const payload = {
+      examtitle: examData.examTitle,
+      examduration: {
+        hours: parseInt(examData.durationHours),
+        minutes: parseInt(examData.durationMinutes)
+      },
+      passingPercentage: parseInt(examData.passingPercentage),
+      questions: formattedQuestions,
+      course: examData.course,
+      batch: examData.batch,
+      isDraft: false,
+      type: 'Student'
+    };
+
     if (isEditing && selectedExam) {
-      // Update existing exam
-      setExams(exams.map(exam => 
-        exam.id === selectedExam.id ? { ...exam, ...examData, id: exam.id } : exam
-      ));
+      dispatch(updateExaminationStudent({
+        id: selectedExam._id,
+        ...payload
+      }));
     } else {
-      // Add new exam
-      const newExam = {
-        id: exams.length + 1,
-        ...examData,
-        createdAt: new Date().toLocaleDateString('en-GB')
-      };
-      setExams([...exams, newExam]);
+      dispatch(createExaminationStudent(payload));
     }
-    setShowModal(false);
-    setSelectedExam(null);
   };
 
   const handleFilterChange = (e) => {
@@ -79,9 +94,9 @@ const StudentExaminations = () => {
 
   const filteredExams = exams.filter(exam => {
     return (
-      (filters.examTitle === '' || exam.examTitle.toLowerCase().includes(filters.examTitle.toLowerCase())) &&
-      (filters.courseName === '' || exam.course?.toLowerCase().includes(filters.courseName.toLowerCase())) &&
-      (filters.batch === '' || exam.batch.toLowerCase().includes(filters.batch.toLowerCase()))
+      (filters.examTitle === '' || exam.examtitle.toLowerCase().includes(filters.examTitle.toLowerCase())) &&
+      (filters.courseName === '' || exam.course?.name?.toLowerCase().includes(filters.courseName.toLowerCase())) &&
+      (filters.batch === '' || exam.batch?.name?.toLowerCase().includes(filters.batch.toLowerCase()))
     );
   });
 
@@ -94,7 +109,7 @@ const StudentExaminations = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div>
             <select
               name="examTitle"
@@ -103,8 +118,10 @@ const StudentExaminations = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Exam Title</option>
-              <option value="husen1 exam">husen1 exam</option>
-             </select>
+              {[...new Set(exams.map(exam => exam.examtitle))].map(title => (
+                <option key={title} value={title}>{title}</option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -115,8 +132,10 @@ const StudentExaminations = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Course Name</option>
-              <option value="MS Office Basics">MS Office Basics</option>
-             </select>
+              {coursesData?.data?.map(course => (
+                <option key={course._id} value={course.name}>{course.name}</option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -127,8 +146,10 @@ const StudentExaminations = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Batch</option>
-              <option value="ms office">ms office</option>
-             </select>
+              {batchesData?.data?.map(batch => (
+                <option key={batch._id} value={batch.name}>{batch.name}</option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -139,9 +160,9 @@ const StudentExaminations = () => {
               Clear Filters
             </button>
           </div>
-        </div> 
+        </div>
 
-         <div className="mb-6 flex justify-end items-center">
+        <div className="mb-6 flex justify-end items-center">
           <button
             onClick={handleAddExam}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center gap-2"
@@ -150,28 +171,34 @@ const StudentExaminations = () => {
           </button>
         </div>
 
-         <div className="overflow-x-auto">
+        <div className="overflow-x-auto">
           <Table
             headers={tableHeaders}
             data={filteredExams}
             renderRow={(exam, index) => (
               <tr 
-                key={exam.id} 
+                key={exam._id} 
                 className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
               >
                 <td className="py-4 px-4">
-                  <div className="font-medium text-gray-800">{exam.batch}</div>
+                  <div className="font-medium text-gray-800">{exam.batch?.name || exam.batch}</div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="text-gray-700">{exam.course || 'N/A'}</div>
+                  <div className="text-gray-700">{exam.course?.name || exam.course || 'N/A'}</div>
                 </td>
-                <td className="py-4 px-4 text-gray-800 font-medium">{exam.examTitle}</td>
-                <td className="py-4 px-4 text-gray-700">{exam.examTime}</td>
-                <td className="py-4 px-4 text-gray-700">{exam.examDuration}</td>
+                <td className="py-4 px-4 text-gray-800 font-medium">{exam.examtitle}</td>
+                <td className="py-4 px-4 text-gray-700">
+                  {new Date(exam.createdAt).toLocaleString('en-GB')}
+                </td>
+                <td className="py-4 px-4 text-gray-700">
+                  {exam.examduration?.hours || 0} hr : {exam.examduration?.minutes || 0} Min
+                </td>
                 <td className="py-4 px-4">
                   <span className="font-bold text-gray-800">{exam.passingPercentage}%</span>
                 </td>
-                <td className="py-4 px-4 text-gray-700">{exam.createdAt}</td>
+                <td className="py-4 px-4 text-gray-700">
+                  {new Date(exam.createdAt).toLocaleDateString('en-GB')}
+                </td>
                 <td className="py-4 px-4">
                   <div className="flex items-center gap-2">
                     <button
@@ -188,7 +215,7 @@ const StudentExaminations = () => {
           />
         </div>
 
-        {filteredExams.length === 0 && (
+        {filteredExams.length === 0 && !examinationsListData?.loading && (
           <div className="text-center py-12">
             <div className="text-4xl mb-4">📝</div>
             <h3 className="text-xl font-semibold text-gray-600 mb-2">No examinations found</h3>
@@ -200,7 +227,12 @@ const StudentExaminations = () => {
           </div>
         )}
 
-        {/* Pagination - Simple version as shown in image */}
+        {examinationsListData?.loading && (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          </div>
+        )}
+
         {filteredExams.length > 0 && (
           <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-200">
             <button 
@@ -217,7 +249,7 @@ const StudentExaminations = () => {
         )}
       </div>
 
-       <ExamModalStudent
+      <ExamModalStudent
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
@@ -226,6 +258,9 @@ const StudentExaminations = () => {
         onSave={handleSaveExam}
         examData={selectedExam}
         isEditing={isEditing}
+        coursesData={coursesData?.data || []}
+        batchesData={batchesData?.data || []}
+        loading={createExaminationStudentData?.loading || updateExaminationStudentData?.loading}
       />
     </div>
   );

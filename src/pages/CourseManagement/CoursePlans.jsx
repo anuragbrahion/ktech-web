@@ -242,19 +242,13 @@ export default function CoursePlansManagement() {
 
   const fetchPlans = () => {
     setLoading(true);
-    const params = {
-      page: currentPage,
-      size: itemsPerPage,
-      ...(filters.search && { search: filters.search }),
-      ...(filters.minAmount && { minAmount: filters.minAmount }),
-      ...(filters.maxAmount && { maxAmount: filters.maxAmount }),
-      ...(filters.course && { course: filters.course }),
-      ...(filters.status && { status: filters.status }),
-      ...(filters.startDate && { startDate: filters.startDate }),
-      ...(filters.endDate && { endDate: filters.endDate })
-    };
-    
-    dispatch(coursePlansList(params)).then((action) => {
+
+    const query = {};
+    if(filters.search) {
+      query.search = filters.search;
+    }
+    dispatch(coursePlansList({page: currentPage,
+      size: itemsPerPage,populate:'course'})).then((action) => {
       if (action.error) {
         toast.error(action.payload || 'Failed to fetch plans');
       }
@@ -346,56 +340,23 @@ export default function CoursePlansManagement() {
     }
   };
 
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFilter = () => {
-    setCurrentPage(1);
-    fetchPlans();
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      search: '',
-      minAmount: '',
-      maxAmount: '',
-      course: '',
-      status: '',
-      startDate: '',
-      endDate: ''
-    });
-    setCurrentPage(1);
-    fetchPlans();
-  };
-
   const getStatusColor = (status) => {
     return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  };
-
-  const getCourseNames = (courseIds, allCourses = []) => {
-    if (!courseIds || courseIds.length === 0) return 'No courses';
-    
-    const courseNames = courseIds.map(courseId => {
-      const course = allCourses?.list.find(c => c._id === courseId);
-      return course ? course.courseName : 'Unknown Course';
-    });
-    
-    return courseNames.slice(0, 2).join(', ') + (courseNames.length > 2 ? ` +${courseNames.length - 2} more` : '');
   };
 
   const plans = plansListData?.data?.data?.list || [];
   const totalPlans = plansListData?.data?.total || 0;
   const totalPages = Math.ceil(totalPlans / itemsPerPage);
   const tableHeaders = ['Plan Name', 'Amount', 'Courses', 'Status', 'Created At', 'Actions'];
-  const courses = useSelector(state => state.course?.coursesAllDocumentsData?.data?.data) || [];
-  const tableData = plans.map(plan => [
-    <div className="font-medium text-gray-900">{plan.name}</div>,
-    <div className="font-bold text-green-600 text-lg">
-      ₹{plan.amount}
+   const tableData = plans.map(plan => [
+    <div className="font-medium text-gray-900 capitalize">{plan.name}</div>,
+    <div className="font-bold text-green-600 text-lg capitalize">
+       ₹{plan.amount}
     </div>,
     <div className="max-w-xs">
-      {getCourseNames(plan.course, courses)}
+        {plan.course.map((data, index) => (
+          <div key={index} className='capitalize'>{data.courseName?? "N/A"}</div>
+        ))}
     </div>,
     <div className="flex items-center">
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(plan.status)}`}>

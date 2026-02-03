@@ -31,6 +31,9 @@ const initialState = {
   deleteCourseBatchesData: {},
   createCourseBatchesData: {},
   updateCourseBatchesData: {},
+
+  getAllStudFeeNameData: {},
+  getAllStuCouseNameData: {},
 };
 
 /* =========================
@@ -162,6 +165,18 @@ export const updateCourseBatches = createApiThunkPrivate(
   "/courses/batches/update",
 );
 
+export const getAllStudFeeName = createApiThunkPrivate(
+  "getAllStudFeeName",
+  "/students/all-documents",
+  "GET",
+);
+
+export const getAllStuCouseName = createApiThunkPrivate(
+  "getAllStuCouseName",
+  "/students/course-installments",
+  "GET",
+);
+
 /* =========================
    Slice
 ========================= */
@@ -264,6 +279,9 @@ export const courseSlice = createSlice({
       updateCourseBatches,
       "updateCourseBatchesData",
     );
+
+    createExtraReducersForThunk(builder, getAllStudFeeName, "getAllStudFeeNameData");
+    createExtraReducersForThunk(builder, getAllStuCouseName, "getAllStuCouseNameData");
   },
 });
 

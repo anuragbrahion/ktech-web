@@ -26,6 +26,10 @@ const initialState = {
   deleteInquiryStatusData: {},
   createInquiryStatusData: {},
   updateInquiryStatusData: {},
+
+  //emp ref amount
+  getEmpRefAmountData: {},
+
 };
 
 /* =========================
@@ -114,6 +118,17 @@ export const updateInquiryStatus = createApiThunkPrivate(
   "/inquires/status/update",
 );
 
+
+export const updateEmpRefAmount = createApiThunkPrivate(
+  "updateEmpRefAmount",
+  "/employee/referral-amount",
+);
+
+export const getEmpRefAmount = createApiThunkPrivate(
+  "getEmpRefAmount",
+  "/employee/referral-amount",
+  "GET"
+);
 /* =========================
    Slice
 ========================= */
@@ -194,6 +209,12 @@ export const banchSlice = createSlice({
       builder,
       updateInquiryStatus,
       "updateInquiryStatusData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      getEmpRefAmount,
+      "getEmpRefAmountData",
     );
   },
 });

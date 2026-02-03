@@ -37,7 +37,7 @@ const USER_TYPES = {
         placeholder: "teacher@university.edu"
     },
     branch: {
-        title: "Branch Login",
+        title: "Branch/Admin Login",
         subtitle: "Branch administration",
         icon: Building,
         gradient: "from-orange-500 to-amber-500",

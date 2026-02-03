@@ -65,9 +65,15 @@ const initialState = {
 ========================= */
   teachersListData: {},
   teachersAllDocumentsData: {},
-   enableDisableTeachersData: {},
-    updateTeachersData: {},
-    updateTeachersPasswordData: {},
+  enableDisableTeachersData: {},
+  updateTeachersData: {},
+  updateTeachersPasswordData: {},
+
+  // Users
+  usersListData: {},
+  createUsersData: {},
+  updateUsersData: {},
+  enableDisableUsersData: {},
 };
 
 /* =========================
@@ -317,6 +323,31 @@ export const updateTeachersPassword = createApiThunkPrivate(
 );
 
 /* =========================
+   Users
+========================= */
+
+export const usersList = createApiThunkPrivate(
+  "usersList",
+  "/users/list",
+  "GET",
+);
+
+export const createUsers = createApiThunkPrivate(
+  "createUsers",
+  "/users/create",
+);
+
+export const updateUsers = createApiThunkPrivate(
+  "updateUsers",
+  "/users/update",
+);
+
+export const enableDisableUsers = createApiThunkPrivate(
+  "enableDisableUsers",
+  "/users/enable-disable",
+);
+
+/* =========================
    Slice
 ========================= */
 
@@ -487,10 +518,19 @@ export const employeeSlice = createSlice({
     );
     createExtraReducersForThunk(builder, updateTeachers, "updateTeachersData");
     createExtraReducersForThunk(
-  builder,
-  updateTeachersPassword,
-  "updateTeachersPasswordData",
-);
+      builder,
+      updateTeachersPassword,
+      "updateTeachersPasswordData",
+    );
+    // Users
+    createExtraReducersForThunk(builder, usersList, "usersListData");
+    createExtraReducersForThunk(builder, createUsers, "createUsersData");
+    createExtraReducersForThunk(builder, updateUsers, "updateUsersData");
+    createExtraReducersForThunk(
+      builder,
+      enableDisableUsers,
+      "enableDisableUsersData",
+    );
   },
 });
 
