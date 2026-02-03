@@ -17,6 +17,7 @@ const CoursePlanModal = ({ plan, onSave, onClose }) => {
     amount: '',
     course: []
   });
+console.log("object22222222",formData)
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +29,7 @@ const CoursePlanModal = ({ plan, onSave, onClose }) => {
       setFormData({
         name: plan.name || '',
         amount: plan.amount || '',
-        course: plan.course || []
+        course: plan.course.map(item => item._id) || []
       });
     }
   }, [plan]);
@@ -223,7 +224,7 @@ export default function CoursePlansManagement() {
     endDate: ''
   });
   const [loading, setLoading] = useState(false);
-
+console.log("object",editingPlan)
   const plansListData = useSelector(state => state.course?.coursePlansListData);
   const enableDisableData = useSelector(state => state.course?.enableDisableCoursePlansData);
   const deleteData = useSelector(state => state.course?.deleteCoursePlansData);

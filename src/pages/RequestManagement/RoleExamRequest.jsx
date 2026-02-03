@@ -148,7 +148,7 @@ const RoleExamRequest = () => {
   };
 
   return (
-    <div className="container mx-auto">
+    <div className="">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Role Exam Requests</h1>
         <p className="text-gray-600 mt-2">Manage teacher role examination requests</p>

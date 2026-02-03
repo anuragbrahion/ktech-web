@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Table from "../../components/Atoms/TableData/TableData";
@@ -156,7 +157,7 @@ const ProductModal = ({
           <div className="flex justify-between items-center mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {isEditing ? "# Edit Product" : "# Add Product"}
+                {isEditing ? "Edit Product" : "Add Product"}
               </h2>
             </div>
             <button
@@ -357,11 +358,9 @@ const Ecommerce = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [filters, setFilters] = useState({
-    productName: "",
-    productCategory: "",
-    priceRange: "",
-  });
+   const [filters, setFilters] = useState({
+      search: ""
+    });
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -369,15 +368,24 @@ const Ecommerce = () => {
   const products = useSelector(
     (state) => state.commerce.commerceProductsListData?.data?.data?.list || [],
   );
+    const productsTotal = useSelector(
+    (state) => state.commerce.commerceProductsListData?.data?.data?.total || [],
+  );
   const categories = useSelector(
     (state) =>
       state.commerce.commerceCategoriesAllDocumentsData?.data?.data?.list || [],
   );
 
   useEffect(() => {
-    dispatch(commerceProductsList({ page: currentPage, size: itemsPerPage }));
+    const params = {
+      page: currentPage,
+      size: itemsPerPage,
+      ...(filters.search && { keyWord: filters.search }),
+      searchFields: "name",
+    };
+    dispatch(commerceProductsList(params));
     dispatch(commerceCategoriesAllDocuments());
-  }, [dispatch]);
+  }, [filters.search, currentPage]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -389,9 +397,7 @@ const Ecommerce = () => {
 
   const handleResetFilters = () => {
     setFilters({
-      productName: "",
-      productCategory: "",
-      priceRange: "",
+     search: "",
     });
   };
 
@@ -464,33 +470,11 @@ const Ecommerce = () => {
     }
   };
 
-  const filteredProducts = products.filter((product) => {
-    return (
-      (filters.productName === "" ||
-        product.name
-          .toLowerCase()
-          .includes(filters.productName.toLowerCase())) &&
-      (filters.productCategory === "" ||
-        product.category === filters.productCategory) &&
-      (filters.priceRange === "" ||
-        (filters.priceRange === "low" && product.sellingPrice < 2000) ||
-        (filters.priceRange === "medium" &&
-          product.sellingPrice >= 2000 &&
-          product.sellingPrice < 5000) ||
-        (filters.priceRange === "high" && product.sellingPrice >= 5000))
-    );
-  });
-
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const totalPages = Math.ceil(productsTotal / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
-
-  const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
+  const currentProducts = products.slice(startIndex, endIndex);
+ 
 
   const tableHeaders = [
     "Product Image",
@@ -508,7 +492,7 @@ const Ecommerce = () => {
   };
 
   return (
-    <div className="container mx-auto">
+    <div className="">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Products</h1>
         <p className="text-gray-600 mt-2">
@@ -517,49 +501,18 @@ const Ecommerce = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        {/* Filter Section */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+         <div className="flex justify-between gap-4 w-full mb-6">
           <div>
             <input
               type="text"
-              name="productName"
-              value={filters.productName}
+              name="search"
+              value={filters.search}
               onChange={handleFilterChange}
               placeholder="Search product name"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-96 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-
-          <div>
-            <select
-              name="productCategory"
-              value={filters.productCategory}
-              onChange={handleFilterChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">--- no select ---</option>
-              {categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <select
-              name="priceRange"
-              value={filters.priceRange}
-              onChange={handleFilterChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">--- no select ---</option>
-              <option value="low">Under ₹2000</option>
-              <option value="medium">₹2000 - ₹5000</option>
-              <option value="high">Above ₹5000</option>
-            </select>
-          </div>
-
+          </div> 
+          <div className="flex gap-6">
           <button
             onClick={handleResetFilters}
             className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700 font-medium"
@@ -575,13 +528,16 @@ const Ecommerce = () => {
             <span>+</span>
             <span>{loading ? "Processing..." : "Add Product"}</span>
           </button>
+          </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+         <div className="overflow-x-auto">
           <Table
             headers={tableHeaders}
-            data={currentProducts}
+  data={currentProducts}
+  currentPage={currentPage}
+  totalPages={totalPages}
+  handlePageChange={setCurrentPage}
             renderRow={(product, index) => (
               <tr
                 key={product._id}
@@ -603,30 +559,27 @@ const Ecommerce = () => {
                   </div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="font-medium text-gray-800">
+                  <div className=" text-gray-800 capitalize">
                     {product.name}
-                  </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    ID: {product._id?.slice(-6)}
-                  </div>
+                  </div> 
                 </td>
-                <td className="py-4 px-4">
+                <td className="py-4 px-4 capitalize">
                   {getCategoryName(product.category)}
                 </td>
                 <td className="py-4 px-4">
-                  <div className="text-gray-700 font-medium">
+                  <div className="text-gray-700">
                     ₹{product.mrp?.toFixed(2) || "0.00"}
                   </div>
                 </td>
                 <td className="py-4 px-4">
                   <div className="space-y-1">
-                    <div className="font-bold text-lg text-green-600">
+                    <div className="text-lg text-green-600">
                       ₹{product.sellingPrice?.toFixed(2) || "0.00"}
                     </div>
                   </div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="flex flex-col items-center font-bold text-green-600">
+                  <div className="flex flex-col items-center text-green-600">
                     {product.discount || 0}% OFF
                   </div>
                 </td> 
@@ -658,101 +611,7 @@ const Ecommerce = () => {
               </tr>
             )}
           />
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">📦</div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">
-              No results.
-            </h3>
-            <p className="text-gray-500">
-              {Object.values(filters).some((f) => f !== "")
-                ? "No products match your filter criteria"
-                : "No products available. Click 'Add Product' to create one."}
-            </p>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {filteredProducts.length > 0 && (
-          <div className="flex flex-col md:flex-row justify-between items-center mt-6 pt-6 border-t border-gray-200">
-            <div className="text-sm text-gray-600 mb-4 md:mb-0">
-              Showing {startIndex + 1}-
-              {Math.min(endIndex, filteredProducts.length)} of{" "}
-              {filteredProducts.length} products
-            </div>
-
-            <div className="flex items-center space-x-2 my-4 md:my-0">
-              {Array.from({ length: Math.min(4, totalPages) }, (_, i) => {
-                let pageNum;
-                if (totalPages <= 4) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 2) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 1) {
-                  pageNum = totalPages - 3 + i;
-                } else {
-                  pageNum = currentPage - 1 + i;
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                      currentPage === pageNum
-                        ? "bg-blue-500 text-white"
-                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-              {totalPages > 4 && currentPage < totalPages - 2 && (
-                <>
-                  <span className="text-gray-500">...</span>
-                  <button
-                    onClick={() => handlePageChange(totalPages)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                      currentPage === totalPages
-                        ? "bg-blue-500 text-white"
-                        : "border border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              )}
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 ${
-                  currentPage === 1
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-700"
-                }`}
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 ${
-                  currentPage === totalPages
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-gray-700"
-                }`}
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        </div> 
       </div>
 
       <ProductModal

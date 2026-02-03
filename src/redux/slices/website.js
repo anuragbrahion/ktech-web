@@ -71,6 +71,8 @@ const initialState = {
 
   websiteRefundGetData: {},
   websiteRefundPostData: {},
+
+  getWebsiteQueriesData:{}
 };
 
 export const websiteLanguagesList = createApiThunkPrivate(
@@ -153,6 +155,12 @@ export const updateWebsiteCategory = createApiThunkPrivate(
   "/website/category/update",
 );
 
+
+export const getWebsiteQueries = createApiThunkPrivate(
+  "getWebsiteQueries",
+  "/website/queries",
+  "GET"
+);
 /* =========================
    Website Blogs
 ========================= */
@@ -591,6 +599,12 @@ export const websiteSlice = createSlice({
       builder,
       postWebsiteRefund,
       "websiteRefundPostData",
+    );
+
+     createExtraReducersForThunk(
+      builder,
+      getWebsiteQueries,
+      "getWebsiteQueriesData",
     );
   },
 });

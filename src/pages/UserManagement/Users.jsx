@@ -211,7 +211,7 @@ const Users = () => {
   return (
     <div className="">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">User Management</h1>
+        <h1 className="text-3xl text-gray-800">User Management</h1>
         <p className="text-gray-600 mt-2">Manage your users and their details</p>
       </div>
 
@@ -290,19 +290,19 @@ const Users = () => {
                   <div className="font-medium text-gray-800">{(currentPage - 1) * itemsPerPage + index + 1}</div>
                 </td>
                 <td className="py-4 px-4">
-                  <div className="font-medium text-gray-800">{user.name || 'N/A'}</div>
+                  <div className="capitalize text-gray-800">{user.name || 'N/A'}</div>
                 </td>
                 <td className="py-4 px-4">
                   <div className="text-gray-700">{user.email || 'N/A'}</div>
                 </td>
                 <td className="py-4 px-4 text-gray-700">{user.phoneNo || 'N/A'}</td>
                 <td className="py-4 px-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getRoleColor(user.role)}`}>
+                  <span className={`px-3 py-1 rounded-full text-sm border ${getRoleColor(user.role)}`}>
                     {user.role || 'N/A'}
                   </span>
                 </td>
                 <td className="py-4 px-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold border ${getStatusColor(user.status)}`}>
+                  <span className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(user.status)}`}>
                     {user.status === true ? 'Active' : 'Inactive'}
                   </span>
                 </td>

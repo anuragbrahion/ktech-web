@@ -24,20 +24,12 @@ const VisitorsBook = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterDate, setFilterDate] = useState("");
-  const [editingVisitor, setEditingVisitor] = useState(null);
+   const [editingVisitor, setEditingVisitor] = useState(null);
   const [deletingVisitor, setDeletingVisitor] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [resData, setResData] = useState([]);
-  const [filters, setFilters] = useState({
-    name: "",
-    meetingWith: "",
-    purpose: "",
-    date: "",
-    followUpDate: "",
-  });
   const visitorsListData = useSelector(
     (state) => state.inquires?.visitorsListData,
   );
@@ -63,11 +55,7 @@ const VisitorsBook = () => {
     const params = {
       page: currentPage,
       size: itemsPerPage,
-      ...(filters.name && { name: filters.name }),
-      ...(filters.meetingWith && { meetingWith: filters.meetingWith }),
-      ...(filters.purpose && { purpose: filters.purpose }),
-      ...(filters.date && { date: filters.date }),
-      ...(filters.followUpDate && { followUpDate: filters.followUpDate }),
+
     };
 
     dispatch(visitorsList(params)).then((action) => {
@@ -156,22 +144,8 @@ const VisitorsBook = () => {
     fetchVisitorFollowUpData();
   }, []);
 
-  const handleFilterChange = (field, value) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
-  };
-
   const resetFilters = () => {
-    setFilters({
-      name: "",
-      meetingWith: "",
-      purpose: "",
-      date: "",
-      followUpDate: "",
-    });
-    setSearchTerm("");
-    setFilterDate("");
-    setCurrentPage(1);
-    fetchVisitors();
+   
   };
 
   const formatDateForAPI = (dateString) => {
@@ -183,22 +157,7 @@ const VisitorsBook = () => {
     return `${day}-${month}-${year}`;
   };
 
-  const filteredVisitors = visitors.filter((visitor) => {
-    const matchesSearch =
-      (visitor.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-      (visitor.phoneNo || "").includes(searchTerm) ||
-      (visitor.meetingWith?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase(),
-      ) ||
-      (visitor.purpose?.toLowerCase() || "").includes(searchTerm.toLowerCase());
-    const matchesDate =
-      !filterDate ||
-      (visitor.date &&
-        moment(visitor.date).format("DD MM YYYY") === moment(filterDate).format("DD MM YYYY"));
-    return matchesSearch && matchesDate;
-  });
-
-  const tableData = filteredVisitors.map((visitor) => [
+  const tableData = visitors.map((visitor) => [
     visitor.name || "N/A",
     visitor.phoneNo || "N/A",
     visitor.meetingWith || "N/A",
@@ -214,31 +173,27 @@ const VisitorsBook = () => {
       name,
       phoneNo,
       meetingWith,
-      date,
-      followUpDate,
+       followUpDate,
       purpose,
       totalPerson,
       visitorId,
     ] = row;
-    const visitor = filteredVisitors[index];
-    const isFollowUpOverdue =
-      visitor.followUpDate &&
-      new Date(moment(visitor.followUpDate).format("DD MM YYYY")) < new Date();
+    const visitor = visitors[index];
+    const isFollowUpOverdue =visitor.followUpDate && new Date(moment(visitor.followUpDate).format("DD MM YYYY")) < new Date();
 
     return (
       <tr
         key={visitorId}
         className={`hover:bg-sky-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
       >
-        <td className="py-4 px-4 text-black font-medium">{name}</td>
+        <td className="py-4 px-4 text-black">{name}</td>
         <td className="py-4 px-4 text-black">
           <a href={`tel:${phoneNo}`} className="hover:text-blue-600">
             {phoneNo}
           </a>
         </td>
         <td className="py-4 px-4 text-black">{meetingWith}</td>
-        <td className="py-4 px-4 text-black">{date}</td>
-        <td className="py-4 px-4 text-black">
+         <td className="py-4 px-4 text-black">
           <span
             className={`${isFollowUpOverdue ? "text-red-600" : "text-green-600"} font-medium`}
           >
@@ -247,9 +202,7 @@ const VisitorsBook = () => {
         </td>
         <td className="py-4 px-4 text-black">{purpose}</td>
         <td className="py-4 px-4 text-black text-center">
-          <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full">
-            {totalPerson}
-          </span>
+          {totalPerson}
         </td>
         <td className="py-4 px-4">
           <div className="flex space-x-2">
@@ -279,8 +232,7 @@ const VisitorsBook = () => {
     "Visitor Name",
     "Phone No",
     "Meeting With",
-    "Date",
-    "Follow Up Date",
+     "Follow Up Date",
     "Purpose",
     "Total Persons",
     "Actions",
@@ -288,7 +240,7 @@ const VisitorsBook = () => {
 
   return (
     <div className="">
-      <div className="container mx-auto">
+      <div className="">
         <div className="mb-8">
           <div className="flex justify-between items-start md:items-center mb-4 flex-col md:flex-row gap-4">
             <div>
@@ -319,8 +271,8 @@ const VisitorsBook = () => {
                 </label>
                 <input
                   type="text"
-                  value={filters.name}
-                  onChange={(e) => handleFilterChange("name", e.target.value)}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm("name", e.target.value)}
                   placeholder="Search by name"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                 />
@@ -355,7 +307,7 @@ const VisitorsBook = () => {
               </div>
             </div>
           </div>
-          {filteredVisitors.length > 0 ? (
+          {visitors.length > 0 ? (
             <Table
               headers={tableHeaders}
               data={tableData}
@@ -372,13 +324,6 @@ const VisitorsBook = () => {
               <h3 className="text-xl font-semibold text-gray-600 mb-2">
                 {loading ? "Loading visitors..." : "No visitors found"}
               </h3>
-              <p className="text-gray-500 mb-6">
-                {searchTerm ||
-                filterDate ||
-                Object.values(filters).some((f) => f)
-                  ? "No visitors match your search criteria"
-                  : "No visitor records available. Add your first visitor!"}
-              </p>
               <button
                 onClick={() => setShowAddModal(true)}
                 className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600"

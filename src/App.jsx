@@ -5,8 +5,9 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-// import { useSelector } from "react-redux";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import Header from "./components/Header/Header";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -112,8 +113,7 @@ const MainLayout = ({
 };
 
 const App = () => {
-  // const { isAuthenticated } = useSelector((state) => state.auth);
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [websiteMode, setWebsiteMode] = React.useState(false);
 
   const toggleWebsiteMode = () => setWebsiteMode(!websiteMode);
@@ -133,6 +133,7 @@ const App = () => {
 
   return (
     <Router>
+      <ToastContainer />
       <Routes>
         <Route path="/" element={<Navigate to="/welcome" replace />} />
         
