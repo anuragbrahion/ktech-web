@@ -205,36 +205,36 @@ const allSections = {
       },
     ],
   },
-  examinations: {
-    title: "Examinations",
-    icon: Award,
-    items: [
-      {
-        id: "allPastExams",
-        label: "All Past Examinations List",
-        icon: FileText,
-        path: "/all-past-exams",
-      },
-      {
-        id: "studentExams",
-        label: "Student Examinations",
-        icon: GraduationCap,
-        path: "/student-exams",
-      },
-      {
-        id: "roleExams",
-        label: "Role Examination",
-        icon: UserCog,
-        path: "/role-exams",
-      },
-      {
-        id: "goalExams",
-        label: "Goal Examination",
-        icon: Target,
-        path: "/goal-exams",
-      },
-    ],
-  },
+  // examinations: {
+  //   title: "Examinations",
+  //   icon: Award,
+  //   items: [
+  //     {
+  //       id: "allPastExams",
+  //       label: "All Past Examinations List",
+  //       icon: FileText,
+  //       path: "/all-past-exams",
+  //     },
+  //     {
+  //       id: "studentExams",
+  //       label: "Student Examinations",
+  //       icon: GraduationCap,
+  //       path: "/student-exams",
+  //     },
+  //     {
+  //       id: "roleExams",
+  //       label: "Role Examination",
+  //       icon: UserCog,
+  //       path: "/role-exams",
+  //     },
+  //     {
+  //       id: "goalExams",
+  //       label: "Goal Examination",
+  //       icon: Target,
+  //       path: "/goal-exams",
+  //     },
+  //   ],
+  // },
   branchManagement: {
     title: "Branch Management",
     icon: GitBranch,
