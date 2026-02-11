@@ -32,6 +32,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    sessionStorage.removeItem("data");
     navigate("/welcome");
   };
 

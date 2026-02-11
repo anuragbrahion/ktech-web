@@ -34,7 +34,7 @@ function Layout() {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token && !isAuthenticated) {
-            window.location.href = "/login";
+            window.location.href = "/welcome";
         }
     }, [isAuthenticated]);
 
@@ -55,7 +55,7 @@ function Layout() {
     }
 
     if (!isAuthenticated && !localStorage.getItem("token")) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/welcome" replace />;
     }
 
     return (

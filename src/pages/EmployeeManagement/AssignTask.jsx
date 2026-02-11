@@ -123,8 +123,8 @@ const AssignTask = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
+    <div className="">
+      <div className="">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-black">Task Assign List</h1>
           <p className="text-black mt-2">Assign and manage tasks for staff members</p>
@@ -208,32 +208,7 @@ const AssignTask = () => {
               </tr>
             )}
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Staff</h3>
-            <p className="text-3xl font-bold text-black mt-2">{staffList.length}</p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Teachers</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {staffList.filter(s => s.role === 'Teacher').length}
-            </p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Students</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {staffList.filter(s => s.role === 'Student').length}
-            </p>
-          </div>
-          <div className="bg-sky-50 p-6 rounded-lg shadow border border-sky-100">
-            <h3 className="text-lg font-semibold text-sky-700">Total Tasks</h3>
-            <p className="text-3xl font-bold text-black mt-2">
-              {staffList.reduce((total, staff) => total + staff.tasks.length, 0)}
-            </p>
-          </div>
-        </div>
+        </div> 
       </div>
 
       <AssignTaskModal

@@ -7,10 +7,9 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
- import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import Header from "./components/Header/Header";
-import Sidebar from "./components/Sidebar/Sidebar";
 import Login from "./pages/Login/Login";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import WebsiteDashboard from "./pages/WebsiteDashboard/WebsiteDashboard";
@@ -74,10 +73,25 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import BlogCategoryManagement from "./pages/WebsiteManagement/Blogs/BlogCategoryManagement";
+ import Sidebar from "./components/Sidebar/Sidebar";
+import TeacherDashboard from "./pages/Dashboard/TeacherDashboard";
+import StudentDashboard from "./pages/Dashboard/StudentDashboard";
 
-const Pages = () => <div>Pages</div>;
-const MediaLibrary = () => <div>Media Library</div>;
-const WebsiteSettings = () => <div>Website Settings</div>;
+// Simple components for teacher/student pages
+const TeacherIncentive = () => <div className="p-6"><h1 className="text-2xl font-bold">My Incentive</h1></div>;
+const TeacherAttendance = () => <div className="p-6"><h1 className="text-2xl font-bold">My Attendance Report</h1></div>;
+const TeacherLeaveRequest = () => <div className="p-6"><h1 className="text-2xl font-bold">Leave Request</h1></div>;
+const StudentAttendanceList = () => <div className="p-6"><h1 className="text-2xl font-bold">Student Attendance List</h1></div>;
+const RoleAssign = () => <div className="p-6"><h1 className="text-2xl font-bold">Role Assign</h1></div>;
+const GoalAssign = () => <div className="p-6"><h1 className="text-2xl font-bold">Goal Assign</h1></div>;
+const MyTasks = () => <div className="p-6"><h1 className="text-2xl font-bold">My Tasks</h1></div>;
+const PastExams = () => <div className="p-6"><h1 className="text-2xl font-bold">All Past Examinations List</h1></div>;
+const StudentReferralAmount = () => <div className="p-6"><h1 className="text-2xl font-bold">Referral Amount</h1></div>;
+const StudentMyAttendance = () => <div className="p-6"><h1 className="text-2xl font-bold">My Attendance Report</h1></div>;
+const StudentLeaveRequest = () => <div className="p-6"><h1 className="text-2xl font-bold">Leave Request</h1></div>;
+const StudentMyCourses = () => <div className="p-6"><h1 className="text-2xl font-bold">My Courses</h1></div>;
+const StudentMyExams = () => <div className="p-6"><h1 className="text-2xl font-bold">My Exams</h1></div>;
+const StudentPastExams = () => <div className="p-6"><h1 className="text-2xl font-bold">All Past Examinations List</h1></div>;
 
 const MainLayout = ({
   children,
@@ -113,7 +127,7 @@ const MainLayout = ({
 };
 
 const App = () => {
-   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [websiteMode, setWebsiteMode] = React.useState(false);
 
   const toggleWebsiteMode = () => setWebsiteMode(!websiteMode);
@@ -149,6 +163,117 @@ const App = () => {
           </PublicRoute>
         } />
         
+        <Route path="/forgot-password" element={
+          <PublicRoute>
+            <ForgotPassword />
+          </PublicRoute>
+        } />
+
+        <Route path="/reset-password" element={
+          <PublicRoute>
+            <ResetPassword />
+          </PublicRoute>
+        } />
+
+        {/* Teacher Routes */}
+        <Route path="/teacher-dashboard" element={
+          <ProtectedRoute>
+            {renderMainLayout(TeacherDashboard)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/incentive" element={
+          <ProtectedRoute>
+            {renderMainLayout(TeacherIncentive)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/attendance" element={
+          <ProtectedRoute>
+            {renderMainLayout(TeacherAttendance)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/leave-request" element={
+          <ProtectedRoute>
+            {renderMainLayout(TeacherLeaveRequest)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/student-attendance" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentAttendanceList)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/role-assign" element={
+          <ProtectedRoute>
+            {renderMainLayout(RoleAssign)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/goal-assign" element={
+          <ProtectedRoute>
+            {renderMainLayout(GoalAssign)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/my-tasks" element={
+          <ProtectedRoute>
+            {renderMainLayout(MyTasks)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/teacher/past-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(PastExams)}
+          </ProtectedRoute>
+        } />
+
+        {/* Student Routes */}
+        <Route path="/student-dashboard" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentDashboard)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student/referral-amount" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentReferralAmount)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student/attendance" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentMyAttendance)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student/leave-request" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentLeaveRequest)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student/my-courses" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentMyCourses)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student/my-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentMyExams)}
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/student/past-exams" element={
+          <ProtectedRoute>
+            {renderMainLayout(StudentPastExams)}
+          </ProtectedRoute>
+        } />
+
+        {/* Admin Routes (Shared) */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             {renderMainLayout(Dashboard)}
@@ -184,18 +309,6 @@ const App = () => {
             {renderMainLayout(LanguageManagement)}
           </ProtectedRoute>
         } />
-
-        <Route path="/forgot-password" element={
-  <PublicRoute>
-    <ForgotPassword />
-  </PublicRoute>
-} />
-
-<Route path="/reset-password" element={
-  <PublicRoute>
-    <ResetPassword />
-  </PublicRoute>
-} />
         
         <Route path="/web-about" element={
           <ProtectedRoute>
@@ -242,24 +355,6 @@ const App = () => {
         <Route path="/website-dashboard" element={
           <ProtectedRoute>
             {renderMainLayout(WebsiteDashboard)}
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/pages" element={
-          <ProtectedRoute>
-            {renderMainLayout(Pages)}
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/media-library" element={
-          <ProtectedRoute>
-            {renderMainLayout(MediaLibrary)}
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/website-settings" element={
-          <ProtectedRoute>
-            {renderMainLayout(WebsiteSettings)}
           </ProtectedRoute>
         } />
         

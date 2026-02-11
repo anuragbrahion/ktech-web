@@ -24,6 +24,23 @@ const initialState = {
   // Results
   examinationsResultListData: {},
   examinationsResultViewData: {},
+
+  // Request Roles
+  requestRolesListData: {},
+  requestRolesUpdateStatusData: {},
+  requestRolesAssignedData: {},
+
+  // Request Leaves
+  requestLeavesListData: {},
+  requestLeavesUpdateStatusData: {},
+  requestLeavesApplyData: {},
+
+  // Request Goals
+  requestGoalsListData: {},
+  requestGoalsUpdateStatusData: {},
+  requestGoalsAssignedData: {},
+
+  assignEmployeeTeacherTaskData:{},
 };
 
 /* =========================
@@ -101,6 +118,75 @@ export const examinationsResultView = createApiThunkPrivate(
 );
 
 /* =========================
+   Request Roles
+========================= */
+
+export const requestRolesList = createApiThunkPrivate(
+  "requestRolesList",
+  "/requests/roles/list",
+  "GET",
+);
+
+export const requestRolesUpdateStatus = createApiThunkPrivate(
+  "requestRolesUpdateStatus",
+  "/requests/roles/update-status",
+);
+
+export const requestRolesAssigned = createApiThunkPrivate(
+  "requestRolesAssigned",
+  "/requests/roles/assigned",
+  "GET",
+);
+
+export const assignEmployeeTeacherTask = createApiThunkPrivate(
+  "assignEmployeeTeacherTask",
+  "/employee/teachers/assign-task",
+  "POST",
+);
+
+
+/* =========================
+   Request Leaves
+========================= */
+
+export const requestLeavesList = createApiThunkPrivate(
+  "requestLeavesList",
+  "/requests/leaves/list",
+  "GET",
+);
+
+export const requestLeavesUpdateStatus = createApiThunkPrivate(
+  "requestLeavesUpdateStatus",
+  "/requests/leaves/update-status",
+);
+
+export const requestLeavesApply = createApiThunkPrivate(
+  "requestLeavesApply",
+  "/requests/leaves/apply",
+);
+
+/* =========================
+   Request Goals
+========================= */
+
+export const requestGoalsList = createApiThunkPrivate(
+  "requestGoalsList",
+  "/requests/goals/list",
+  "GET",
+);
+
+export const requestGoalsUpdateStatus = createApiThunkPrivate(
+  "requestGoalsUpdateStatus",
+  "/requests/goals/update-status",
+);
+
+export const requestGoalsAssigned = createApiThunkPrivate(
+  "requestGoalsAssigned",
+  "/requests/goals/assigned",
+  "GET",
+);
+
+/* =========================
    Slice
 ========================= */
 
@@ -166,6 +252,63 @@ export const examinationSlice = createSlice({
       builder,
       examinationsResultView,
       "examinationsResultViewData",
+    );
+
+    // Request Roles
+    createExtraReducersForThunk(
+      builder,
+      requestRolesList,
+      "requestRolesListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      requestRolesUpdateStatus,
+      "requestRolesUpdateStatusData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      requestRolesAssigned,
+      "requestRolesAssignedData",
+    );
+
+    // Request Leaves
+    createExtraReducersForThunk(
+      builder,
+      requestLeavesList,
+      "requestLeavesListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      requestLeavesUpdateStatus,
+      "requestLeavesUpdateStatusData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      requestLeavesApply,
+      "requestLeavesApplyData",
+    );
+
+    // Request Goals
+    createExtraReducersForThunk(
+      builder,
+      requestGoalsList,
+      "requestGoalsListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      requestGoalsUpdateStatus,
+      "requestGoalsUpdateStatusData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      requestGoalsAssigned,
+      "requestGoalsAssignedData",
+    );
+
+     createExtraReducersForThunk(
+      builder,
+      assignEmployeeTeacherTask,
+      "assignEmployeeTeacherTaskData",
     );
   },
 });

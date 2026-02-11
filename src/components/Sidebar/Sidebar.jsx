@@ -45,17 +45,27 @@ import {
   ChevronDown,
   ChevronUp,
   X,
-  Menu,
   Package,
   Activity,
   Share2,
   Tags,
   Layers,
   List,
+  DollarSign,
+  BarChart,
+  CheckCircle,
+  Eye,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+// Remove problematic import and use alternative
+import { FaTasks } from "react-icons/fa";
 
-const allSections = {
+const getUserData = () => {
+  const userData = sessionStorage.getItem("data");
+  return userData ? JSON.parse(userData) : null;
+};
+
+const adminSections = {
   websiteOptions: {
     title: "Website Management",
     icon: Globe,
@@ -63,102 +73,33 @@ const allSections = {
       { id: "homePage", label: "Home Page", icon: Home, path: "/home-page" },
       { id: "blogs", label: "Blogs", icon: FileText, path: "/blogs" },
       { id: "branches", label: "Branches", icon: GitBranch, path: "/branches" },
-      {
-        id: "testimonials",
-        label: "Testimonials",
-        icon: MessageSquare,
-        path: "/testimonials",
-      },
+      { id: "testimonials", label: "Testimonials", icon: MessageSquare, path: "/testimonials" },
       { id: "language", label: "Language", icon: Languages, path: "/language" },
       { id: "aboutUs", label: "About Us", icon: Info, path: "/web-about" },
       { id: "whyUs", label: "Why Us", icon: HelpCircle, path: "/why-us" },
-      {
-        id: "terms",
-        label: "Terms & Conditions",
-        icon: FileCheck,
-        path: "/terms-conditions",
-      },
-      {
-        id: "courseFaq",
-        label: "Course FAQ",
-        icon: BookOpen,
-        path: "/course-faq",
-      },
-      {
-        id: "privacyPolicy",
-        label: "Privacy Policy",
-        icon: Shield,
-        path: "/privacy-policy",
-      },
-      {
-        id: "companyDetails",
-        label: "Company Details",
-        icon: Building2,
-        path: "/company-details",
-      },
+      { id: "terms", label: "Terms & Conditions", icon: FileCheck, path: "/terms-conditions" },
+      { id: "courseFaq", label: "Course FAQ", icon: BookOpen, path: "/course-faq" },
+      { id: "privacyPolicy", label: "Privacy Policy", icon: Shield, path: "/privacy-policy" },
+      { id: "companyDetails", label: "Company Details", icon: Building2, path: "/company-details" },
     ],
   },
   courseOptions: {
     title: "Courses",
     icon: BookOpen,
     items: [
-      // {
-      //   id: "exam",
-      //   label: "Exam Grade System",
-      //   icon: Award,
-      //   path: "/exam-grade-system",
-      // },
-      // { id: "subjects", label: "Subjects", icon: BookOpen, path: "/subjects" },
-      // { id: "languages", label: "Languages", icon: Globe, path: "/languages" },
-      // {
-      //   id: "categories",
-      //   label: "Course Categories",
-      //   icon: Grid,
-      //   path: "/course-categories",
-      // },
-      {
-        id: "courseList",
-        label: "Course",
-        icon: Grid,
-        path: "/course-list",
-      },
-       {
-        id: "coursePlans",
-        label: "Course Plans",
-        icon: Grid,
-        path: "/course-plans",
-      },
-      {
-        id: "batches",
-        label: "Course Batches",
-        icon: Grid,
-        path: "/course-batches",
-      },
+      { id: "courseList", label: "Course", icon: Grid, path: "/course-list" },
+      { id: "coursePlans", label: "Course Plans", icon: Grid, path: "/course-plans" },
+      { id: "batches", label: "Course Batches", icon: Grid, path: "/course-batches" },
     ],
   },
   studentInfo: {
     title: "Student Information",
     icon: Users,
     items: [
-      {
-        id: "admission",
-        label: "Admission",
-        icon: UserCircle,
-        path: "/admission",
-      },
-      {
-        id: "reAdmission",
-        label: "Re-Admission",
-        icon: RefreshCw,
-        path: "/re-admission",
-      },
+      { id: "admission", label: "Admission", icon: UserCircle, path: "/admission" },
+      { id: "reAdmission", label: "Re-Admission", icon: RefreshCw, path: "/re-admission" },
       { id: "inquiry", label: "Inquiry", icon: FileSearch, path: "/inquiry" },
-      {
-        id: "studentFeeSummary",
-        label: "Student Fee Summary",
-        icon: FileBarChart,
-        path: "/student-fee-summary",
-      },
+      { id: "studentFeeSummary", label: "Student Fee Summary", icon: FileBarChart, path: "/student-fee-summary" },
     ],
   },
   employeeManagement: {
@@ -167,286 +108,199 @@ const allSections = {
     items: [
       { id: "role", label: "Role", icon: UserCog, path: "/role" },
       { id: "goal", label: "Goal", icon: Target, path: "/goal" },
-      {
-        id: "designation",
-        label: "Designation",
-        icon: Briefcase,
-        path: "/designation",
-      },
-      {
-        id: "department",
-        label: "Department",
-        icon: Building,
-        path: "/department",
-      },
-      {
-        id: "teacherDirectory",
-        label: "Teacher Directory",
-        icon: Users,
-        path: "/teacher-directory",
-      },
-      {
-        id: "leaveType",
-        label: "Leave Type",
-        icon: Calendar,
-        path: "/leave-type",
-      },
-      {
-        id: "assignTask",
-        label: "Assign Task",
-        icon: ClipboardCheck,
-        path: "/assign-task",
-      },
-      {
-        id: "allAssignTask",
-        label: "All Assign Task",
-        icon: ClipboardList,
-        path: "/all-assign-task",
-      },
+      { id: "designation", label: "Designation", icon: Briefcase, path: "/designation" },
+      { id: "department", label: "Department", icon: Building, path: "/department" },
+      { id: "teacherDirectory", label: "Teacher Directory", icon: Users, path: "/teacher-directory" },
+      { id: "leaveType", label: "Leave Type", icon: Calendar, path: "/leave-type" },
+      { id: "assignTask", label: "Assign Task", icon: ClipboardCheck, path: "/assign-task" },
+      { id: "allAssignTask", label: "All Assign Task", icon: ClipboardList, path: "/all-assign-task" },
     ],
   },
   examinations: {
     title: "Examinations",
     icon: Award,
     items: [
-      {
-        id: "allPastExams",
-        label: "All Past Examinations List",
-        icon: FileText,
-        path: "/all-past-exams",
-      },
-      {
-        id: "studentExams",
-        label: "Student Examinations",
-        icon: GraduationCap,
-        path: "/student-exams",
-      },
-      {
-        id: "roleExams",
-        label: "Role Examination",
-        icon: UserCog,
-        path: "/role-exams",
-      },
-      {
-        id: "goalExams",
-        label: "Goal Examination",
-        icon: Target,
-        path: "/goal-exams",
-      },
+      { id: "allPastExams", label: "All Past Examinations List", icon: FileText, path: "/all-past-exams" },
+      { id: "studentExams", label: "Student Examinations", icon: GraduationCap, path: "/student-exams" },
+      { id: "roleExams", label: "Role Examination", icon: UserCog, path: "/role-exams" },
+      { id: "goalExams", label: "Goal Examination", icon: Target, path: "/goal-exams" },
     ],
   },
   branchManagement: {
     title: "Branch Management",
     icon: GitBranch,
     items: [
-      {
-        id: "visitorsBook",
-        label: "Visitor's Book",
-        icon: Book,
-        path: "/visitors-book",
-      },
-      {
-        id: "referralAmount",
-        label: "Referral Amount",
-        icon: CreditCard,
-        path: "/referral-amount",
-      },
-      {
-        id: "roleGoalAssign",
-        label: "Role/Goal-Assign",
-        icon: ClipboardList,
-        path: "/role-goal-assign",
-      },
-      {
-        id: "coursePlans",
-        label: "Course Plans",
-        icon: Layers,
-        path: "/course-plans",
-      },
-      {
-        id: "courseBatches",
-        label: "Course Batches",
-        icon: Calendar,
-        path: "/course-batches",
-      },
-      {
-        id: "inquirySource",
-        label: "Inquiry Source",
-        icon: Share2,
-        path: "/inquiry-source",
-      },
-      {
-        id: "inquiryStatus",
-        label: "Inquiry Status",
-        icon: Activity,
-        path: "/inquiry-status",
-      }
+      { id: "visitorsBook", label: "Visitor's Book", icon: Book, path: "/visitors-book" },
+      { id: "referralAmount", label: "Referral Amount", icon: CreditCard, path: "/referral-amount" },
+      { id: "roleGoalAssign", label: "Role/Goal-Assign", icon: ClipboardList, path: "/role-goal-assign" },
+      { id: "coursePlans", label: "Course Plans", icon: Layers, path: "/course-plans" },
+      { id: "courseBatches", label: "Course Batches", icon: Calendar, path: "/course-batches" },
+      { id: "inquirySource", label: "Inquiry Source", icon: Share2, path: "/inquiry-source" },
+      { id: "inquiryStatus", label: "Inquiry Status", icon: Activity, path: "/inquiry-status" }
     ],
   },
   requestManagement: {
     title: "All Request",
     icon: ClipboardList,
-    items: [ 
-      {
-        id: "roleExamRequest",
-        label: "Role Exam Request",
-        icon: Award,
-        path: "/role-exam-request",
-      },
-      {
-        id: "goalExamRequest",
-        label: "Goal Exam Request",
-        icon: Target,
-        path: "/goal-exam-request",
-      },
-      {
-        id: "certificateRequestStatus",
-        label: "Certificate Request Status",
-        icon: FileCheck,
-        path: "/certificate-request-status",
-      },
-      {
-        id: "leaveRequest",
-        label: "Leave Request",
-        icon: Calendar,
-        path: "/leave-request",
-      },
-      {
-        id: "complaints",
-        label: "Complaints",
-        icon: AlertCircle,
-        path: "/complaints",
-      },
+    items: [
+      { id: "roleExamRequest", label: "Role Exam Request", icon: Award, path: "/role-exam-request" },
+      { id: "goalExamRequest", label: "Goal Exam Request", icon: Target, path: "/goal-exam-request" },
+      { id: "certificateRequestStatus", label: "Certificate Request Status", icon: FileCheck, path: "/certificate-request-status" },
+      { id: "leaveRequest", label: "Leave Request", icon: Calendar, path: "/leave-request" },
+      { id: "complaints", label: "Complaints", icon: AlertCircle, path: "/complaints" },
     ],
   },
   attendance: {
     title: "Mark Attendance",
     icon: Calendar,
     items: [
-      {
-        id: "markTeacherAttendance",
-        label: "Mark Teacher Attendance",
-        icon: Users,
-        path: "/mark-teacher-attendance",
-      },
-      {
-        id: "markStudentAttendance",
-        label: "Mark Student Attendance",
-        icon: GraduationCap,
-        path: "/mark-student-attendance",
-      },
+      { id: "markTeacherAttendance", label: "Mark Teacher Attendance", icon: Users, path: "/mark-teacher-attendance" },
+      { id: "markStudentAttendance", label: "Mark Student Attendance", icon: GraduationCap, path: "/mark-student-attendance" },
     ],
   },
   certificate: {
     title: "Student Certificate",
     icon: FileCheck,
     items: [
-      {
-        id: "allCertificate",
-        label: "All Certificate",
-        icon: FileCheck,
-        path: "/all-certificate",
-      },
-    ],
-  },
-  config: {
-    title: "Config Information",
-    icon: Settings,
-    items: [
-      { id: "config", label: "Config", icon: Cog, path: "/config" },
+      { id: "allCertificate", label: "All Certificate", icon: FileCheck, path: "/all-certificate" },
     ],
   },
   financial: {
     title: "Financial Management",
     icon: Wallet,
     items: [
-      {
-        id: "category",
-        label: "Category",
-        icon: Grid,
-        path: "/financial-category",
-      },
-      {
-        id: "transactions",
-        label: "Transactions",
-        icon: CreditCard,
-        path: "/transactions",
-      },
+      { id: "category", label: "Category", icon: Grid, path: "/financial-category" },
+      { id: "transactions", label: "Transactions", icon: CreditCard, path: "/transactions" },
     ],
   },
   ecommerce: {
     title: "Ecommerce",
     icon: ShoppingCart,
     items: [
-      {
-        id: "productCategory",
-        label: "Product Category",
-        icon: Package,
-        path: "/product-category",
-      },
-      {
-        id: "ecommerce",
-        label: "E-commerce",
-        icon: ShoppingCart,
-        path: "/ecommerce",
-      },
-      {
-        id: "myOrders",
-        label: "My Orders",
-        icon: ShoppingBag,
-        path: "/my-orders",
-      },
-      {
-        id: "contactUs",
-        label: "Contact Us",
-        icon: Phone,
-        path: "/contact-us",
-      },
+      { id: "productCategory", label: "Product Category", icon: Package, path: "/product-category" },
+      { id: "ecommerce", label: "E-commerce", icon: ShoppingCart, path: "/ecommerce" },
+      { id: "myOrders", label: "My Orders", icon: ShoppingBag, path: "/my-orders" },
+      { id: "contactUs", label: "Contact Us", icon: Phone, path: "/contact-us" },
     ],
   },
-  
-  userManagement: {
-    title: "User Management",
+};
+
+// OPTION 1: Use a Lucide icon instead
+import { Clipboard } from "lucide-react";
+
+const teacherSections = {
+  profileManagement: {
+    title: "Profile Management",
+    icon: UserCog,
+    items: [
+      { id: "teacherDashboard", label: "Dashboard", icon: Home, path: "/teacher-dashboard" },
+      { id: "myIncentive", label: "My Incentive", icon: DollarSign, path: "/teacher/incentive" },
+      { id: "myAttendance", label: "My Attendance Report", icon: CalendarCheck, path: "/teacher/attendance" },
+      { id: "leaveRequest", label: "Leave Request", icon: Calendar, path: "/teacher/leave-request" },
+    ]
+  },
+  studentInfo: {
+    title: "Student Information",
     icon: Users,
     items: [
-      { id: "users", label: "Users", icon: Users, path: "/users" },
-      { id: "profile", label: "Profile", icon: User, path: "/profile" },
-      // { id: "settings", label: "Settings", icon: Settings, path: "/settings" },
-      { id: "logout", label: "Logout", icon: LogOut, path: "/logout" },
-    ],
+      { id: "studentAttendance", label: "Student Attendance List", icon: Eye, path: "/teacher/student-attendance" },
+    ]
   },
+  assignments: {
+    title: "Assign",
+    // OPTION 1: Use Clipboard icon from lucide-react
+    icon: Clipboard,
+    items: [
+      { id: "roleAssign", label: "Role Assign", icon: UserCog, path: "/teacher/role-assign" },
+      { id: "goalAssign", label: "Goal Assign", icon: Target, path: "/teacher/goal-assign" },
+      { id: "myTask", label: "My Task", icon: ClipboardCheck, path: "/teacher/my-tasks" },
+    ]
+  },
+  examinations: {
+    title: "Examinations",
+    icon: Award,
+    items: [
+      { id: "allPastExams", label: "All Past Examinations List", icon: FileText, path: "/teacher/past-exams" },
+    ]
+  },
+};
+
+const studentSections = {
+  profileManagement: {
+    title: "Profile Management",
+    icon: UserCog,
+    items: [
+      { id: "studentDashboard", label: "Dashboard", icon: Home, path: "/student-dashboard" },
+      { id: "referralAmount", label: "Referral Amount", icon: DollarSign, path: "/student/referral-amount" },
+      { id: "myAttendance", label: "My Attendance Report", icon: CalendarCheck, path: "/student/attendance" },
+      { id: "leaveRequest", label: "Leave Request", icon: Calendar, path: "/student/leave-request" },
+    ]
+  },
+  coursesInfo: {
+    title: "Courses Information",
+    icon: BookOpen,
+    items: [
+      { id: "myCourses", label: "My Courses", icon: Book, path: "/student/my-courses" },
+      { id: "myExams", label: "My Exams", icon: Award, path: "/student/my-exams" },
+    ]
+  },
+  examinations: {
+    title: "Examinations",
+    icon: Award,
+    items: [
+      { id: "allPastExams", label: "All Past Examinations List", icon: FileText, path: "/student/past-exams" },
+    ]
+  },
+};
+
+const getRoleSpecificSections = (role) => {
+  const userRole = role.toLowerCase();
+  if (userRole === 'teacher') return teacherSections;
+  if (userRole === 'student') return studentSections;
+  return adminSections;
 };
 
 const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [userData, setUserData] = useState(getUserData());
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedSections, setExpandedSections] = useState(() => {
-    const state = {};
-    Object.keys(allSections).forEach((key) => {
-      state[key] = false;
-    });
-    return state;
-  });
-  const [hoveredItem, setHoveredItem] = useState(null);
+  const [expandedSections, setExpandedSections] = useState({});
   const [hoveredSection, setHoveredSection] = useState(null);
   const sidebarRef = useRef(null);
-  const [tooltip, setTooltip] = useState({
-    visible: false,
-    label: "",
-    x: 0,
-    y: 0,
-  });
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const data = getUserData();
+    setUserData(data);
+  }, [location]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+      if (window.innerWidth >= 1024 && !isOpen) {
+        onToggle();
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isOpen, onToggle]);
+
+  const role = userData?.role?.toLowerCase() || 'student';
+  const sections = getRoleSpecificSections(role);
 
   useEffect(() => {
     const initialState = {};
-    Object.keys(allSections).forEach((key) => {
+    Object.keys(sections).forEach((key) => {
       initialState[key] = false;
     });
     setExpandedSections(initialState);
-  }, []);
+  }, [sections]);
+
+  const isAdminRole = ['admin', 'superadmin', 'branch'].includes(role);
 
   const handleModeToggle = () => {
+    if (!isAdminRole) return;
     onModeToggle();
     navigate(websiteMode ? "/dashboard" : "/website-dashboard");
   };
@@ -459,81 +313,63 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
   };
 
   const NavItem = ({ to, icon: Icon, label, isActive }) => {
+    // Check if Icon is a valid component
+    if (!Icon) {
+      console.error(`Icon is undefined for label: ${label}`);
+      Icon = HelpCircle; // Fallback icon
+    }
+    
     const active = location.pathname === to || isActive;
 
     return (
       <Link
         to={to}
-        className="group flex items-center gap-3 relative py-1 ml-6"
-        onMouseEnter={(e) => {
-          setTooltip({
-            visible: true,
-            label,
-            x: e.clientX,
-            y: e.clientY,
-          });
-        }}
-        onMouseLeave={() =>
-          setTooltip({ visible: false, label: "", x: 0, y: 0 })
-        }
+        className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all duration-200 ${
+          active 
+            ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 font-semibold border-l-3 border-blue-500 shadow-sm' 
+            : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+        } ${isOpen ? 'ml-2' : 'justify-center'}`}
       >
-        <Icon
-          className={`w-5 h-5 shrink-0 transition-transform ${
-            active ? "scale-110" : ""
-          }`}
-        />
+        <Icon className={`w-5 h-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
         {isOpen && (
           <span className="text-sm font-medium truncate">{label}</span>
-        )}
-
-        {!isOpen && hoveredItem === label && (
-          <div
-            className="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap z-[9999] shadow-lg"
-            style={{
-              left: sidebarRef.current?.getBoundingClientRect().right + 8,
-              top: window.event?.clientY - 16,
-            }}
-          >
-            {label}
-          </div>
         )}
       </Link>
     );
   };
 
-  const Section = ({ sectionKey, title, items }) => {
+  const Section = ({ sectionKey, title, items, icon: SectionIcon }) => {
     const isExpanded = expandedSections[sectionKey] || false;
     const hasActiveItem = items.some((item) => location.pathname === item.path);
 
     return (
       <div
-        className={`mt-2 relative ${isOpen ? "px-1" : ""}`}
+        className="relative group"
         onMouseEnter={() => !isOpen && setHoveredSection(sectionKey)}
         onMouseLeave={() => !isOpen && setHoveredSection(null)}
       >
-        {isOpen && (
+        {isOpen && title && (
           <button
             onClick={() => toggleSection(sectionKey)}
-            className="w-full flex items-center justify-between mb-1 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
+            className="w-full flex items-center justify-between mb-1 px-2 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 group/section"
           >
-            <span
-              className={`text-xs font-semibold uppercase tracking-wide transition-colors ${
-                hasActiveItem
-                  ? "text-blue-600"
-                  : "text-gray-600 group-hover:text-gray-900"
-              }`}
-            >
-              {title}
-            </span>
+            <div className="flex items-center gap-2">
+              <div className={`p-1.5 rounded-md ${hasActiveItem ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
+                {SectionIcon && <SectionIcon className="w-3.5 h-3.5" />}
+              </div>
+              <span className={`text-xs font-semibold uppercase tracking-wide ${hasActiveItem ? "text-blue-600" : "text-gray-600"}`}>
+                {title}
+              </span>
+            </div>
             {isExpanded ? (
-              <ChevronUp className="w-3.5 h-3.5 text-gray-500 group-hover:text-gray-700" />
+              <ChevronUp className="w-4 h-4 text-gray-500 group-hover/section:text-gray-700" />
             ) : (
-              <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-hover:text-gray-700" />
+              <ChevronDown className="w-4 h-4 text-gray-500 group-hover/section:text-gray-700" />
             )}
           </button>
         )}
 
-        <div className={`space-y-1 ${!isOpen ? "pt-2" : ""}`}>
+        <div className="space-y-0.5">
           {(isOpen ? isExpanded : true) &&
             items.map((item) => (
               <NavItem
@@ -548,7 +384,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
 
         {!isOpen && hoveredSection === sectionKey && (
           <div className="absolute left-full top-0 ml-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
-            <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+            <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
               <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
                 {title}
               </h3>
@@ -565,7 +401,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                   }`}
                   onClick={() => setHoveredSection(null)}
                 >
-                  <item.icon className="w-4 h-4" />
+                  {item.icon && <item.icon className="w-4 h-4" />}
                   <span className="text-sm font-medium">{item.label}</span>
                 </Link>
               ))}
@@ -576,16 +412,12 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
     );
   };
 
-  const searchResults = Object.entries(allSections).flatMap(
+  const searchResults = isAdminRole ? Object.entries(sections).flatMap(
     ([key, section]) => {
       const matchingItems = section.items.filter((item) =>
         item.label.toLowerCase().includes(searchTerm.toLowerCase())
       );
-
-      if (
-        matchingItems.length > 0 ||
-        section.title.toLowerCase().includes(searchTerm.toLowerCase())
-      ) {
+      if (matchingItems.length > 0 || section.title.toLowerCase().includes(searchTerm.toLowerCase())) {
         return matchingItems.map((item) => ({
           ...item,
           sectionKey: key,
@@ -594,15 +426,24 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
       }
       return [];
     }
-  );
+  ) : [];
 
-  const currentOptions = websiteMode
-    ? allSections.websiteOptions
-    : (allSections.courseOptions || allSections.websiteOptions);
+  const getDashboardPath = () => {
+    switch(role) {
+      case 'student': return "/student-dashboard";
+      case 'teacher': return "/teacher-dashboard";
+      default: return websiteMode ? "/website-dashboard" : "/dashboard";
+    }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    navigate("/login");
+  };
 
   return (
     <>
-      {isOpen && (
+      {isOpen && isMobile && (
         <div
           onClick={onToggle}
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden transition-opacity duration-300"
@@ -611,19 +452,15 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
 
       <aside
         ref={sidebarRef}
-        className={`fixed lg:sticky top-0 z-40 h-screen bg-white border-r border-gray-200 shadow-sm
+        className={`fixed lg:sticky top-0 z-40 h-screen bg-white border-r border-gray-200 flex flex-col
           transition-all duration-300 ease-in-out
-          ${
-            isOpen
-              ? "w-72 translate-x-0"
-              : "w-16 -translate-x-full lg:translate-x-0"
-          }
-          lg:flex lg:flex-col`}
+          ${isOpen ? "w-72" : "w-16"}
+          ${isMobile ? (isOpen ? "translate-x-0" : "-translate-x-full") : "translate-x-0"}`}
       >
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 bg-white sticky top-0 z-10">
           {isOpen ? (
             <Link
-              to={websiteMode ? "/website-dashboard" : "/dashboard"}
+              to={getDashboardPath()}
               className="flex items-center gap-3 hover:opacity-90 transition-opacity"
             >
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow">
@@ -633,22 +470,22 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                   className="w-8 h-8 rounded-md object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
+                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
                   }}
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-gray-800 leading-tight">
-                  Admin Panel
+                <span className="font-bold text-gray-800 leading-tight text-sm">
+                  {role.charAt(0).toUpperCase() + role.slice(1)} Panel
                 </span>
-                <span className="text-xs text-gray-500 font-medium">
-                  {websiteMode ? "Website Mode" : "Course Mode"}
+                <span className="text-xs text-gray-500 font-medium truncate max-w-[140px]">
+                  {userData?.name || 'User'}
+                  {isAdminRole && ` • ${websiteMode ? "Website" : "Course"}`}
                 </span>
               </div>
             </Link>
           ) : (
-            <Link to="/dashboard" className="mx-auto">
+            <Link to={getDashboardPath()} className="mx-auto">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow">
                 <img
                   src="/logonew.jpeg"
@@ -656,8 +493,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                   className="w-8 h-8 rounded-md object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src =
-                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
+                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
                   }}
                 />
               </div>
@@ -666,7 +502,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
 
           <button
             onClick={onToggle}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:block"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {isOpen ? (
@@ -677,7 +513,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </button>
         </div>
 
-        {isOpen && (
+        {isOpen && isAdminRole && (
           <div className="p-3 border-b border-gray-200">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -699,7 +535,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
 
               {searchTerm && searchResults.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
-                  <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+                  <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-blue-100 border-b">
                     <h3 className="text-sm font-semibold text-gray-800">
                       Search Results ({searchResults.length})
                     </h3>
@@ -713,13 +549,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                         location.pathname === result.path ? "bg-blue-50" : ""
                       }`}
                     >
-                      <result.icon
-                        className={`w-4 h-4 ${
-                          location.pathname === result.path
-                            ? "text-blue-600"
-                            : "text-gray-500"
-                        }`}
-                      />
+                      {result.icon && <result.icon className={`w-4 h-4 ${location.pathname === result.path ? "text-blue-600" : "text-gray-500"}`} />}
                       <div className="flex-1 min-w-0">
                         <div
                           className={`text-sm font-medium truncate ${
@@ -743,123 +573,70 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
           </div>
         )}
 
-        <div
-          className={`p-3 border-b border-gray-200 ${
-            isOpen ? "block" : "hidden"
-          }`}
-        >
-          <button
-            onClick={handleModeToggle}
-            className={`w-full flex items-center justify-center gap-3 text-white py-3 rounded-xl text-sm font-semibold transform hover:scale-[1.02] active:scale-95 shadow-md ${
-              websiteMode
-                ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
-                : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-            }`}
+        {isOpen && isAdminRole && (
+          <div className="p-3 border-b border-gray-200">
+            <button
+              onClick={handleModeToggle}
+              className={`w-full flex items-center justify-center gap-3 text-white py-3 rounded-xl text-sm font-semibold transition-all hover:shadow-lg ${
+                websiteMode
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700"
+                  : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              }`}
+            >
+              <RefreshCw className="w-4 h-4" />
+              {websiteMode ? "Switch to Course" : "Switch to Website"}
+            </button>
+          </div>
+        )}
+
+        <nav className="flex-1 overflow-y-auto py-4 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <Link
+            to={getDashboardPath()}
+            className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all ${
+              location.pathname === getDashboardPath() 
+                ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 font-semibold border-l-3 border-blue-500' 
+                : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
+            } ${isOpen ? 'ml-2' : 'justify-center'}`}
           >
-            <RefreshCw className="w-4 h-4" />
-            {websiteMode ? "Switch to Course" : "Switch to Website"}
-          </button>
-        </div>
+            <Home className="w-5 h-5" />
+            {isOpen && <span className="text-sm font-medium">Dashboard</span>}
+          </Link>
 
-        <nav className="flex-1 overflow-y-auto pb-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
-          <div className="px-2 pt-4">
-            <NavItem
-              to={websiteMode ? "/website-dashboard" : "/dashboard"}
-              icon={Home}
-              label="Dashboard"
-            />
-
-            {isOpen && (
-              <div className="mt-6 mb-4">
-                <div className="px-3 mb-2">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                    {websiteMode ? "Website Management" : "Courses"}
-                  </h4>
-                </div>
-                <Section
-                  sectionKey={websiteMode ? "websiteOptions" : "courseOptions"}
-                  title={websiteMode ? "Website Management" : "Courses"}
-                  items={currentOptions.items}
-                />
-              </div>
-            )}
-
-            <div className="mt-2">
-              {Object.entries(allSections).map(([key, section]) => {
-                if (
-                  (websiteMode && key === "websiteOptions") ||
-                  (!websiteMode && key === "courseOptions")
-                ) {
-                  return null;
-                }
-                return (
-                  <Section
-                    key={key}
-                    sectionKey={key}
-                    title={section.title}
-                    items={section.items}
-                  />
-                );
-              })}
-            </div>
+          <div className="">
+            {Object.entries(sections).map(([key, section]) => (
+              <Section
+                key={key}
+                sectionKey={key}
+                title={section.title}
+                items={section.items}
+                icon={section.icon}
+              />
+            ))}
           </div>
         </nav>
 
-        {isOpen && (
-          <div className="border-t border-gray-200 p-4 bg-gradient-to-r from-gray-50 to-white">
-            <div className="text-center">
-              <p className="text-xs text-gray-600 font-medium">Version 1.0.0</p>
-              <p className="text-xs text-gray-500 mt-1">© 2025 Institution</p>
-            </div>
+        <div className="mt-auto border-t border-gray-200 pt-2 pb-2 px-3 bg-gradient-to-t from-gray-50 to-white">
+          <div className="space-y-1">
+            <Link
+              to="/profile"
+              className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <User className="w-5 h-5" />
+              {isOpen && <span className="text-sm font-medium">Profile</span>}
+            </Link>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              {isOpen && <span className="text-sm font-medium">Logout</span>}
+            </button>
           </div>
-        )}
-      </aside>
-      {tooltip.visible && !isOpen && (
-        <div
-          className="fixed px-3 py-2 bg-gray-900 text-white text-sm rounded-lg whitespace-nowrap shadow-lg z-[9999]"
-          style={{
-            left: tooltip.x + 12,
-            top: tooltip.y - 16,
-          }}
-        >
-          {tooltip.label}
         </div>
-      )}
+      </aside>
     </>
   );
 };
 
 export default Sidebar;
-
-const style = document.createElement("style");
-style.textContent = `
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.5);
-    border-radius: 3px;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(156, 163, 175, 0.8);
-  }
-  
-   @media (max-width: 1024px) {
-    aside {
-      max-height: 100vh;
-      overflow-y: auto;
-    }
-  }
-`;
-document.head.appendChild(style);

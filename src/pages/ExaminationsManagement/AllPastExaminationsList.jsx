@@ -170,8 +170,7 @@ const AllPastExaminationsList = () => {
   };
 
   return (
-    <div className="">
-      <div className="container mx-auto">
+      <div className="">
         <div className="mb-8">
           <h1 className="text-3xl font-bold">All Past Exam List</h1>
           <p className="text-black mt-2">View and manage all past examination records</p>
@@ -346,8 +345,6 @@ const AllPastExaminationsList = () => {
             </div>
           )}
         </div>
-      </div>
-
       <ExamDetailsModalStudent
         isOpen={showDetailsModal}
         onClose={() => {

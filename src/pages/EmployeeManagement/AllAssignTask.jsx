@@ -90,8 +90,7 @@ const AllAssignTask = () => {
   };
 
   const statuses = ['All', 'Pending', 'In-Progress', 'Completed'];
-  const staffNames = [...new Set(tasks.map(task => task.staffName))];
-
+ 
   const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -112,14 +111,7 @@ const AllAssignTask = () => {
     'Assign Date', 
     'Status', 
     'Actions'
-  ];
-
-  const stats = {
-    total: tasks.length,
-    pending: tasks.filter(t => t.status === 'Pending').length,
-    inProgress: tasks.filter(t => t.status === 'In-Progress').length,
-    completed: tasks.filter(t => t.status === 'Completed').length
-  };
+  ]; 
 
   return (
     <div className="">
@@ -128,26 +120,7 @@ const AllAssignTask = () => {
           <h1 className="text-3xl font-bold text-black">Assign Task List</h1>
           <p className="text-black mt-2">View and manage all assigned tasks</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-blue-50 p-6 rounded-lg shadow border border-blue-100">
-            <h3 className="text-lg font-semibold text-blue-700">Total Tasks</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.total}</p>
-          </div>
-          <div className="bg-yellow-50 p-6 rounded-lg shadow border border-yellow-100">
-            <h3 className="text-lg font-semibold text-yellow-700">Pending</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.pending}</p>
-          </div>
-          <div className="bg-orange-50 p-6 rounded-lg shadow border border-orange-100">
-            <h3 className="text-lg font-semibold text-orange-700">In-Progress</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.inProgress}</p>
-          </div>
-          <div className="bg-green-50 p-6 rounded-lg shadow border border-green-100">
-            <h3 className="text-lg font-semibold text-green-700">Completed</h3>
-            <p className="text-3xl font-bold text-black mt-2">{stats.completed}</p>
-          </div>
-        </div>
-
+ 
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4 mb-6">
             <div className="flex-1">
@@ -256,14 +229,7 @@ const AllAssignTask = () => {
               </button>
             </div>
           )}
-        </div>
-
-        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-sky-700 mb-4">Additional Notes</h3>
-          <p className="text-black italic">
-            anna nura delalils as a admission form of student azhar sir ko whatsano ner send
-          </p>
-        </div>
+        </div> 
       </div>
     </div>
   );
