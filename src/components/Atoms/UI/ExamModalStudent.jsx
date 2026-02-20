@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const ExamModalStudent = ({ isOpen, onClose, onSave, examData, isEditing }) => {
+const ExamModalStudent = ({ isOpen, onClose, onSave, examData, isEditing , coursesData,batchesData}) => {
   const [formData, setFormData] = useState({
     batch: '',
     course: '',
@@ -170,8 +170,7 @@ const ExamModalStudent = ({ isOpen, onClose, onSave, examData, isEditing }) => {
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Batch */}
-              <div>
+               <div>
                 <label className="block text-gray-700 mb-2">Batch</label>
                 <select
                   name="batch"
@@ -181,9 +180,11 @@ const ExamModalStudent = ({ isOpen, onClose, onSave, examData, isEditing }) => {
                   required
                 >
                   <option value="">Select Batch</option>
-                  <option value="ms office">ms office</option>
-                  <option value="batch 2">Batch 2</option>
-                  <option value="batch 3">Batch 3</option>
+                  {coursesData.map((course) => (
+                    <option key={course.batch} value={course.batch}>
+                      {course.batch}
+                    </option>
+                  ))}
                 </select>
               </div>
 

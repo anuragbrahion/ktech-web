@@ -34,6 +34,14 @@ const initialState = {
 
   getAllStudFeeNameData: {},
   getAllStuCouseNameData: {},
+
+    // Student Admissions
+  studentAdmissionsListData: {},
+  studentAdmissionsViewData: {},
+  studentAdmissionsAllDocumentsData: {},
+  createNewAdmissionData: {},
+  updateAdmissionData: {},
+  reAdmissionData: {},
 };
 
 /* =========================
@@ -178,6 +186,43 @@ export const getAllStuCouseName = createApiThunkPrivate(
 );
 
 /* =========================
+   Student Admissions
+========================= */
+
+export const studentAdmissionsList = createApiThunkPrivate(
+  "studentAdmissionsList",
+  "/students/admissions",
+  "GET",
+);
+
+export const studentAdmissionsView = createApiThunkPrivate(
+  "studentAdmissionsView",
+  "/students/admissions/view",
+  "GET",
+);
+
+export const studentAdmissionsAllDocuments = createApiThunkPrivate(
+  "studentAdmissionsAllDocuments",
+  "/students/admissions/all-documents",
+  "GET",
+);
+
+export const createNewAdmission = createApiThunkPrivate(
+  "createNewAdmission",
+  "/students/create-new-admission",
+);
+
+export const updateAdmission = createApiThunkPrivate(
+  "updateAdmission",
+  "/students/update-admission",
+);
+
+export const reAdmission = createApiThunkPrivate(
+  "reAdmission",
+  "/students/re-admission",
+);  
+
+/* =========================
    Slice
 ========================= */
 
@@ -282,6 +327,38 @@ export const courseSlice = createSlice({
 
     createExtraReducersForThunk(builder, getAllStudFeeName, "getAllStudFeeNameData");
     createExtraReducersForThunk(builder, getAllStuCouseName, "getAllStuCouseNameData");
+
+        // Student Admissions
+    createExtraReducersForThunk(
+      builder,
+      studentAdmissionsList,
+      "studentAdmissionsListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      studentAdmissionsView,
+      "studentAdmissionsViewData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      studentAdmissionsAllDocuments,
+      "studentAdmissionsAllDocumentsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      createNewAdmission,
+      "createNewAdmissionData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      updateAdmission,
+      "updateAdmissionData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      reAdmission,
+      "reAdmissionData",
+    );
   },
 });
 

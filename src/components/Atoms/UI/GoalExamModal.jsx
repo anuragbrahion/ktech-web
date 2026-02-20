@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from 'react';
 
-const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
+const GoalExamModal = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  examData, 
+  isEditing, 
+  goalsData,
+  loading 
+}) => {
   const [formData, setFormData] = useState({
     goalName: '',
-    designation: '',
     examTitle: '',
     durationHours: 0,
     durationMinutes: 0,
@@ -12,58 +19,42 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
       {
         id: 1,
         text: '',
-        options: {
-          A: '',
-          B: '',
-          C: '',
-          D: ''
-        },
+        options: { A: '', B: '', C: '', D: '' },
         correctAnswer: 'A'
       }
     ]
   });
 
-  const designationOptions = [
-    'Graphic Designer',
-    'Data Analyst',
-    'Junior Developer',
-    'Project Coordinator',
-    'Marketing Specialist',
-    'UX Designer',
-    'QA Engineer',
-    'System Administrator',
-    'Business Analyst',
-    'Content Writer'
-  ];
-
   useEffect(() => {
     if (examData && isEditing) {
       setFormData({
-        goalName: examData.goalName || '',
-        designation: examData.designation || '',
-        examTitle: examData.examTitle || '',
-        durationHours: parseInt(examData.examDuration?.split('hr')[0]) || 0,
-        durationMinutes: parseInt(examData.examDuration?.split('Min')[0]?.split(':')[1]) || 0,
+        goalName: examData.goal?._id || examData.goal || '',
+        examTitle: examData.examtitle || '',
+        durationHours: examData.examduration?.hours || 0,
+        durationMinutes: examData.examduration?.minutes || 0,
         passingPercentage: examData.passingPercentage || '',
-        questions: examData.questions || [
+        questions: examData.questions?.map((q, index) => ({
+          id: index + 1,
+          text: q.question || '',
+          options: {
+            A: q.option_1 || '',
+            B: q.option_2 || '',
+            C: q.option_3 || '',
+            D: q.option_4 || ''
+          },
+          correctAnswer: q.answer || 'A'
+        })) || [
           {
             id: 1,
             text: '',
-            options: {
-              A: '',
-              B: '',
-              C: '',
-              D: ''
-            },
+            options: { A: '', B: '', C: '', D: '' },
             correctAnswer: 'A'
           }
         ]
       });
     } else {
-      // Reset form for new exam
       setFormData({
         goalName: '',
-        designation: '',
         examTitle: '',
         durationHours: 0,
         durationMinutes: 0,
@@ -72,12 +63,7 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
           {
             id: 1,
             text: '',
-            options: {
-              A: '',
-              B: '',
-              C: '',
-              D: ''
-            },
+            options: { A: '', B: '', C: '', D: '' },
             correctAnswer: 'A'
           }
         ]
@@ -131,21 +117,24 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
         {
           id: prev.questions.length + 1,
           text: '',
-          options: {
-            A: '',
-            B: '',
-            C: '',
-            D: ''
-          },
+          options: { A: '', B: '', C: '', D: '' },
           correctAnswer: 'A'
         }
       ]
     }));
   };
 
+  const removeQuestion = (index) => {
+    if (formData.questions.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        questions: prev.questions.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     onSave(formData);
   };
 
@@ -163,65 +152,53 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 text-2xl"
             >
-              &times;
+              ×
             </button>
           </div>
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Goal Name */}
               <div>
-                <label className="block text-gray-700 mb-2">Goal Name</label>
-                <input
-                  type="text"
+                <label className="block text-gray-700 mb-2">
+                  Select Goal <span className="text-red-500">*</span>
+                </label>
+                <select
                   name="goalName"
                   value={formData.goalName}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter goal name"
-                  required
-                />
-              </div>
-
-              {/* Designation */}
-              <div>
-                <label className="block text-gray-700 mb-2">Designation</label>
-                <select
-                  name="designation"
-                  value={formData.designation}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   required
                 >
-                  <option value="">Select Designation</option>
-                  {designationOptions.map((designation) => (
-                    <option key={designation} value={designation}>
-                      {designation}
+                  <option value="">Select Goal</option>
+                  {goalsData.map((goal) => (
+                    <option key={goal._id} value={goal._id}>
+                      {goal.name}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Exam Title */}
-              <div className="md:col-span-2">
-                <label className="block text-gray-700 mb-2">Exam Title</label>
+              <div>
+                <label className="block text-gray-700 mb-2">
+                  Exam Title <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
                   name="examTitle"
                   value={formData.examTitle}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                   placeholder="Enter exam title"
                   required
                 />
               </div>
 
-              {/* Duration */}
               <div>
-                <label className="block text-gray-700 mb-2">Duration</label>
+                <label className="block text-gray-700 mb-2">
+                  Duration <span className="text-red-500">*</span>
+                </label>
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-600 mb-1">Hours</label>
                     <div className="flex items-center border border-gray-300 rounded-md">
                       <input
                         type="number"
@@ -230,12 +207,12 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
                         onChange={handleInputChange}
                         min="0"
                         className="w-full px-4 py-2 focus:outline-none"
+                        required
                       />
                       <span className="px-3 text-gray-500">hr</span>
                     </div>
                   </div>
                   <div className="flex-1">
-                    <label className="block text-sm text-gray-600 mb-1">Minutes</label>
                     <div className="flex items-center border border-gray-300 rounded-md">
                       <input
                         type="number"
@@ -245,16 +222,18 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
                         min="0"
                         max="59"
                         className="w-full px-4 py-2 focus:outline-none"
+                        required
                       />
-                      <span className="px-3 text-gray-500">Min</span>
+                      <span className="px-3 text-gray-500">min</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Passing Percentage */}
               <div>
-                <label className="block text-gray-700 mb-2">Passing Percentage</label>
+                <label className="block text-gray-700 mb-2">
+                  Passing Percentage <span className="text-red-500">*</span>
+                </label>
                 <div className="flex items-center border border-gray-300 rounded-md">
                   <input
                     type="number"
@@ -272,7 +251,6 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
               </div>
             </div>
 
-            {/* Questions Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-800">Questions</h3>
@@ -281,19 +259,34 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
                   onClick={addQuestion}
                   className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium"
                 >
-                  + Add your question
+                  + Add Question
                 </button>
               </div>
 
               {formData.questions.map((question, index) => (
                 <div key={question.id} className="mb-6 p-4 border border-gray-200 rounded-lg">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-medium text-gray-700">Question {index + 1}</h4>
+                    {formData.questions.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeQuestion(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
                   <div className="mb-4">
-                    <label className="block text-gray-700 mb-2">Question {index + 1}</label>
+                    <label className="block text-gray-700 mb-2">
+                      Question Text <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="text"
                       value={question.text}
                       onChange={(e) => handleQuestionChange(index, 'text', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                       placeholder="Enter question text"
                       required
                     />
@@ -302,12 +295,14 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     {['A', 'B', 'C', 'D'].map((option) => (
                       <div key={option}>
-                        <label className="block text-gray-700 mb-2">option_{option}</label>
+                        <label className="block text-gray-700 mb-2">
+                          Option {option} <span className="text-red-500">*</span>
+                        </label>
                         <input
                           type="text"
                           value={question.options[option]}
                           onChange={(e) => handleQuestionChange(index, `option_${option}`, e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                           placeholder={`Enter option ${option}`}
                           required
                         />
@@ -316,37 +311,40 @@ const GoalExamModal = ({ isOpen, onClose, onSave, examData, isEditing }) => {
                   </div>
 
                   <div>
-                    <label className="block text-gray-700 mb-2">answer</label>
+                    <label className="block text-gray-700 mb-2">
+                      Correct Answer <span className="text-red-500">*</span>
+                    </label>
                     <select
                       value={question.correctAnswer}
                       onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
                       required
                     >
-                      <option value="A">option_A</option>
-                      <option value="B">option_B</option>
-                      <option value="C">option_C</option>
-                      <option value="D">option_D</option>
+                      <option value="A">Option A</option>
+                      <option value="B">Option B</option>
+                      <option value="C">Option C</option>
+                      <option value="D">Option D</option>
                     </select>
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Submit Buttons */}
             <div className="flex justify-end gap-4">
               <button
                 type="button"
                 onClick={onClose}
                 className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-gray-700 font-medium"
+                disabled={loading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+                className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={loading}
               >
-                {isEditing ? 'Update' : 'Submit'}
+                {loading ? 'Processing...' : (isEditing ? 'Update' : 'Submit')}
               </button>
             </div>
           </form>

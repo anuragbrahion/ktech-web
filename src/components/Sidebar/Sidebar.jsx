@@ -124,6 +124,7 @@ const adminSections = {
       { id: "studentExams", label: "Student Examinations", icon: GraduationCap, path: "/student-exams" },
       { id: "roleExams", label: "Role Examination", icon: UserCog, path: "/role-exams" },
       { id: "goalExams", label: "Goal Examination", icon: Target, path: "/goal-exams" },
+      { id: "hallTickets", label: "Hall Tickets", icon: Target, path: "/hall-tickets" },
     ],
   },
   branchManagement: {
@@ -208,8 +209,7 @@ const teacherSections = {
   },
   assignments: {
     title: "Assign",
-    // OPTION 1: Use Clipboard icon from lucide-react
-    icon: Clipboard,
+     icon: Clipboard,
     items: [
       { id: "roleAssign", label: "Role Assign", icon: UserCog, path: "/teacher/role-assign" },
       { id: "goalAssign", label: "Goal Assign", icon: Target, path: "/teacher/goal-assign" },

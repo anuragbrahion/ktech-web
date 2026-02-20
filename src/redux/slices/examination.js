@@ -41,6 +41,9 @@ const initialState = {
   requestGoalsAssignedData: {},
 
   assignEmployeeTeacherTaskData:{},
+  getHallTicketListData:{},
+  getALlExamListData:{},
+  getAllAdmissionListData:{},
 };
 
 /* =========================
@@ -186,6 +189,29 @@ export const requestGoalsAssigned = createApiThunkPrivate(
   "GET",
 );
 
+export const getHallTicketList = createApiThunkPrivate(
+  "getHallTicketList",
+  "/examinations/hallticket/list",
+  "GET",
+);
+
+export const addHallTicketList = createApiThunkPrivate(
+  "addHallTicketList",
+  "/examinations/hallticket/add"
+);
+
+export const getALlExamList = createApiThunkPrivate(
+  "getALlExamList",
+  "/examinations/all-documents",
+  "GET",
+);
+
+export const getAllAdmissionList = createApiThunkPrivate(
+  "getAllAdmissionList",
+  "/students/admissions/all-documents",
+  "GET",
+);
+
 /* =========================
    Slice
 ========================= */
@@ -309,6 +335,23 @@ export const examinationSlice = createSlice({
       builder,
       assignEmployeeTeacherTask,
       "assignEmployeeTeacherTaskData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      getHallTicketList,
+      "getHallTicketListData",
+    );
+
+     createExtraReducersForThunk(
+      builder,
+      getALlExamList,
+      "getALlExamListData",
+    );
+     createExtraReducersForThunk(
+      builder,
+      getAllAdmissionList,
+      "getAllAdmissionListData",
     );
   },
 });

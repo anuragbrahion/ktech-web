@@ -185,7 +185,7 @@ const RoleExamination = () => {
   const tableHeaders = ['Course Name', 'Exam Title', 'Exam Duration', 'Passing Percentage', 'Created At', 'Actions'];
 
   return (
-    <div className="container mx-auto">
+    <div className="">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Role Examination Lists</h1>
       </div>

@@ -76,6 +76,7 @@ import BlogCategoryManagement from "./pages/WebsiteManagement/Blogs/BlogCategory
  import Sidebar from "./components/Sidebar/Sidebar";
 import TeacherDashboard from "./pages/Dashboard/TeacherDashboard";
 import StudentDashboard from "./pages/Dashboard/StudentDashboard";
+import HallTickets from "./pages/ExaminationsManagement/HallTickets";
 
 // Simple components for teacher/student pages
 const TeacherIncentive = () => <div className="p-6"><h1 className="text-2xl font-bold">My Incentive</h1></div>;
@@ -627,7 +628,12 @@ const App = () => {
             {renderMainLayout(GoalExamination)}
           </ProtectedRoute>
         } />
-        
+        <Route path="/hall-tickets" element={
+          <ProtectedRoute>
+            {renderMainLayout(HallTickets)}
+          </ProtectedRoute>
+        } />
+
         <Route path="*" element={<Navigate to="/welcome" replace />} />
       </Routes>
     </Router>
