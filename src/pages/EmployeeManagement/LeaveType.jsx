@@ -291,32 +291,14 @@ export default function LeaveTypeManagement() {
       </button>
     </div>
   ]);
-
-  const activeLeaveTypes = leaveTypes.filter(lt => lt.status).length;
-  const inactiveLeaveTypes = leaveTypes.filter(lt => !lt.status).length;
+ 
 
   return (
     <div className="">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Leave Type</h1>
         <p className="text-gray-600 mt-2">Manage leave types and their status</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Total Types</h3>
-          <p className="text-3xl font-bold text-black mt-2">{leaveTypes.length}</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Active</h3>
-          <p className="text-3xl font-bold text-black mt-2">{activeLeaveTypes}</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Inactive</h3>
-          <p className="text-3xl font-bold text-black mt-2">{inactiveLeaveTypes}</p>
-        </div>
-      </div>
-
+      </div> 
       <div className="flex justify-end items-center mb-6">
         <button
           onClick={handleAddLeaveTypeClick}

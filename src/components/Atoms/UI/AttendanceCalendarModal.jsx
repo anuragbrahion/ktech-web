@@ -1,219 +1,449 @@
-// components/AttendanceCalendarModal/AttendanceCalendarModal.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AttendanceCalendarModal = ({ isOpen, onClose, teacherData }) => {
+const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendance, onViewAttendance, teachData }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [attendanceStatus, setAttendanceStatus] = useState('');
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [loading, setLoading] = useState(false);
+  const [viewMode, setViewMode] = useState('calendar');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const month = currentMonth.getMonth();
+  const year = currentMonth.getFullYear();
 
-  const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-  const currentDate = new Date('2025-12-01');
-  const month = currentDate.getMonth();
-  const year = currentDate.getFullYear();
-  
+  const newTechData = teachData?.data?.data
+
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
   };
-  
+
   const getFirstDayOfMonth = (year, month) => {
     return new Date(year, month, 1).getDay();
   };
 
-  const daysInMonth = getDaysInMonth(year, month);
-  const firstDay = getFirstDayOfMonth(year, month);
-  
-  const dates = [];
-  for (let i = 0; i < firstDay; i++) {
-    dates.push(null);
-  }
-  
-  for (let i = 1; i <= daysInMonth; i++) {
-    dates.push(i);
-  }
+  useEffect(() => {
+    if (teacherData && isOpen) {
+
+      const date = new Date(currentMonth);
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const formattedStart = formatDate(firstDay);
+      const formattedEnd = formatDate(lastDay);
+
+      setStartDate(formattedStart);
+      setEndDate(formattedEnd);
+
+      fetchAttendanceData(formattedStart, formattedEnd);
+    }
+  }, [teacherData, isOpen, currentMonth]);
+
+  const formatDate = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const formatDateForAPI = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const fetchAttendanceData = async (start, end) => {
+    if (!teacherData) return;
+
+    setLoading(true);
+    try {
+      const data = await onViewAttendance(teacherData.id || teacherData._id, start, end);
+      if (data) {
+        console.log("0000000000000000000000000000000000", data)
+        setAttendanceRecords(data.attendance);
+      } else {
+        setAttendanceRecords([]);
+      }
+    } catch (error) {
+      console.error('Error fetching attendance:', error);
+      setAttendanceRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDateRangeSearch = () => {
+    if (startDate && endDate) {
+      fetchAttendanceData(startDate, endDate);
+    }
+  };
+
+  const handleStatusSubmit = async (e) => {
+    e.preventDefault();
+    if (selectedDate && attendanceStatus && teacherData) {
+      setLoading(true);
+      try {
+        await onMarkAttendance(
+          teacherData.id || teacherData._id,
+          attendanceStatus,
+          formatDateForAPI(selectedDate)
+        );
+
+        await fetchAttendanceData(startDate, endDate);
+
+        setSelectedDate('');
+        setAttendanceStatus('');
+      } catch (error) {
+        console.error('Error marking attendance:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
 
   const handleDateClick = (day) => {
     if (day) {
-      const dateStr = `2025-12-${day.toString().padStart(2, '0')}`;
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
       setSelectedDate(dateStr);
     }
   };
 
-  const handleStatusSubmit = (e) => {
-    e.preventDefault();
-    if (selectedDate && attendanceStatus) {
-      const newRecord = {
-        date: selectedDate,
-        status: attendanceStatus
-      };
-      setAttendanceRecords([...attendanceRecords, newRecord]);
-      setSelectedDate('');
-      setAttendanceStatus('');
+  const getAttendanceColor = (dateStr, dayIndex) => {
+    if (dayIndex === 0) {
+      return "bg-gray-300 text-black font-semibold";
+    }
+
+    if (!newTechData || newTechData.length === 0) {
+      return "bg-gray-100 hover:bg-gray-200 text-gray-900";
+    }
+
+    const record = newTechData.find((r) => {
+      const [day, month, year] = r.date.split("-");
+      const formattedAPI = `${year}-${month}-${day}`;
+      return formattedAPI === dateStr;
+    });
+
+    if (!record) {
+      return "bg-gray-100 hover:bg-gray-200 text-gray-900";
+    }
+
+    switch (record.status) {
+      case "Present":
+        return "bg-green-500 text-white";
+      case "Absent":
+        return "bg-red-500 text-white";
+      case "Leave":
+        return "bg-yellow-500 text-white";
+      case "Half-day":
+        return "bg-orange-500 text-white";
+      default:
+        return "bg-gray-200 text-gray-900";
     }
   };
+  const daysInMonth = getDaysInMonth(year, month);
+  const firstDay = getFirstDayOfMonth(year, month);
+
+  const dates = [];
+  for (let i = 0; i < firstDay; i++) {
+    dates.push(null);
+  }
+
+  for (let i = 1; i <= daysInMonth; i++) {
+    dates.push(i);
+  }
+
 
   if (!isOpen || !teacherData) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden overflow-y-auto">
-        <div className="bg-gray-200 text-black p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+        <div className="bg-gradient-to-r from-sky-500 to-sky-600 text-white p-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Attendance Details - {teacherData.name}</h2>
+            <h2 className="text-xl font-semibold">Attendance Details - {teacherData.user.name}</h2>
             <button
               onClick={onClose}
-              className="text-black hover:text-gray-600"
+              className="text-white hover:text-gray-200 transition-colors"
             >
-              ✕
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
         </div>
-        
-        <div className="p-6">
-          <div className="mb-6">
-            <form onSubmit={handleStatusSubmit} className="space-y-4">
+
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+          <div className="flex justify-end mb-4">
+            <div className="inline-flex rounded-md shadow-sm">
+              <button
+                onClick={() => setViewMode('calendar')}
+                className={`px-4 py-2 text-sm font-medium rounded-l-md ${viewMode === 'calendar'
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                  } border border-gray-300`}
+              >
+                Calendar View
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-4 py-2 text-sm font-medium rounded-r-md ${viewMode === 'list'
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                  } border border-l-0 border-gray-300`}
+              >
+                List View
+              </button>
+            </div>
+          </div>
+
+          <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Mark Attendance</h3>
+            <form onSubmit={handleStatusSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-black mb-2">Name</label>
+                <label className="block text-gray-700 mb-2 font-medium">Teacher Name</label>
                 <input
                   type="text"
-                  value={teacherData.name}
+                  value={teacherData.user.name}
                   readOnly
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-black mb-2">Status</label>
+                <label className="block text-gray-700 mb-2 font-medium">Status</label>
                 <select
                   value={attendanceStatus}
                   onChange={(e) => setAttendanceStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900"
                   required
                 >
-                  <option value="">Select...</option>
+                  <option value="">Select Status</option>
                   <option value="Present">Present</option>
                   <option value="Absent">Absent</option>
                   <option value="Leave">Leave</option>
                   <option value="Half-day">Half-day</option>
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-black mb-2">Date</label>
+                <label className="block text-gray-700 mb-2 font-medium">Date</label>
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900"
                   required
+                  max={new Date().toISOString().split('T')[0]}
                 />
               </div>
-              
-              <div className="pt-2">
+
+              <div className="md:col-span-3">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600"
+                  disabled={loading}
+                  className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Submit
+                  {loading ? 'Submitting...' : 'Submit Attendance'}
                 </button>
               </div>
             </form>
           </div>
 
-          <div className="mt-8">
-            <h3 className="text-lg font-semibold text-sky-700 mb-4">
-              Check Attendance Calendar Report here.
-            </h3>
-            
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-4">
-                <button className="text-2xl text-gray-600 hover:text-gray-800">«</button>
-                <h4 className="text-lg font-bold text-black">December 2025</h4>
-                <button className="text-2xl text-gray-600 hover:text-gray-800">»</button>
+          {/* Date Range Filter */}
+          <div className="mb-6 bg-white border border-gray-200 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Filter Attendance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate.split('-').reverse().join('-')}
+                  onChange={(e) => {
+                    const [year, month, day] = e.target.value.split('-');
+                    setStartDate(`${day}-${month}-${year}`);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900"
+                />
               </div>
-              
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {days.map((day, index) => (
-                  <div key={index} className="text-center font-semibold text-gray-700 py-2">
-                    {day}
-                  </div>
-                ))}
+              <div>
+                <label className="block text-gray-700 mb-2 font-medium">End Date</label>
+                <input
+                  type="date"
+                  value={endDate.split('-').reverse().join('-')}
+                  onChange={(e) => {
+                    const [year, month, day] = e.target.value.split('-');
+                    setEndDate(`${day}-${month}-${year}`);
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900"
+                />
               </div>
-              
-              <div className="grid grid-cols-7 gap-1">
-                {dates.map((day, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleDateClick(day)}
-                    className={`text-center py-3 rounded cursor-pointer ${
-                      day 
-                        ? selectedDate === `2025-12-${day.toString().padStart(2, '0')}`
-                          ? 'bg-sky-500 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-black'
-                        : 'invisible'
-                    }`}
-                  >
-                    {day || ''}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 flex justify-center space-x-6">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
-                  <span className="text-black">Present</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
-                  <span className="text-black">Absent</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
-                  <span className="text-black">Leave</span>
-                </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleDateRangeSearch}
+                  className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
+                >
+                  Search
+                </button>
               </div>
             </div>
           </div>
-          
-          {attendanceRecords.length > 0 && (
+
+          {viewMode === 'calendar' ? (
             <div className="mt-8">
-              <h4 className="text-lg font-semibold text-sky-700 mb-3">Attendance Records</h4>
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="py-2 px-4 text-left text-black font-semibold border-b">Date</th>
-                      <th className="py-2 px-4 text-left text-black font-semibold border-b">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {attendanceRecords.map((record, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="py-2 px-4 text-black">
-                          {new Date(record.date).toLocaleDateString('en-GB')}
-                        </td>
-                        <td className="py-2 px-4">
-                          <span className={`px-2 py-1 rounded text-sm ${
-                            record.status === 'Present' ? 'bg-green-100 text-green-800' :
-                            record.status === 'Absent' ? 'bg-red-100 text-red-800' :
-                            record.status === 'Leave' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-blue-100 text-blue-800'
-                          }`}>
-                            {record.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Attendance Calendar</h3>
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-center mb-4">
+                  <button
+                    onClick={() => setCurrentMonth(new Date(year, month - 1, 1))}
+                    className="text-2xl text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    «
+                  </button>
+                  <h4 className="text-lg font-bold text-gray-900">
+                    {currentMonth.toLocaleString('default', { month: 'long' })} {year}
+                  </h4>
+                  <button
+                    onClick={() => setCurrentMonth(new Date(year, month + 1, 1))}
+                    className="text-2xl text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    »
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-7 gap-1 mb-2">
+                  {days.map((day, index) => (
+                    <div key={index} className="text-center font-semibold text-gray-700 py-2">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-1">
+                  {dates.map((day, index) => {
+                    const dateObj = day ? new Date(year, month, day) : null;
+                    const dateStr = dateObj
+                      ? dateObj.toISOString().split("T")[0]
+                      : null;
+
+                    const dayIndex = dateObj ? dateObj.getDay() : null;
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => handleDateClick(day)}
+                        className={`text-center py-3 rounded cursor-pointer transition-colors ${day
+                            ? selectedDate === dateStr
+                              ? "ring-2 ring-sky-500 " + getAttendanceColor(dateStr, dayIndex)
+                              : getAttendanceColor(dateStr, dayIndex)
+                            : "invisible"
+                          }`}
+                      >
+                        {day || ''}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6 flex flex-wrap justify-center gap-4">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
+                    <span className="text-gray-700">Present</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-red-500 rounded mr-2"></div>
+                    <span className="text-gray-700">Absent</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
+                    <span className="text-gray-700">Leave</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-orange-500 rounded mr-2"></div>
+                    <span className="text-gray-700">Half-day</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
+                    <span className="text-gray-700">Sunday</span>
+                  </div>
+                </div>
               </div>
             </div>
+          ) : (
+           <div className="mt-8">
+    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      Attendance Records
+    </h3>
+
+    {loading ? (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+        <p className="mt-2 text-gray-600">
+          Loading attendance records...
+        </p>
+      </div>
+    ) : newTechData && newTechData.length > 0 ? (
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="py-3 px-4 text-left border-b">Date</th>
+              <th className="py-3 px-4 text-left border-b">Status</th>
+              <th className="py-3 px-4 text-left border-b">Total Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            {newTechData.map((record, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                {/* Date (already DD-MM-YYYY from API) */}
+                <td className="py-3 px-4 border-b text-gray-900">
+                  {record.date}
+                </td>
+
+                {/* Status Badge */}
+                <td className="py-3 px-4 border-b">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      record.status === "Present"
+                        ? "bg-green-100 text-green-800"
+                        : record.status === "Absent"
+                        ? "bg-red-100 text-red-800"
+                        : record.status === "Leave"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-orange-100 text-orange-800"
+                    }`}
+                  >
+                    {record.status}
+                  </span>
+                </td>
+
+                {/* Count */}
+                <td className="py-3 px-4 border-b text-gray-900">
+                  {record.count || 1}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <div className="text-center py-8 bg-gray-50 rounded-lg">
+        <p className="text-gray-600">
+          No attendance records found for the selected period.
+        </p>
+      </div>
+    )}
+  </div>
           )}
-          
-          <div className="mt-8 pt-6 border-t">
-            <div className="flex justify-end">
+
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="flex justiāfy-end">
               <button
                 onClick={onClose}
-                className="px-6 py-2 bg-gray-100 text-black rounded-md hover:bg-gray-200"
+                className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
               >
                 Close
               </button>

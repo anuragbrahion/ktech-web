@@ -672,7 +672,7 @@ const HallTickets = () => {
             )}
           </div>
 
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Examination <span className="text-red-500">*</span>
             </label>
@@ -691,7 +691,7 @@ const HallTickets = () => {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           <div className="flex justify-end pt-4">
             <button

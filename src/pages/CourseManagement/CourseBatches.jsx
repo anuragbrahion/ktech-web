@@ -742,7 +742,7 @@ export default function CourseBatchesManagement() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+      {/* <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
           Filter Batches
         </h2>
@@ -777,7 +777,7 @@ export default function CourseBatchesManagement() {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="flex justify-end items-center mb-6">
         <button

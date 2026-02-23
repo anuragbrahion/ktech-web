@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -16,9 +17,7 @@ const RoleExamRequest = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [actionData, setActionData] = useState({ type: '', id: '', teacherId: '' });
 
-  const requestRolesListData = useSelector(state => state.examination?.requestRolesListData);
-  const requestRolesUpdateStatusData = useSelector(state => state.examination?.requestRolesUpdateStatusData);
-  const requestRolesAssignedData = useSelector(state => state.examination?.requestRolesAssignedData);
+  const requestRolesListData = useSelector(state => state.examination?.requestRolesListData); 
 
   useEffect(() => {
     fetchRequests();
@@ -103,13 +102,13 @@ const RoleExamRequest = () => {
 
   const tableData = filteredRequests.map((request, index) => [
     (currentPage - 1) * itemsPerPage + index + 1,
-    request.request.teacherName || 'N/A',
-    request.teacherEmail || 'N/A',
-    request.name || 'N/A',
-    request.days || 'N/A',
-    request.status || 'Pending',
-    request._id,
-    request.teacherId || request.teacher?._id
+    request?.teacherName || 'N/A',
+    request?.teacherEmail || 'N/A',
+    request?.name || 'N/A',
+    request?.days || 'N/A',
+    request?.status || 'Pending',
+    request?._id,
+    request?.teacherId || request.teacher?._id
   ]);
 
   const renderRow = (row, index) => {

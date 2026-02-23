@@ -241,8 +241,7 @@ export default function DepartmentManagement() {
   
   const tableData = departments.map(department => [
     <div className="flex items-center">
-      <Building className="w-4 h-4 text-gray-400 mr-2" />
-      <div className="font-medium text-gray-900">{department.name}</div>
+        <div className="font-medium text-gray-900">{department.name}</div>
     </div>,
     <div className="flex items-center">
       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(department.status)}`}>
@@ -288,33 +287,14 @@ export default function DepartmentManagement() {
         <Trash2 className="w-4 h-4" />
       </button>
     </div>
-  ]);
-
-  const activeDepartments = departments.filter(dept => dept.status).length;
-  const inactiveDepartments = departments.filter(dept => !dept.status).length;
+  ]); 
 
   return (
     <div className="">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Department</h1>
         <p className="text-gray-600 mt-2">Manage all departments in the organization</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Total Departments</h3>
-          <p className="text-3xl font-bold text-black mt-2">{departments.length}</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Active</h3>
-          <p className="text-3xl font-bold text-black mt-2">{activeDepartments}</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Inactive</h3>
-          <p className="text-3xl font-bold text-black mt-2">{inactiveDepartments}</p>
-        </div>
-      </div>
-
+      </div> 
       <div className="flex justify-end items-center mb-6">
         <button
           onClick={handleAddDepartmentClick}

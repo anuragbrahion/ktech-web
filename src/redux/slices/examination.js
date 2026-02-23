@@ -44,6 +44,18 @@ const initialState = {
   getHallTicketListData:{},
   getALlExamListData:{},
   getAllAdmissionListData:{},
+
+    // Attendances - Teachers
+  teacherAttendanceViewData: {},
+  teacherMarkAttendanceData: {},
+  teacherMyAttendancesData: {},
+
+  // Attendances - Students
+  studentMarkAttendanceData: {},
+
+  // Attendance List
+  attendanceListData: {},
+  studentViewAttendanceData: {},
 };
 
 /* =========================
@@ -213,6 +225,47 @@ export const getAllAdmissionList = createApiThunkPrivate(
 );
 
 /* =========================
+   Attendances
+========================= */
+
+// Teachers
+export const teacherAttendanceView = createApiThunkPrivate(
+  "teacherAttendanceView",
+  "/attendances/teachers/view",
+  "GET",
+);
+
+export const teacherMarkAttendance = createApiThunkPrivate(
+  "teacherMarkAttendance",
+  "/attendances/teachers/mark-attendance",
+);
+
+export const teacherMyAttendances = createApiThunkPrivate(
+  "teacherMyAttendances",
+  "/attendances/teachers/my-attendances",
+  "GET",
+);
+
+// Students
+export const studentMarkAttendance = createApiThunkPrivate(
+  "studentMarkAttendance",
+  "/attendances/students/mark-attendance",
+);
+
+export const studentViewAttendance = createApiThunkPrivate(
+  "studentViewAttendance",
+  "/attendances/students/view",
+  "GET"
+);
+
+// List
+export const attendanceList = createApiThunkPrivate(
+  "attendanceList",
+  "/attendances/list",
+  "GET",
+);
+
+/* =========================
    Slice
 ========================= */
 
@@ -352,6 +405,48 @@ export const examinationSlice = createSlice({
       builder,
       getAllAdmissionList,
       "getAllAdmissionListData",
+    );
+        /* =========================
+       Attendances
+    ========================= */
+
+    // Teachers
+    createExtraReducersForThunk(
+      builder,
+      teacherAttendanceView,
+      "teacherAttendanceViewData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      teacherMarkAttendance,
+      "teacherMarkAttendanceData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      teacherMyAttendances,
+      "teacherMyAttendancesData",
+    );
+
+    // Students
+    createExtraReducersForThunk(
+      builder,
+      studentMarkAttendance,
+      "studentMarkAttendanceData",
+    );
+
+    // List
+    createExtraReducersForThunk(
+      builder,
+      attendanceList,
+      "attendanceListData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      studentViewAttendance,
+      "studentViewAttendanceData",
     );
   },
 });

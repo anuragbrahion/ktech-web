@@ -38,12 +38,14 @@ const ReAdmission = () => {
     balance: ''
   });
 
-  const studentsData = useSelector((state) => state?.hallticket?.getAllStudFeeName?.data?.data?.list || []);
+  const studentsData = useSelector((state) => state?.course?.getAllStudFeeNameData?.data?.data?.list || []);
   const coursesData = useSelector((state) => state?.course?.coursesAllDocumentsData?.data?.data?.list || []);
-  const batchesData = useSelector((state) => state?.batch?.courseBatchesAllDocumentsData?.data?.data?.list || []);
-  const plansData = useSelector((state) => state?.plan?.coursePlansAllDocumentsData?.data?.data?.list || []);
+  const batchesData = useSelector((state) => state?.course?.courseBatchesAllDocumentsData?.data?.data?.list || []);
+  const plansData = useSelector((state) => state?.course?.coursePlansAllDocumentsData?.data?.data?.list || []);
   const teachersData = useSelector((state) => state?.employee?.teachersAllDocumentsData?.data?.data?.list || []);
   const reAdmissionData = useSelector((state) => state?.course?.reAdmissionData);
+
+console.log("studentsData",batchesData)
 
   useEffect(() => {
     loadMasterData();
