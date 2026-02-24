@@ -344,7 +344,7 @@ const GoalModal = ({ goal, onSave, onClose }) => {
   );
 };
 
-export default function GoalManagement() {
+export default function GoalManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -489,18 +489,6 @@ export default function GoalManagement() {
     return des ? des.name : 'Unknown Designation';
   };
 
-  const getRoleNames = (roleIds) => {
-    const roles = rolesData?.data?.data || [];
-    const roleNames = roleIds.map(roleId => {
-      const role = roles.find(r => r._id === roleId);
-      return role ? role.name : 'Unknown Role';
-    });
-    
-    if (roleNames.length === 0) return 'No roles assigned';
-    if (roleNames.length <= 3) return roleNames.join(', ');
-    return roleNames.slice(0, 3).join(', ') + ` +${roleNames.length - 3} more`;
-  };
-
   const goals = goalsListData?.data?.data?.list || [];
   const totalGoals = goalsListData?.data?.total || 0;
   const totalPages = Math.ceil(totalGoals / itemsPerPage);
@@ -578,18 +566,17 @@ export default function GoalManagement() {
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData==="superadmin" &&<button
         onClick={() => handleDeleteClick(goal)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   ]);
 
-  const activeGoals = goals.filter(goal => goal.status).length;
   const totalSalary = goals.reduce((total, goal) => total + (Number(goal.salary) || 0), 0);
   const uniqueDesignations = new Set(goals.map(goal => goal.designation)).size;
   const totalDuration = goals.reduce((total, goal) => {

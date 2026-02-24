@@ -57,8 +57,7 @@ import {
   Eye,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-// Remove problematic import and use alternative
-import { FaTasks } from "react-icons/fa";
+ import { Clipboard } from "lucide-react";
 
 const getUserData = () => {
   const userData = sessionStorage.getItem("data");
@@ -186,9 +185,6 @@ const adminSections = {
   },
 };
 
-// OPTION 1: Use a Lucide icon instead
-import { Clipboard } from "lucide-react";
-
 const teacherSections = {
   profileManagement: {
     title: "Profile Management",
@@ -287,7 +283,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
   }, [isOpen, onToggle]);
 
   const role = userData?.role?.toLowerCase() || 'student';
-  const sections = getRoleSpecificSections(role);
+   const sections = getRoleSpecificSections(role);
 
   useEffect(() => {
     const initialState = {};

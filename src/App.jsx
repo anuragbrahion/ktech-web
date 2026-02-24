@@ -130,9 +130,16 @@ const MainLayout = ({
 const App = () => {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [websiteMode, setWebsiteMode] = React.useState(false);
-
   const toggleWebsiteMode = () => setWebsiteMode(!websiteMode);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const getUserData = () => {
+  const userData = sessionStorage.getItem("data");
+  return userData ? JSON.parse(userData) : null;
+};
+
+const role = getUserData()
+const roleData=role?.role?.toLowerCase(); 
 
   const renderMainLayout = (Component) => (
     <MainLayout
@@ -176,8 +183,7 @@ const App = () => {
           </PublicRoute>
         } />
 
-        {/* Teacher Routes */}
-        <Route path="/teacher-dashboard" element={
+         <Route path="/teacher-dashboard" element={
           <ProtectedRoute>
             {renderMainLayout(TeacherDashboard)}
           </ProtectedRoute>
@@ -231,8 +237,7 @@ const App = () => {
           </ProtectedRoute>
         } />
 
-        {/* Student Routes */}
-        <Route path="/student-dashboard" element={
+         <Route path="/student-dashboard" element={
           <ProtectedRoute>
             {renderMainLayout(StudentDashboard)}
           </ProtectedRoute>
@@ -274,8 +279,7 @@ const App = () => {
           </ProtectedRoute>
         } />
 
-        {/* Admin Routes (Shared) */}
-        <Route path="/dashboard" element={
+         <Route path="/dashboard" element={
           <ProtectedRoute>
             {renderMainLayout(Dashboard)}
           </ProtectedRoute>
@@ -293,15 +297,21 @@ const App = () => {
           </ProtectedRoute>
         } />
         
-        <Route path="/branches" element={
-          <ProtectedRoute>
-            {renderMainLayout(BranchManagement)}
-          </ProtectedRoute>
-        } />
-        
+        <Route
+  path="/branches"
+  element={
+    <ProtectedRoute>
+      {renderMainLayout(() => (
+        <BranchManagement roleData={roleData} />
+      ))}
+    </ProtectedRoute>
+  }
+/>  
         <Route path="/testimonials" element={
           <ProtectedRoute>
-            {renderMainLayout(TestimonialManagement)}
+            {renderMainLayout(()=>(
+              <TestimonialManagement roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
@@ -361,25 +371,33 @@ const App = () => {
         
         <Route path="/role" element={
           <ProtectedRoute>
-            {renderMainLayout(RoleManagement)}
+            {renderMainLayout(()=>(
+              <RoleManagement roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
         <Route path="/goal" element={
           <ProtectedRoute>
-            {renderMainLayout(GoalManagement)}
+            {renderMainLayout(()=>(
+              <GoalManagement roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
         <Route path="/designation" element={
           <ProtectedRoute>
-            {renderMainLayout(Designation)}
+            {renderMainLayout(()=>(
+              <Designation roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
         <Route path="/department" element={
           <ProtectedRoute>
-            {renderMainLayout(Department)}
+            {renderMainLayout(()=>(
+              <Department roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
@@ -391,7 +409,9 @@ const App = () => {
         
         <Route path="/leave-type" element={
           <ProtectedRoute>
-            {renderMainLayout(LeaveType)}
+            {renderMainLayout(()=>(
+              <LeaveType roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
@@ -403,7 +423,9 @@ const App = () => {
         
         <Route path="/all-assign-task" element={
           <ProtectedRoute>
-            {renderMainLayout(AllAssignTask)}
+            {renderMainLayout(()=>(
+              <AllAssignTask roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
@@ -433,7 +455,9 @@ const App = () => {
         
         <Route path="/course-list" element={
           <ProtectedRoute>
-            {renderMainLayout(CourseList)}
+            {renderMainLayout(()=>(
+              <CourseList roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
@@ -451,25 +475,33 @@ const App = () => {
         
         <Route path="/course-batches" element={
           <ProtectedRoute>
-            {renderMainLayout(CourseBatches)}
+            {renderMainLayout(()=>(
+              <CourseBatches roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
         <Route path="/inquiry-source" element={
           <ProtectedRoute>
-            {renderMainLayout(InquirySource)}
+            {renderMainLayout(()=>(
+              <InquirySource roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
         <Route path="/inquiry-status" element={
           <ProtectedRoute>
-            {renderMainLayout(InquiryStatus)}
+            {renderMainLayout(()=>(
+              <InquiryStatus roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
         <Route path="/product-category" element={
           <ProtectedRoute>
-            {renderMainLayout(ProductCategory)}
+            {renderMainLayout(()=>(
+              <ProductCategory roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         
@@ -565,7 +597,9 @@ const App = () => {
         
         <Route path="/ecommerce" element={
           <ProtectedRoute>
-            {renderMainLayout(Ecommerce)}
+            {renderMainLayout(()=>(
+              <Ecommerce roleData={roleData} />
+            ))}
           </ProtectedRoute>
         } />
         

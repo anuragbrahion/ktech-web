@@ -9,7 +9,7 @@ import {
   deleteCommerceCategories
 } from '../../redux/slices/commerce';
 
-const ProductCategory = () => {
+const ProductCategory = ({roleData}) => {
   const dispatch = useDispatch();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
@@ -145,13 +145,13 @@ const ProductCategory = () => {
                           >
                             👁️
                           </button>
-                          <button
+                          {roleData==='superadmin' && <button
                             onClick={() => handleDeleteCategory(category._id)}
                             className="text-red-500 hover:text-red-700 text-lg"
                             title="Delete Category"
                           >
-                            🗑️
-                          </button>
+                           <Trash2 className="w-4 h-4" />
+                          </button>}
                         </div>
                       </td>
                     </tr>

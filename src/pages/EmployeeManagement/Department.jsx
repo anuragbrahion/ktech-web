@@ -104,7 +104,7 @@ const DepartmentModal = ({ department, onSave, onClose }) => {
   );
 };
 
-export default function DepartmentManagement() {
+export default function DepartmentManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -278,14 +278,14 @@ export default function DepartmentManagement() {
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData==="superadmin" &&<button
         onClick={() => handleDeleteClick(department)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   ]); 
 

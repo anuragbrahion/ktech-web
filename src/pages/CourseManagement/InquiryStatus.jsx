@@ -106,7 +106,7 @@ const StatusModal = ({ status, onSave, onClose }) => {
   );
 };
 
-export default function InquiryStatusManagement() {
+export default function InquiryStatusManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -316,14 +316,14 @@ export default function InquiryStatusManagement() {
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData==="superadmin" &&<button
         onClick={() => handleDeleteClick(status)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   ]);
 

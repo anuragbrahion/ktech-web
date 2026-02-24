@@ -420,7 +420,7 @@ const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
   );
 };
 
-export default function CourseBatchesManagement() {
+export default function CourseBatchesManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -587,23 +587,6 @@ export default function CourseBatchesManagement() {
     });
   };
 
-  const handleFilterChange = (field, value) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleFilter = () => {
-    setCurrentPage(1);
-    fetchBatches();
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      search: "",
-    });
-    setCurrentPage(1);
-    fetchBatches();
-  };
-
   const formatTimeForDisplay = (time24) => {
     if (!time24) return "";
 
@@ -722,15 +705,15 @@ export default function CourseBatchesManagement() {
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData === "superadmin" && <button
         onClick={() => handleDeleteClick(batch)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
-    </div>,
+      </button>}
+    </div>
   ]);
 
   return (

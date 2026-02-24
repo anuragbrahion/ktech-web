@@ -206,7 +206,7 @@ console.log("object22222222",formData)
   );
 };
 
-export default function CoursePlansManagement() {
+export default function CoursePlansManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -214,18 +214,9 @@ export default function CoursePlansManagement() {
   const [deletingPlan, setDeletingPlan] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [filters, setFilters] = useState({
-    search: '',
-    minAmount: '',
-    maxAmount: '',
-    course: '',
-    status: '',
-    startDate: '',
-    endDate: ''
-  });
+  
   const [loading, setLoading] = useState(false);
-console.log("object",editingPlan)
-  const plansListData = useSelector(state => state.course?.coursePlansListData);
+   const plansListData = useSelector(state => state.course?.coursePlansListData);
   const enableDisableData = useSelector(state => state.course?.enableDisableCoursePlansData);
   const deleteData = useSelector(state => state.course?.deleteCoursePlansData);
   const createData = useSelector(state => state.course?.createCoursePlansData);
@@ -243,11 +234,6 @@ console.log("object",editingPlan)
 
   const fetchPlans = () => {
     setLoading(true);
-
-    const query = {};
-    if(filters.search) {
-      query.search = filters.search;
-    }
     dispatch(coursePlansList({page: currentPage,
       size: itemsPerPage,populate:'course'})).then((action) => {
       if (action.error) {
@@ -394,14 +380,14 @@ console.log("object",editingPlan)
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData==="superadmin" &&<button
         onClick={() => handleDeleteClick(plan)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   ]);
 
@@ -411,128 +397,6 @@ console.log("object",editingPlan)
         <h1 className="text-3xl font-bold text-gray-900">Course Plans Management</h1>
         <p className="text-gray-600 mt-2">Manage pricing plans for all courses</p>
       </div>
-
-      {/* <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search
-            </label>
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Search plan names..."
-              disabled={loading}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Min Amount
-              </label>
-              <input
-                type="number"
-                value={filters.minAmount}
-                onChange={(e) => handleFilterChange('minAmount', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                placeholder="Min"
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Max Amount
-              </label>
-              <input
-                type="number"
-                value={filters.maxAmount}
-                onChange={(e) => handleFilterChange('maxAmount', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                placeholder="Max"
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Course ID
-            </label>
-            <input
-              type="text"
-              value={filters.course}
-              onChange={(e) => handleFilterChange('course', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Course ID"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
-              disabled={loading}
-            >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Start Date
-            </label>
-            <input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              End Date
-            </label>
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              disabled={loading}
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={handleFilter}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? 'Loading...' : 'Filter'}
-          </button>
-          <button
-            onClick={resetFilters}
-            className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
-            disabled={loading}
-          >
-            Reset
-          </button>
-        </div>
-      </div> */}
-
       <div className="flex justify-end items-center mb-6">
         <button
           onClick={handleAddPlanClick}

@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { Trash2 } from "lucide-react";
 import Loader from "../../../components/Loader/Loader";
 
-export default function LanguageManagement() {
+export default function LanguageManagement({roleData}) {
   const dispatch = useDispatch();
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
@@ -89,7 +89,7 @@ export default function LanguageManagement() {
   };
 
   const handleClosePopup = () => {
-    if (loading) return; // ✅ prevent closing during API call
+    if (loading) return; 
     setShowAddPopup(false);
     setEditingLanguage(null);
     setNewLanguage({
@@ -204,13 +204,13 @@ export default function LanguageManagement() {
           </div>
         </button>
 
-        <button
+        {roleData==="superadmin" &&<button
           onClick={() => handleDeleteClick(language)}
           disabled={deleteWebsiteLanguagesData?.loading}
           className="text-red-600 hover:text-red-800"
         >
           <Trash2 size={22} />
-        </button>
+        </button>}
       </div>
     );
   };

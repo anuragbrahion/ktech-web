@@ -436,7 +436,7 @@ const CourseModal = ({ course, onSave, onClose }) => {
   );
 };
 
-export default function CourseManagement() {
+export default function CourseManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -573,27 +573,6 @@ export default function CourseManagement() {
     }
   };
 
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFilter = () => {
-    setCurrentPage(1);
-    fetchCourses();
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      search: '',
-      category: '',
-      status: '',
-      startDate: '',
-      endDate: ''
-    });
-    setCurrentPage(1);
-    fetchCourses();
-  };
-
   const getStatusColor = (status) => {
     return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
@@ -662,14 +641,14 @@ export default function CourseManagement() {
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData==="superadmin" &&<button
         onClick={() => handleDeleteClick(course)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   ]);
 
@@ -679,99 +658,6 @@ export default function CourseManagement() {
         <h1 className="text-3xl font-bold text-gray-900">Course Management</h1>
         <p className="text-gray-600 mt-2">Manage all courses and their details</p>
       </div>
-
-      {/* <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Courses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search
-            </label>
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(e) => handleFilterChange('search', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Search courses..."
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category
-            </label>
-            <input
-              type="text"
-              value={filters.category}
-              onChange={(e) => handleFilterChange('category', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Category ID"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
-              disabled={loading}
-            >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Start Date
-            </label>
-            <input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => handleFilterChange('startDate', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              disabled={loading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              End Date
-            </label>
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => handleFilterChange('endDate', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              disabled={loading}
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={handleFilter}
-            className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? 'Loading...' : 'Filter'}
-          </button>
-          <button
-            onClick={resetFilters}
-            className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
-            disabled={loading}
-          >
-            Reset
-          </button>
-        </div>
-      </div> */}
-
       <div className="flex justify-end items-center mb-6">
         <button
           onClick={handleAddCourseClick}

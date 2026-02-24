@@ -176,7 +176,7 @@ const AddEditBranchModal = ({ branch, onSave, onClose }) => {
   );
 };
 
-export default function BranchManagement() {
+export default function BranchManagement({roleData}) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [editingBranch, setEditingBranch] = useState(null);
@@ -189,7 +189,6 @@ export default function BranchManagement() {
     endDate: ''
   });
   const [loading, setLoading] = useState(false);
-
   const branchesListData = useSelector(state => state.website?.websiteBranchesListData);
   const enableDisableData = useSelector(state => state.website?.enableDisableWebsiteBranchesData);
   const deleteData = useSelector(state => state.website?.deleteWebsiteBranchesData);
@@ -378,14 +377,14 @@ export default function BranchManagement() {
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
+      {roleData==='superadmin' && <button
         onClick={() => handleDeleteBranch(branch._id)}
         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
         title="Delete"
         disabled={loading}
       >
         <Trash2 className="w-4 h-4" />
-      </button>
+      </button>}
     </div>
   ]);
 
@@ -478,8 +477,7 @@ export default function BranchManagement() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Branch List</h2>
-            <p className="text-gray-600">{totalBranches} branches found</p>
-          </div>
+           </div>
           <button
             onClick={handleAddBranchClick}
             className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"

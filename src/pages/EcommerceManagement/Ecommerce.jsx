@@ -353,7 +353,7 @@ const ProductModal = ({
   );
 };
 
-const Ecommerce = () => {
+const Ecommerce = ({roleData}) => {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -599,13 +599,13 @@ const Ecommerce = () => {
                     >
                       <span className="text-xl">✏️</span>
                     </button>
-                    <button
+                    {roleData==='superadmin' &&<button
                       onClick={() => handleDeleteProduct(product._id)}
                       className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg"
                       title="Delete Product"
                     >
-                      <span className="text-xl">🗑️</span>
-                    </button>
+                       <Trash2 className="w-4 h-4" />
+                    </button>}
                   </div>
                 </td>
               </tr>

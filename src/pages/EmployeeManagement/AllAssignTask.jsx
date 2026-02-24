@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Table from '../../components/Atoms/TableData/TableData';
 
-const AllAssignTask = () => {
+const AllAssignTask = ({roleData}) => {
   const [tasks, setTasks] = useState([
     { 
       id: 1, 
@@ -110,7 +110,7 @@ const AllAssignTask = () => {
     'Description', 
     'Assign Date', 
     'Status', 
-    'Actions'
+    [roleData==="superadmin" && 'Actions']
   ]; 
 
   return (
@@ -183,17 +183,17 @@ const AllAssignTask = () => {
                     <option value="Completed" className="bg-white text-black">Completed</option>
                   </select>
                 </td>
-                <td className="py-4 px-4">
+               {roleData==='superadmin'&&<td className="py-4 px-4">
                   <div className="flex space-x-3">
                     <button
                       onClick={() => handleDeleteTask(task.id)}
                       className="text-red-500 hover:text-red-700"
                       title="Delete"
                     >
-                      🗑️
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </td>
+                </td>}
               </tr>
             )}
           />
