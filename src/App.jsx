@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -77,15 +78,14 @@ import BlogCategoryManagement from "./pages/WebsiteManagement/Blogs/BlogCategory
 import TeacherDashboard from "./pages/Dashboard/TeacherDashboard";
 import StudentDashboard from "./pages/Dashboard/StudentDashboard";
 import HallTickets from "./pages/ExaminationsManagement/HallTickets";
+import TeacherIncentive from "./pages/Teachers/TeacherIncentive";
+import TeacherAttendance from "./pages/Teachers/TeacherAttendance";
+import TeacherLeaveRequest from "./pages/Teachers/TeacherLeaveRequest";
+import StudentAttendanceList from "./pages/Teachers/StudentAttendanceList";
+import MyTasks from "./pages/Teachers/MyTasks";
+import RoleAssign from "./pages/Teachers/RoleAssign";
+import GoalAssign from "./pages/Teachers/GoalAssign";
 
-// Simple components for teacher/student pages
-const TeacherIncentive = () => <div className="p-6"><h1 className="text-2xl font-bold">My Incentive</h1></div>;
-const TeacherAttendance = () => <div className="p-6"><h1 className="text-2xl font-bold">My Attendance Report</h1></div>;
-const TeacherLeaveRequest = () => <div className="p-6"><h1 className="text-2xl font-bold">Leave Request</h1></div>;
-const StudentAttendanceList = () => <div className="p-6"><h1 className="text-2xl font-bold">Student Attendance List</h1></div>;
-const RoleAssign = () => <div className="p-6"><h1 className="text-2xl font-bold">Role Assign</h1></div>;
-const GoalAssign = () => <div className="p-6"><h1 className="text-2xl font-bold">Goal Assign</h1></div>;
-const MyTasks = () => <div className="p-6"><h1 className="text-2xl font-bold">My Tasks</h1></div>;
 const PastExams = () => <div className="p-6"><h1 className="text-2xl font-bold">All Past Examinations List</h1></div>;
 const StudentReferralAmount = () => <div className="p-6"><h1 className="text-2xl font-bold">Referral Amount</h1></div>;
 const StudentMyAttendance = () => <div className="p-6"><h1 className="text-2xl font-bold">My Attendance Report</h1></div>;

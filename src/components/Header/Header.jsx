@@ -21,6 +21,13 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/media-library": "Media Library",
       "/user-management": "User Management",
       "/website-settings": "Website Settings",
+      "/teacher/incentive": "My Incentives",
+      "/teacher/attendance":"My Attendance Report",
+      "/teacher/leave-request":"My Leave Request",
+      "/teacher/student-attendance":"Student Attendance Report",
+      "/teacher/my-tasks":"My Tasks",
+      "/teacher/role-assign":"Role Assign",
+      "/teacher/goal-assign":"Goal Assign",
     };
 
     return (

@@ -14,7 +14,7 @@ const Dropdown = ({
   error = "",
   mainClassName = "",
   required = false,
-  isMulti = false,
+  // isMulti = false,
   showIcon = true,
   // maxOptionsVisible = 10,
   ...rest

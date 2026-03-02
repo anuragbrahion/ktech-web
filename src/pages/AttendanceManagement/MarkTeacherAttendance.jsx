@@ -7,7 +7,6 @@ import AttendanceCalendarModal from '../../components/Atoms/UI/AttendanceCalenda
 import {
   teacherAttendanceView,
   teacherMarkAttendance,
-  teacherMyAttendances,
   attendanceList
 } from '../../redux/slices/examination';
 
@@ -21,6 +20,7 @@ const MarkTeacherAttendance = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   const AttendenceData = useSelector(
     (state) => state?.examination?.attendanceListData,
@@ -32,19 +32,19 @@ const MarkTeacherAttendance = () => {
 
    useEffect(() => {
     fetchTeachersList();
-  }, [currentPage]);
+  }, [currentPage,searchTerm]);
 
   const fetchTeachersList = async () => {
     setLoading(true);
     try {
        const result = await dispatch(attendanceList({
         page: currentPage,
-        size: 10,
+        size: itemsPerPage,
         type: 'Teacher'
       })).unwrap();
        if (result) {
         setTeachers(result.data.list || []);
-        setTotalPages(result.data.totalPages || 1);
+        setTotalPages(Math.ceil(result.data.total / itemsPerPage));
       }
     } catch (error) {
       console.error('Error fetching teachers:', error);
@@ -101,6 +101,8 @@ const MarkTeacherAttendance = () => {
     'Actions',
     'Check Attendance'
   ];
+
+  console.log("total",totalPages);
 
   return (
     <div className="">

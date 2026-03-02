@@ -104,7 +104,12 @@ const Dropdown = ({
           isDisabled={disabled}
           isMulti={isMulti}
           placeholder={placeholder}
-          styles={customStyles}
+          styles={{
+            ...customStyles,
+            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+          }}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
           {...rest}
         />
       </div>
