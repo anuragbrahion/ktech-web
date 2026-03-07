@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import Table from '../../components/Atoms/TableData/TableData';
 import CategoryModalBranch from '../../components/Atoms/UI/CategoryModalBranch';
 import {
-  commerceCategoriesAllDocuments,
+  commerceCategoriesList,
   createCommerceCategories,
   updateCommerceCategories,
   deleteCommerceCategories
 } from '../../redux/slices/commerce';
+import { Trash2 } from 'lucide-react';
 
 const ProductCategory = ({roleData}) => {
   const dispatch = useDispatch();
@@ -17,10 +18,10 @@ const ProductCategory = ({roleData}) => {
   const [searchTerm, setSearchTerm] = useState('');
    const [loading, setLoading] = useState(false);
 
-  const categories = useSelector(state => state.commerce.commerceCategoriesAllDocumentsData?.data?.data?.list || []);
+  const categories = useSelector(state => state.commerce.commerceCategoriesListData?.data?.data?.list || []);
 
   useEffect(() => {
-    dispatch(commerceCategoriesAllDocuments());
+    dispatch(commerceCategoriesList({page:1,size:100}));
   }, [dispatch]);
 
   const handleAddCategory = () => {
@@ -40,7 +41,7 @@ const ProductCategory = ({roleData}) => {
     if (modalMode === 'add') {
       dispatch(createCommerceCategories({ name: categoryData.name }))
         .then(() => {
-          dispatch(commerceCategoriesAllDocuments());
+          dispatch(commerceCategoriesList());
           setShowCategoryModal(false);
           setLoading(false);
         })
@@ -51,7 +52,7 @@ const ProductCategory = ({roleData}) => {
         name: categoryData.name 
       }))
         .then(() => {
-          dispatch(commerceCategoriesAllDocuments());
+          dispatch(commerceCategoriesList());
           setShowCategoryModal(false);
           setLoading(false);
         })
@@ -63,7 +64,7 @@ const ProductCategory = ({roleData}) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       dispatch(deleteCommerceCategories({ _id: categoryId }))
         .then(() => {
-          dispatch(commerceCategoriesAllDocuments());
+          dispatch(commerceCategoriesList());
         });
     }
   };

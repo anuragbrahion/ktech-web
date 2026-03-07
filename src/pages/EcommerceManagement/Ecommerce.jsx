@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 import { apiUrl } from "../../utils/axiosProvider";
 import { toast } from "react-toastify";
+import { Trash2 } from "lucide-react";
 
 const ProductModal = ({
   isOpen,
@@ -363,8 +364,8 @@ const Ecommerce = ({roleData}) => {
     });
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
+  const itemsPerPage = 3;
+console.log("currentPage",currentPage)
   const products = useSelector(
     (state) => state.commerce.commerceProductsListData?.data?.data?.list || [],
   );
@@ -465,16 +466,12 @@ const Ecommerce = ({roleData}) => {
   const handleDeleteProduct = (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       dispatch(deleteCommerceProducts({ id: productId })).then(() => {
-        dispatch(commerceProductsList());
+       dispatch(commerceProductsList({ page: currentPage, size: itemsPerPage }));
       });
     }
   };
 
-  const totalPages = Math.ceil(productsTotal / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = products.slice(startIndex, endIndex);
- 
+  const totalPages = Math.ceil(productsTotal / itemsPerPage) || 1;
 
   const tableHeaders = [
     "Product Image",
@@ -534,7 +531,7 @@ const Ecommerce = ({roleData}) => {
          <div className="overflow-x-auto">
           <Table
             headers={tableHeaders}
-  data={currentProducts}
+  data={products}
   currentPage={currentPage}
   totalPages={totalPages}
   handlePageChange={setCurrentPage}

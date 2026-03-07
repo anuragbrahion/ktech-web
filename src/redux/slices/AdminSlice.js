@@ -17,7 +17,8 @@ const initialState = {
     settingsGlobalData:{},
     updateContentCategoriesData:{},
     createContentCategoriesData:{},
-    enableDisableContentCategoriesData:{}
+    enableDisableContentCategoriesData:{},
+    getProfileDataData:{}
 }
 export const getAdminRoleList = createApiThunkPrivate('getAdminRoleList', '/admin/roles/list', 'GET')
 export const createAdminRole = createApiThunkPrivate('createAdminRole', '/admin/roles/create')
@@ -38,6 +39,15 @@ export const settingsGlobal=createApiThunkPrivate('settingsGlobal','/global/sett
 export const createContentCategories=createApiThunkPrivate('createContentCategories','/categories/admin/create')
 export const updateContentCategories=createApiThunkPrivate('updateContentCategories','/categories/admin/update')
 export const enableDisableContentCategories=createApiThunkPrivate('enableDisableContentCategories','/categories/admin/enable-disable')
+export const getProfileData=createApiThunkPrivate('getProfileData','/auth/profile','GET')
+export const changePassword=createApiThunkPrivate('changePassword','/auth/change-password')
+export const updateProfilePhoto=createApiThunkPrivate('updateProfilePhoto','/auth/update-profile-photo')
+
+
+
+
+
+
 export const adminSlice = createSlice({
     name: 'admin',
     initialState,
@@ -61,6 +71,7 @@ export const adminSlice = createSlice({
         createExtraReducersForThunk(builder,createContentCategories,'createContentCategoriesData')
         createExtraReducersForThunk(builder,updateContentCategories,'updateContentCategoriesData')
         createExtraReducersForThunk(builder,enableDisableContentCategories,'enableDisableContentCategoriesData')
+        createExtraReducersForThunk(builder, getProfileData, 'getProfileDataData')
     }
 })
 
