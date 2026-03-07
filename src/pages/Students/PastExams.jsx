@@ -100,7 +100,6 @@ const PastExams = () => {
     ]);
   }, [resultList]);
 
-  console.log("viewModalData", viewModalData);
 
   return (
     <>

@@ -5,11 +5,25 @@ import {
 } from "../../utils/apiThunk";
 const initialState = {
   getStudentOverviewData: {},
+  getStudentCoursesListData: {},
+  getStudentExamsListData: {},
 };
 
 export const getStudentOverview = createApiThunkPrivate(
   "getStudentOverview",
   "/students/overview",
+  "GET",
+);
+
+export const getStudentCoursesList = createApiThunkPrivate(
+  "getStudentCoursesList",
+  "/students/my-courses",
+  "GET",
+);
+
+export const getStudentExamsList = createApiThunkPrivate(
+  "getStudentExamsList",
+  "/examinations/student/my-exams",
   "GET",
 );
 
@@ -21,6 +35,16 @@ export const studentSlice = createSlice({
       builder,
       getStudentOverview,
       "getStudentOverviewData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      getStudentCoursesList,
+      "getStudentCoursesListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      getStudentExamsList,
+      "getStudentExamsListData",
     );
   },
 });
