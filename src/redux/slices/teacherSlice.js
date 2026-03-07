@@ -11,6 +11,7 @@ const initialState = {
   getMyTasksListData: {},
   getAssignedRoleListData: {},
   getAssignedGoalListData: {},
+  getExamResultListData: {},
 };
 
 export const getIncentiveList = createApiThunkPrivate(
@@ -79,6 +80,18 @@ export const requestApprovalForGoal = createApiThunkPrivate(
   "POST",
 );
 
+export const getExamResultList = createApiThunkPrivate(
+  "getExamResultList",
+  "/examinations/result/list",
+  "GET",
+);
+
+export const getExamResultView = createApiThunkPrivate(
+  "getExamResultView",
+  "/examinations/result/view",
+  "GET",
+);
+
 export const teacherSlice = createSlice({
   name: "teacher",
   initialState,
@@ -109,6 +122,11 @@ export const teacherSlice = createSlice({
       builder,
       getAssignedGoalList,
       "getAssignedGoalListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      getExamResultList,
+      "getExamResultListData",
     );
   },
 });
