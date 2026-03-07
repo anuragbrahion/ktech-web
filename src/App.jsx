@@ -76,7 +76,6 @@ import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import BlogCategoryManagement from "./pages/WebsiteManagement/Blogs/BlogCategoryManagement";
  import Sidebar from "./components/Sidebar/Sidebar";
 import TeacherDashboard from "./pages/Dashboard/TeacherDashboard";
-import StudentDashboard from "./pages/Dashboard/StudentDashboard";
 import HallTickets from "./pages/ExaminationsManagement/HallTickets";
 import TeacherIncentive from "./pages/Teachers/TeacherIncentive";
 import TeacherAttendance from "./pages/Teachers/TeacherAttendance";
@@ -85,14 +84,15 @@ import StudentAttendanceList from "./pages/Teachers/StudentAttendanceList";
 import MyTasks from "./pages/Teachers/MyTasks";
 import RoleAssign from "./pages/Teachers/RoleAssign";
 import GoalAssign from "./pages/Teachers/GoalAssign";
+import PastExams from "./pages/Teachers/PastExams";
+import StudentDashboard from "./pages/Students/Dashboard";
+import StudentMyAttendance from "./pages/Students/AttendanceList"
+import StudentLeaveRequest from "./pages/Students/LeaveRequest"
+import StudentPastExams from "./pages/Students/PastExams"
 
-const PastExams = () => <div className="p-6"><h1 className="text-2xl font-bold">All Past Examinations List</h1></div>;
 const StudentReferralAmount = () => <div className="p-6"><h1 className="text-2xl font-bold">Referral Amount</h1></div>;
-const StudentMyAttendance = () => <div className="p-6"><h1 className="text-2xl font-bold">My Attendance Report</h1></div>;
-const StudentLeaveRequest = () => <div className="p-6"><h1 className="text-2xl font-bold">Leave Request</h1></div>;
 const StudentMyCourses = () => <div className="p-6"><h1 className="text-2xl font-bold">My Courses</h1></div>;
 const StudentMyExams = () => <div className="p-6"><h1 className="text-2xl font-bold">My Exams</h1></div>;
-const StudentPastExams = () => <div className="p-6"><h1 className="text-2xl font-bold">All Past Examinations List</h1></div>;
 
 const MainLayout = ({
   children,

@@ -10,6 +10,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
     const path = location.pathname;
     const pathMap = {
       "/dashboard": "Dashboard",
+      "/student-dashboard": "Dashboard",
       "/website-dashboard": "Website Dashboard",
       "/home-page": "Home Page Editor",
       "/exam-grade-system": "Exam Grade System",
@@ -28,6 +29,11 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/teacher/my-tasks":"My Tasks",
       "/teacher/role-assign":"Role Assign",
       "/teacher/goal-assign":"Goal Assign",
+      "/teacher/past-exams":"Exam Result",
+      "/student/attendance":"My Attendance Report",
+      "/student/leave-request":"My Leave Request",
+      "/student/past-exams":"Exam Result",
+
     };
 
     return (

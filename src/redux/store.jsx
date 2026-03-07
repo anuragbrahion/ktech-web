@@ -9,6 +9,7 @@ import inquiresSlice from "./slices/inquires";
 import commerceSlice from "./slices/commerce";
 import examinationSlice from "./slices/examination";
 import teacherSlice from "./slices/teacherSlice";
+import studentSlice from "./slices/studentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,6 @@ export const store = configureStore({
     commerce: commerceSlice,
     examination: examinationSlice,
     teacher: teacherSlice,
+    student: studentSlice,
   },
 });
