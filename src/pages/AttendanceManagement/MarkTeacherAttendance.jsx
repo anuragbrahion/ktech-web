@@ -30,21 +30,25 @@ const MarkTeacherAttendance = () => {
     (state) => state?.examination?.teacherAttendanceViewData,
   );
 
-   useEffect(() => {
+  useEffect(() => {
     fetchTeachersList();
-  }, [currentPage,searchTerm]);
+  }, [currentPage, searchTerm]);
 
   const fetchTeachersList = async () => {
     setLoading(true);
     try {
-       const result = await dispatch(attendanceList({
-        page: currentPage,
-        size: itemsPerPage,
-        type: 'Teacher'
-      })).unwrap();
-       if (result) {
+      const result = await dispatch(
+        attendanceList({
+          page: currentPage,
+          size: itemsPerPage,
+          type: "Teacher",
+          ...(searchTerm && { keyWord: searchTerm }),
+          searchFields: "name phoneNo role"
+        })
+      ).unwrap();
+      if (result) {
         setTeachers(result.data.list || []);
-        setTotalPages(Math.ceil(result.data.total / itemsPerPage));
+        setTotalPages(Math.ceil((result.data.total || 0) / itemsPerPage) || 1);
       }
     } catch (error) {
       console.error('Error fetching teachers:', error);
@@ -53,7 +57,7 @@ const MarkTeacherAttendance = () => {
     }
   };
 
-  const handleViewDetails = (teacher) => { 
+  const handleViewDetails = (teacher) => {
     setSelectedTeacher(teacher);
     setShowDetailsModal(true);
   };
@@ -71,7 +75,7 @@ const MarkTeacherAttendance = () => {
         date
       })).unwrap();
       if (result) {
-         alert('Attendance marked successfully');
+        alert('Attendance marked successfully');
       }
     } catch (error) {
       console.error('Error marking attendance:', error);
@@ -86,7 +90,7 @@ const MarkTeacherAttendance = () => {
         endDate,
         teacherId
       })).unwrap();
-      
+
       return result.data;
     } catch (error) {
       console.error('Error fetching attendance:', error);
@@ -97,12 +101,12 @@ const MarkTeacherAttendance = () => {
   const tableHeaders = [
     'Teacher Name',
     'Role',
-     'Status',
+    'Status',
     'Actions',
     'Check Attendance'
   ];
 
-  console.log("total",totalPages);
+  console.log("total", totalPages);
 
   return (
     <div className="">
@@ -118,13 +122,19 @@ const MarkTeacherAttendance = () => {
               type="text"
               placeholder="Search by name, phone, or role..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900"
             />
           </div>
           <div className="flex gap-2">
             <button
-              onClick={() => fetchTeachersList()}
+              onClick={() => {
+  setCurrentPage(1);
+  fetchTeachersList();
+}}
               className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
             >
               Refresh
@@ -142,6 +152,9 @@ const MarkTeacherAttendance = () => {
             <Table
               headers={tableHeaders}
               data={teachers}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              handlePageChange={setCurrentPage}
               renderRow={(teacher, index) => (
                 <tr
                   key={teacher.id || teacher._id}
@@ -154,7 +167,7 @@ const MarkTeacherAttendance = () => {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-gray-900">{teacher.status}</td>
-                   <td className="py-4 px-4">
+                  <td className="py-4 px-4">
                     <button
                       onClick={() => handleViewDetails(teacher)}
                       className="text-sky-500 hover:text-sky-700 transition-colors"
@@ -176,28 +189,6 @@ const MarkTeacherAttendance = () => {
                 </tr>
               )}
             />
-
-             {totalPages > 1 && (
-              <div className="flex justify-center mt-6 gap-2">
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                <span className="px-3 py-1">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
-            )}
           </>
         )}
       </div>
@@ -209,7 +200,7 @@ const MarkTeacherAttendance = () => {
           setSelectedTeacher(null);
         }}
         teacherData={selectedTeacher}
-       />
+      />
 
       <AttendanceCalendarModal
         isOpen={showCalendarModal}

@@ -143,11 +143,10 @@ const handleSavePassword = () => {
   };
 
   const getProfileImageUrl = () => {
-    console.log("0000000000011111111",profile)
-    // if (profile?.profilephoto[0].url) {
-    //   return profile.profilephoto[0].url;
-    // }
-    // return null;
+     if (profile?.profilephoto[0].url) {
+      return profile.profilephoto[0].url;
+    }
+    return null;
   };
 
   return (
@@ -193,7 +192,7 @@ const handleSavePassword = () => {
 
             <div className="flex-1 text-center md:text-left">
               <div className="mb-4">
-                <h3 className="text-2xl font-bold text-gray-800">{profile.name || 'Not provided'}</h3>
+                <h3 className="text-2xl font-bold text-gray-800 capitalize">{profile.name || 'Not provided'}</h3>
                 <div className="flex flex-wrap items-center gap-2 mt-2 justify-center md:justify-start">
                   <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
                     {profile.role || 'User'}
