@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   LogIn,
   Key,
+  EyeOff,
+  Eye,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -75,6 +77,7 @@ export default function Login() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotErrors, setForgotErrors] = useState({});
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const validateLogin = () => {
     const e = {};
@@ -95,7 +98,8 @@ export default function Login() {
     return Object.keys(e).length === 0;
   };
 
-const submitLogin = async () => {
+  const submitLogin = async (e) => {
+    e.preventDefault();
     setFormError("");
     if (!validateLogin()) {
       toast.error("Please fix validation errors");
@@ -113,27 +117,27 @@ const submitLogin = async () => {
           name: res.data.name,
           email: res.data.email,
           role: res.data.role,
-          id: res.data.id
+          id: res.data.id,
         };
-        
+
         // Store in sessionStorage
         sessionStorage.setItem("data", JSON.stringify(userData));
         sessionStorage.setItem("token", res.data.token);
-        
+
         toast.success("Login successful!");
-        
+
         // Redirect based on role
         setTimeout(() => {
-          switch(res.data.role.toLowerCase()) {
-            case 'student':
+          switch (res.data.role.toLowerCase()) {
+            case "student":
               router("/student-dashboard");
               break;
-            case 'teacher':
+            case "teacher":
               router("/teacher-dashboard");
               break;
-            case 'admin':
-            case 'superadmin':
-            case 'branch':
+            case "admin":
+            case "superadmin":
+            case "branch":
               router("/dashboard");
               break;
             default:
@@ -160,6 +164,10 @@ const submitLogin = async () => {
     // redirect to forgot password page with email pre-filled
     localStorage.setItem("forgotPasswordEmail", forgotEmail);
     router("/forgot-password");
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((prev) => !prev);
   };
 
   if (loading) {
@@ -320,63 +328,82 @@ const submitLogin = async () => {
             </div>
           )}
 
-          <div className="mb-3">
-            <label className="text-xs font-medium text-gray-600">Email</label>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={email}
-                placeholder={c.placeholder}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
-                  errors.email ? "border-red-400 focus:ring-red-300" : ""
-                }`}
-              />
+          <form onSubmit={submitLogin}>
+            <div className="mb-3">
+              <label className="text-xs font-medium text-gray-600">Email</label>
+              <div className="relative mt-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={email}
+                  placeholder={c.placeholder}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
+                    errors.email ? "border-red-400 focus:ring-red-300" : ""
+                  }`}
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+              )}
             </div>
-            {errors.email && (
-              <p className="mt-1 text-xs text-red-500">{errors.email}</p>
-            )}
-          </div>
 
-          <div className="mb-3">
-            <label className="text-xs font-medium text-gray-600">
-              Password
-            </label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
-                  errors.password ? "border-red-400 focus:ring-red-300" : ""
-                }`}
-              />
+            <div className="mb-3">
+              <label className="text-xs font-medium text-gray-600">
+                Password
+              </label>
+
+              <div className="relative mt-1">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+                <input
+                  type={isPasswordVisible ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`w-full pl-9 pr-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
+                    errors.password ? "border-red-400 focus:ring-red-300" : ""
+                  }`}
+                />
+
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {isPasswordVisible ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+
+              {errors.password && (
+                <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+              )}
             </div>
-            {errors.password && (
-              <p className="mt-1 text-xs text-red-500">{errors.password}</p>
-            )}
-          </div>
 
-          <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             <button
-              onClick={() => setShowForgotPassword(true)}
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              // onClick={submitLogin}
+              type="submit"
+              disabled={loading}
+              className={`w-full mt-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r ${c.btn} ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              Forgot Password?
+              {loading ? "Signing In..." : "Sign In"}
             </button>
-          </div>
-
-          <button
-            onClick={submitLogin}
-            disabled={loading}
-            className={`w-full mt-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r ${c.btn} ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-          >
-            {loading ? "Signing In..." : "Sign In"}
-          </button>
+          </form>
         </div>
       </div>
     </div>
