@@ -39,8 +39,6 @@ import {
   Phone,
   User,
   LogOut,
-  Settings,
-  Cog,
   Search,
   ChevronDown,
   ChevronUp,
@@ -48,16 +46,14 @@ import {
   Package,
   Activity,
   Share2,
-  Tags,
   Layers,
-  List,
   DollarSign,
-  BarChart,
-  CheckCircle,
   Eye,
+  UserRoundCog,
+  UserRoundPlus,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
- import { Clipboard } from "lucide-react";
+import { Clipboard } from "lucide-react";
 
 const getUserData = () => {
   const userData = sessionStorage.getItem("data");
@@ -72,14 +68,39 @@ const adminSections = {
       { id: "homePage", label: "Home Page", icon: Home, path: "/home-page" },
       { id: "blogs", label: "Blogs", icon: FileText, path: "/blogs" },
       { id: "branches", label: "Branches", icon: GitBranch, path: "/branches" },
-      { id: "testimonials", label: "Testimonials", icon: MessageSquare, path: "/testimonials" },
+      {
+        id: "testimonials",
+        label: "Testimonials",
+        icon: MessageSquare,
+        path: "/testimonials",
+      },
       { id: "language", label: "Language", icon: Languages, path: "/language" },
       { id: "aboutUs", label: "About Us", icon: Info, path: "/web-about" },
       { id: "whyUs", label: "Why Us", icon: HelpCircle, path: "/why-us" },
-      { id: "terms", label: "Terms & Conditions", icon: FileCheck, path: "/terms-conditions" },
-      { id: "courseFaq", label: "Course FAQ", icon: BookOpen, path: "/course-faq" },
-      { id: "privacyPolicy", label: "Privacy Policy", icon: Shield, path: "/privacy-policy" },
-      { id: "companyDetails", label: "Company Details", icon: Building2, path: "/company-details" },
+      {
+        id: "terms",
+        label: "Terms & Conditions",
+        icon: FileCheck,
+        path: "/terms-conditions",
+      },
+      {
+        id: "courseFaq",
+        label: "Course FAQ",
+        icon: BookOpen,
+        path: "/course-faq",
+      },
+      {
+        id: "privacyPolicy",
+        label: "Privacy Policy",
+        icon: Shield,
+        path: "/privacy-policy",
+      },
+      {
+        id: "companyDetails",
+        label: "Company Details",
+        icon: Building2,
+        path: "/company-details",
+      },
     ],
   },
   courseOptions: {
@@ -87,18 +108,43 @@ const adminSections = {
     icon: BookOpen,
     items: [
       { id: "courseList", label: "Course", icon: Grid, path: "/course-list" },
-      { id: "coursePlans", label: "Course Plans", icon: Grid, path: "/course-plans" },
-      { id: "batches", label: "Course Batches", icon: Grid, path: "/course-batches" },
+      {
+        id: "coursePlans",
+        label: "Course Plans",
+        icon: Grid,
+        path: "/course-plans",
+      },
+      {
+        id: "batches",
+        label: "Course Batches",
+        icon: Grid,
+        path: "/course-batches",
+      },
     ],
   },
   studentInfo: {
     title: "Student Information",
     icon: Users,
     items: [
-      { id: "admission", label: "Admission", icon: UserCircle, path: "/admission" },
-      { id: "reAdmission", label: "Re-Admission", icon: RefreshCw, path: "/re-admission" },
+      {
+        id: "admission",
+        label: "Admission",
+        icon: UserCircle,
+        path: "/admission",
+      },
+      {
+        id: "reAdmission",
+        label: "Re-Admission",
+        icon: RefreshCw,
+        path: "/re-admission",
+      },
       { id: "inquiry", label: "Inquiry", icon: FileSearch, path: "/inquiry" },
-      { id: "studentFeeSummary", label: "Student Fee Summary", icon: FileBarChart, path: "/student-fee-summary" },
+      {
+        id: "studentFeeSummary",
+        label: "Student Fee Summary",
+        icon: FileBarChart,
+        path: "/student-fee-summary",
+      },
     ],
   },
   employeeManagement: {
@@ -107,80 +153,551 @@ const adminSections = {
     items: [
       { id: "role", label: "Role", icon: UserCog, path: "/role" },
       { id: "goal", label: "Goal", icon: Target, path: "/goal" },
-      { id: "designation", label: "Designation", icon: Briefcase, path: "/designation" },
-      { id: "department", label: "Department", icon: Building, path: "/department" },
-      { id: "teacherDirectory", label: "Teacher Directory", icon: Users, path: "/teacher-directory" },
-      { id: "leaveType", label: "Leave Type", icon: Calendar, path: "/leave-type" },
-      { id: "assignTask", label: "Assign Task", icon: ClipboardCheck, path: "/assign-task" },
-      { id: "allAssignTask", label: "All Assign Task", icon: ClipboardList, path: "/all-assign-task" },
+      {
+        id: "designation",
+        label: "Designation",
+        icon: Briefcase,
+        path: "/designation",
+      },
+      {
+        id: "department",
+        label: "Department",
+        icon: Building,
+        path: "/department",
+      },
+      {
+        id: "teacherDirectory",
+        label: "Teacher Directory",
+        icon: Users,
+        path: "/teacher-directory",
+      },
+      {
+        id: "leaveType",
+        label: "Leave Type",
+        icon: Calendar,
+        path: "/leave-type",
+      },
+      {
+        id: "assignTask",
+        label: "Assign Task",
+        icon: ClipboardCheck,
+        path: "/assign-task",
+      },
+      {
+        id: "allAssignTask",
+        label: "All Assign Task",
+        icon: ClipboardList,
+        path: "/all-assign-task",
+      },
     ],
   },
   examinations: {
     title: "Examinations",
     icon: Award,
     items: [
-      { id: "allPastExams", label: "All Past Examinations List", icon: FileText, path: "/all-past-exams" },
-      { id: "studentExams", label: "Student Examinations", icon: GraduationCap, path: "/student-exams" },
-      { id: "roleExams", label: "Role Examination", icon: UserCog, path: "/role-exams" },
-      { id: "goalExams", label: "Goal Examination", icon: Target, path: "/goal-exams" },
-      { id: "hallTickets", label: "Hall Tickets", icon: Target, path: "/hall-tickets" },
+      {
+        id: "allPastExams",
+        label: "All Past Examinations List",
+        icon: FileText,
+        path: "/all-past-exams",
+      },
+      {
+        id: "studentExams",
+        label: "Student Examinations",
+        icon: GraduationCap,
+        path: "/student-exams",
+      },
+      {
+        id: "roleExams",
+        label: "Role Examination",
+        icon: UserCog,
+        path: "/role-exams",
+      },
+      {
+        id: "goalExams",
+        label: "Goal Examination",
+        icon: Target,
+        path: "/goal-exams",
+      },
+      {
+        id: "hallTickets",
+        label: "Hall Tickets",
+        icon: Target,
+        path: "/hall-tickets",
+      },
     ],
   },
   branchManagement: {
     title: "Branch Management",
     icon: GitBranch,
     items: [
-      { id: "visitorsBook", label: "Visitor's Book", icon: Book, path: "/visitors-book" },
-      { id: "referralAmount", label: "Referral Amount", icon: CreditCard, path: "/referral-amount" },
-      { id: "roleGoalAssign", label: "Role/Goal-Assign", icon: ClipboardList, path: "/role-goal-assign" },
-      { id: "coursePlans", label: "Course Plans", icon: Layers, path: "/course-plans" },
-      { id: "courseBatches", label: "Course Batches", icon: Calendar, path: "/course-batches" },
-      { id: "inquirySource", label: "Inquiry Source", icon: Share2, path: "/inquiry-source" },
-      { id: "inquiryStatus", label: "Inquiry Status", icon: Activity, path: "/inquiry-status" }
+      {
+        id: "visitorsBook",
+        label: "Visitor's Book",
+        icon: Book,
+        path: "/visitors-book",
+      },
+      {
+        id: "referralAmount",
+        label: "Referral Amount",
+        icon: CreditCard,
+        path: "/referral-amount",
+      },
+      {
+        id: "roleGoalAssign",
+        label: "Role/Goal-Assign",
+        icon: ClipboardList,
+        path: "/role-goal-assign",
+      },
+      {
+        id: "coursePlans",
+        label: "Course Plans",
+        icon: Layers,
+        path: "/course-plans",
+      },
+      {
+        id: "courseBatches",
+        label: "Course Batches",
+        icon: Calendar,
+        path: "/course-batches",
+      },
+      {
+        id: "inquirySource",
+        label: "Inquiry Source",
+        icon: Share2,
+        path: "/inquiry-source",
+      },
+      {
+        id: "inquiryStatus",
+        label: "Inquiry Status",
+        icon: Activity,
+        path: "/inquiry-status",
+      },
     ],
   },
   requestManagement: {
     title: "All Request",
     icon: ClipboardList,
     items: [
-      { id: "roleExamRequest", label: "Role Exam Request", icon: Award, path: "/role-exam-request" },
-      { id: "goalExamRequest", label: "Goal Exam Request", icon: Target, path: "/goal-exam-request" },
-      { id: "certificateRequestStatus", label: "Certificate Request Status", icon: FileCheck, path: "/certificate-request-status" },
-      { id: "leaveRequest", label: "Leave Request", icon: Calendar, path: "/leave-request" },
-      { id: "complaints", label: "Complaints", icon: AlertCircle, path: "/complaints" },
+      {
+        id: "roleExamRequest",
+        label: "Role Exam Request",
+        icon: Award,
+        path: "/role-exam-request",
+      },
+      {
+        id: "goalExamRequest",
+        label: "Goal Exam Request",
+        icon: Target,
+        path: "/goal-exam-request",
+      },
+      {
+        id: "certificateRequestStatus",
+        label: "Certificate Request Status",
+        icon: FileCheck,
+        path: "/certificate-request-status",
+      },
+      {
+        id: "leaveRequest",
+        label: "Leave Request",
+        icon: Calendar,
+        path: "/leave-request",
+      },
+      {
+        id: "complaints",
+        label: "Complaints",
+        icon: AlertCircle,
+        path: "/complaints",
+      },
     ],
   },
   attendance: {
     title: "Mark Attendance",
     icon: Calendar,
     items: [
-      { id: "markTeacherAttendance", label: "Mark Teacher Attendance", icon: Users, path: "/mark-teacher-attendance" },
-      { id: "markStudentAttendance", label: "Mark Student Attendance", icon: GraduationCap, path: "/mark-student-attendance" },
+      {
+        id: "markTeacherAttendance",
+        label: "Mark Teacher Attendance",
+        icon: Users,
+        path: "/mark-teacher-attendance",
+      },
+      {
+        id: "markStudentAttendance",
+        label: "Mark Student Attendance",
+        icon: GraduationCap,
+        path: "/mark-student-attendance",
+      },
     ],
   },
   certificate: {
     title: "Student Certificate",
     icon: FileCheck,
     items: [
-      { id: "allCertificate", label: "All Certificate", icon: FileCheck, path: "/all-certificate" },
+      {
+        id: "allCertificate",
+        label: "All Certificate",
+        icon: FileCheck,
+        path: "/all-certificate",
+      },
+    ],
+  },
+  users: {
+    title: "Users Management",
+    icon: UserRoundCog,
+    items: [
+      { id: "users", label: "Users", icon: UserRoundPlus, path: "/users" },
     ],
   },
   financial: {
     title: "Financial Management",
     icon: Wallet,
     items: [
-      { id: "category", label: "Category", icon: Grid, path: "/financial-category" },
-      { id: "transactions", label: "Transactions", icon: CreditCard, path: "/transactions" },
+      {
+        id: "category",
+        label: "Category",
+        icon: Grid,
+        path: "/financial-category",
+      },
+      {
+        id: "transactions",
+        label: "Transactions",
+        icon: CreditCard,
+        path: "/transactions",
+      },
     ],
   },
   ecommerce: {
     title: "Ecommerce",
     icon: ShoppingCart,
     items: [
-      { id: "productCategory", label: "Product Category", icon: Package, path: "/product-category" },
-      { id: "ecommerce", label: "E-commerce", icon: ShoppingCart, path: "/ecommerce" },
-      { id: "myOrders", label: "My Orders", icon: ShoppingBag, path: "/my-orders" },
-      { id: "contactUs", label: "Contact Us", icon: Phone, path: "/contact-us" },
+      {
+        id: "productCategory",
+        label: "Product Category",
+        icon: Package,
+        path: "/product-category",
+      },
+      {
+        id: "ecommerce",
+        label: "E-commerce",
+        icon: ShoppingCart,
+        path: "/ecommerce",
+      },
+      {
+        id: "myOrders",
+        label: "My Orders",
+        icon: ShoppingBag,
+        path: "/my-orders",
+      },
+      {
+        id: "contactUs",
+        label: "Contact Us",
+        icon: Phone,
+        path: "/contact-us",
+      },
+    ],
+  },
+};
+
+const branchSections = {
+  websiteOptions: {
+    title: "Website Management",
+    icon: Globe,
+    items: [
+      { id: "blogs", label: "Blogs", icon: FileText, path: "/blogs" },
+      { id: "language", label: "Language", icon: Languages, path: "/language" },
+    ],
+  },
+  courseOptions: {
+    title: "Courses",
+    icon: BookOpen,
+    items: [
+      { id: "courseList", label: "Course", icon: Grid, path: "/course-list" },
+      {
+        id: "coursePlans",
+        label: "Course Plans",
+        icon: Grid,
+        path: "/course-plans",
+      },
+      {
+        id: "batches",
+        label: "Course Batches",
+        icon: Grid,
+        path: "/course-batches",
+      },
+    ],
+  },
+  studentInfo: {
+    title: "Student Information",
+    icon: Users,
+    items: [
+      {
+        id: "admission",
+        label: "Admission",
+        icon: UserCircle,
+        path: "/admission",
+      },
+      {
+        id: "reAdmission",
+        label: "Re-Admission",
+        icon: RefreshCw,
+        path: "/re-admission",
+      },
+      { id: "inquiry", label: "Inquiry", icon: FileSearch, path: "/inquiry" },
+      {
+        id: "studentFeeSummary",
+        label: "Student Fee Summary",
+        icon: FileBarChart,
+        path: "/student-fee-summary",
+      },
+    ],
+  },
+  employeeManagement: {
+    title: "Employee Management",
+    icon: UserCog,
+    items: [
+      { id: "role", label: "Role", icon: UserCog, path: "/role" },
+      { id: "goal", label: "Goal", icon: Target, path: "/goal" },
+      {
+        id: "designation",
+        label: "Designation",
+        icon: Briefcase,
+        path: "/designation",
+      },
+      {
+        id: "department",
+        label: "Department",
+        icon: Building,
+        path: "/department",
+      },
+      {
+        id: "teacherDirectory",
+        label: "Teacher Directory",
+        icon: Users,
+        path: "/teacher-directory",
+      },
+      {
+        id: "leaveType",
+        label: "Leave Type",
+        icon: Calendar,
+        path: "/leave-type",
+      },
+      {
+        id: "assignTask",
+        label: "Assign Task",
+        icon: ClipboardCheck,
+        path: "/assign-task",
+      },
+      {
+        id: "allAssignTask",
+        label: "All Assign Task",
+        icon: ClipboardList,
+        path: "/all-assign-task",
+      },
+    ],
+  },
+  examinations: {
+    title: "Examinations",
+    icon: Award,
+    items: [
+      {
+        id: "allPastExams",
+        label: "All Past Examinations List",
+        icon: FileText,
+        path: "/all-past-exams",
+      },
+      {
+        id: "studentExams",
+        label: "Student Examinations",
+        icon: GraduationCap,
+        path: "/student-exams",
+      },
+      {
+        id: "roleExams",
+        label: "Role Examination",
+        icon: UserCog,
+        path: "/role-exams",
+      },
+      {
+        id: "goalExams",
+        label: "Goal Examination",
+        icon: Target,
+        path: "/goal-exams",
+      },
+      {
+        id: "hallTickets",
+        label: "Hall Tickets",
+        icon: Target,
+        path: "/hall-tickets",
+      },
+    ],
+  },
+  branchManagement: {
+    title: "Branch Management",
+    icon: GitBranch,
+    items: [
+      {
+        id: "visitorsBook",
+        label: "Visitor's Book",
+        icon: Book,
+        path: "/visitors-book",
+      },
+      {
+        id: "referralAmount",
+        label: "Referral Amount",
+        icon: CreditCard,
+        path: "/referral-amount",
+      },
+      {
+        id: "roleGoalAssign",
+        label: "Role/Goal-Assign",
+        icon: ClipboardList,
+        path: "/role-goal-assign",
+      },
+      {
+        id: "coursePlans",
+        label: "Course Plans",
+        icon: Layers,
+        path: "/course-plans",
+      },
+      {
+        id: "courseBatches",
+        label: "Course Batches",
+        icon: Calendar,
+        path: "/course-batches",
+      },
+      {
+        id: "inquirySource",
+        label: "Inquiry Source",
+        icon: Share2,
+        path: "/inquiry-source",
+      },
+      {
+        id: "inquiryStatus",
+        label: "Inquiry Status",
+        icon: Activity,
+        path: "/inquiry-status",
+      },
+    ],
+  },
+  requestManagement: {
+    title: "All Request",
+    icon: ClipboardList,
+    items: [
+      {
+        id: "roleExamRequest",
+        label: "Role Exam Request",
+        icon: Award,
+        path: "/role-exam-request",
+      },
+      {
+        id: "goalExamRequest",
+        label: "Goal Exam Request",
+        icon: Target,
+        path: "/goal-exam-request",
+      },
+      {
+        id: "certificateRequestStatus",
+        label: "Certificate Request Status",
+        icon: FileCheck,
+        path: "/certificate-request-status",
+      },
+      {
+        id: "leaveRequest",
+        label: "Leave Request",
+        icon: Calendar,
+        path: "/leave-request",
+      },
+      {
+        id: "complaints",
+        label: "Complaints",
+        icon: AlertCircle,
+        path: "/complaints",
+      },
+    ],
+  },
+  attendance: {
+    title: "Mark Attendance",
+    icon: Calendar,
+    items: [
+      {
+        id: "markTeacherAttendance",
+        label: "Mark Teacher Attendance",
+        icon: Users,
+        path: "/mark-teacher-attendance",
+      },
+      {
+        id: "markStudentAttendance",
+        label: "Mark Student Attendance",
+        icon: GraduationCap,
+        path: "/mark-student-attendance",
+      },
+    ],
+  },
+  certificate: {
+    title: "Student Certificate",
+    icon: FileCheck,
+    items: [
+      {
+        id: "allCertificate",
+        label: "All Certificate",
+        icon: FileCheck,
+        path: "/all-certificate",
+      },
+    ],
+  },
+  users: {
+    title: "Users Management",
+    icon: UserRoundCog,
+    items: [
+      { id: "users", label: "Users", icon: UserRoundPlus, path: "/users" },
+    ],
+  },
+  financial: {
+    title: "Financial Management",
+    icon: Wallet,
+    items: [
+      {
+        id: "category",
+        label: "Category",
+        icon: Grid,
+        path: "/financial-category",
+      },
+      {
+        id: "transactions",
+        label: "Transactions",
+        icon: CreditCard,
+        path: "/transactions",
+      },
+    ],
+  },
+  ecommerce: {
+    title: "Ecommerce",
+    icon: ShoppingCart,
+    items: [
+      {
+        id: "productCategory",
+        label: "Product Category",
+        icon: Package,
+        path: "/product-category",
+      },
+      {
+        id: "ecommerce",
+        label: "E-commerce",
+        icon: ShoppingCart,
+        path: "/ecommerce",
+      },
+      {
+        id: "myOrders",
+        label: "My Orders",
+        icon: ShoppingBag,
+        path: "/my-orders",
+      },
+      {
+        id: "contactUs",
+        label: "Contact Us",
+        icon: Phone,
+        path: "/contact-us",
+      },
     ],
   },
 };
@@ -190,34 +707,79 @@ const teacherSections = {
     title: "Profile Management",
     icon: UserCog,
     items: [
-      { id: "teacherDashboard", label: "Dashboard", icon: Home, path: "/teacher-dashboard" },
-      { id: "myIncentive", label: "My Incentive", icon: DollarSign, path: "/teacher/incentive" },
-      { id: "myAttendance", label: "My Attendance Report", icon: CalendarCheck, path: "/teacher/attendance" },
-      { id: "leaveRequest", label: "Leave Request", icon: Calendar, path: "/teacher/leave-request" },
-    ]
+      {
+        id: "teacherDashboard",
+        label: "Dashboard",
+        icon: Home,
+        path: "/teacher-dashboard",
+      },
+      {
+        id: "myIncentive",
+        label: "My Incentive",
+        icon: DollarSign,
+        path: "/teacher/incentive",
+      },
+      {
+        id: "myAttendance",
+        label: "My Attendance Report",
+        icon: CalendarCheck,
+        path: "/teacher/attendance",
+      },
+      {
+        id: "leaveRequest",
+        label: "Leave Request",
+        icon: Calendar,
+        path: "/teacher/leave-request",
+      },
+    ],
   },
   studentInfo: {
     title: "Student Information",
     icon: Users,
     items: [
-      { id: "studentAttendance", label: "Student Attendance List", icon: Eye, path: "/teacher/student-attendance" },
-    ]
+      {
+        id: "studentAttendance",
+        label: "Student Attendance List",
+        icon: Eye,
+        path: "/teacher/student-attendance",
+      },
+    ],
   },
   assignments: {
     title: "Assign",
-     icon: Clipboard,
+    icon: Clipboard,
     items: [
-      { id: "roleAssign", label: "Role Assign", icon: UserCog, path: "/teacher/role-assign" },
-      { id: "goalAssign", label: "Goal Assign", icon: Target, path: "/teacher/goal-assign" },
-      { id: "myTask", label: "My Task", icon: ClipboardCheck, path: "/teacher/my-tasks" },
-    ]
+      {
+        id: "roleAssign",
+        label: "Role Assign",
+        icon: UserCog,
+        path: "/teacher/role-assign",
+      },
+      {
+        id: "goalAssign",
+        label: "Goal Assign",
+        icon: Target,
+        path: "/teacher/goal-assign",
+      },
+      {
+        id: "myTask",
+        label: "My Task",
+        icon: ClipboardCheck,
+        path: "/teacher/my-tasks",
+      },
+    ],
   },
   examinations: {
     title: "Examinations",
     icon: Award,
     items: [
-      { id: "allPastExams", label: "All Past Examinations List", icon: FileText, path: "/teacher/past-exams" },
-    ]
+      {
+        id: "allPastExams",
+        label: "All Past Examinations List",
+        icon: FileText,
+        path: "/teacher/past-exams",
+      },
+    ],
   },
 };
 
@@ -226,33 +788,69 @@ const studentSections = {
     title: "Profile Management",
     icon: UserCog,
     items: [
-      { id: "studentDashboard", label: "Dashboard", icon: Home, path: "/student-dashboard" },
-      { id: "referralAmount", label: "Referral Amount", icon: DollarSign, path: "/student/referral-amount" },
-      { id: "myAttendance", label: "My Attendance Report", icon: CalendarCheck, path: "/student/attendance" },
-      { id: "leaveRequest", label: "Leave Request", icon: Calendar, path: "/student/leave-request" },
-    ]
+      {
+        id: "studentDashboard",
+        label: "Dashboard",
+        icon: Home,
+        path: "/student-dashboard",
+      },
+      {
+        id: "referralAmount",
+        label: "Referral Amount",
+        icon: DollarSign,
+        path: "/student/referral-amount",
+      },
+      {
+        id: "myAttendance",
+        label: "My Attendance Report",
+        icon: CalendarCheck,
+        path: "/student/attendance",
+      },
+      {
+        id: "leaveRequest",
+        label: "Leave Request",
+        icon: Calendar,
+        path: "/student/leave-request",
+      },
+    ],
   },
   coursesInfo: {
     title: "Courses Information",
     icon: BookOpen,
     items: [
-      { id: "myCourses", label: "My Courses", icon: Book, path: "/student/my-courses" },
-      { id: "myExams", label: "My Exams", icon: Award, path: "/student/my-exams" },
-    ]
+      {
+        id: "myCourses",
+        label: "My Courses",
+        icon: Book,
+        path: "/student/my-courses",
+      },
+      {
+        id: "myExams",
+        label: "My Exams",
+        icon: Award,
+        path: "/student/my-exams",
+      },
+    ],
   },
   examinations: {
     title: "Examinations",
     icon: Award,
     items: [
-      { id: "allPastExams", label: "All Past Examinations List", icon: FileText, path: "/student/past-exams" },
-    ]
+      {
+        id: "allPastExams",
+        label: "All Past Examinations List",
+        icon: FileText,
+        path: "/student/past-exams",
+      },
+    ],
   },
 };
 
 const getRoleSpecificSections = (role) => {
   const userRole = role.toLowerCase();
-  if (userRole === 'teacher') return teacherSections;
-  if (userRole === 'student') return studentSections;
+  if (userRole === "teacher") return teacherSections;
+  if (userRole === "student") return studentSections;
+  if (userRole === "admin") return branchSections;
   return adminSections;
 };
 
@@ -282,8 +880,8 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, [isOpen, onToggle]);
 
-  const role = userData?.role?.toLowerCase() || 'student';
-   const sections = getRoleSpecificSections(role);
+  const role = userData?.role?.toLowerCase() || "student";
+  const sections = getRoleSpecificSections(role);
 
   useEffect(() => {
     const initialState = {};
@@ -293,7 +891,9 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
     setExpandedSections(initialState);
   }, [sections]);
 
-  const isAdminRole = ['admin', 'superadmin', 'branch'].includes(role);
+  // const isAdminRole = ["admin", "superadmin", "branch"].includes(role);
+  const isAdminRole = ["superadmin"].includes(role);
+  const isUserRole = ["teacher", "student"].includes(role);
 
   const handleModeToggle = () => {
     if (!isAdminRole) return;
@@ -314,19 +914,21 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
       console.error(`Icon is undefined for label: ${label}`);
       Icon = HelpCircle; // Fallback icon
     }
-    
+
     const active = location.pathname === to || isActive;
 
     return (
       <Link
         to={to}
         className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all duration-200 ${
-          active 
-            ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 font-semibold border-l-3 border-blue-500 shadow-sm' 
-            : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
-        } ${isOpen ? 'ml-2' : 'justify-center'}`}
+          active
+            ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 font-semibold border-l-3 border-blue-500 shadow-sm"
+            : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
+        } ${isOpen ? "ml-2" : "justify-center"}`}
       >
-        <Icon className={`w-5 h-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+        <Icon
+          className={`w-5 h-5 ${active ? "text-blue-600" : "text-gray-500"}`}
+        />
         {isOpen && (
           <span className="text-sm font-medium truncate">{label}</span>
         )}
@@ -350,10 +952,14 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
             className="w-full flex items-center justify-between mb-1 px-2 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 group/section"
           >
             <div className="flex items-center gap-2">
-              <div className={`p-1.5 rounded-md ${hasActiveItem ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
+              <div
+                className={`p-1.5 rounded-md ${hasActiveItem ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-600"}`}
+              >
                 {SectionIcon && <SectionIcon className="w-3.5 h-3.5" />}
               </div>
-              <span className={`text-xs font-semibold uppercase tracking-wide ${hasActiveItem ? "text-blue-600" : "text-gray-600"}`}>
+              <span
+                className={`text-xs font-semibold uppercase tracking-wide ${hasActiveItem ? "text-blue-600" : "text-gray-600"}`}
+              >
                 {title}
               </span>
             </div>
@@ -408,27 +1014,33 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
     );
   };
 
-  const searchResults = isAdminRole ? Object.entries(sections).flatMap(
-    ([key, section]) => {
-      const matchingItems = section.items.filter((item) =>
-        item.label.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      if (matchingItems.length > 0 || section.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-        return matchingItems.map((item) => ({
-          ...item,
-          sectionKey: key,
-          sectionTitle: section.title,
-        }));
-      }
-      return [];
-    }
-  ) : [];
+  const searchResults = isAdminRole
+    ? Object.entries(sections).flatMap(([key, section]) => {
+        const matchingItems = section.items.filter((item) =>
+          item.label.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+        if (
+          matchingItems.length > 0 ||
+          section.title.toLowerCase().includes(searchTerm.toLowerCase())
+        ) {
+          return matchingItems.map((item) => ({
+            ...item,
+            sectionKey: key,
+            sectionTitle: section.title,
+          }));
+        }
+        return [];
+      })
+    : [];
 
   const getDashboardPath = () => {
-    switch(role) {
-      case 'student': return "/student-dashboard";
-      case 'teacher': return "/teacher-dashboard";
-      default: return websiteMode ? "/website-dashboard" : "/dashboard";
+    switch (role) {
+      case "student":
+        return "/student-dashboard";
+      case "teacher":
+        return "/teacher-dashboard";
+      default:
+        return websiteMode ? "/website-dashboard" : "/dashboard";
     }
   };
 
@@ -466,7 +1078,8 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                   className="w-8 h-8 rounded-md object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
+                    e.target.src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
                   }}
                 />
               </div>
@@ -475,7 +1088,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                   {role.charAt(0).toUpperCase() + role.slice(1)} Panel
                 </span>
                 <span className="text-xs text-gray-500 font-medium truncate max-w-[140px]">
-                  {userData?.name || 'User'}
+                  {userData?.name || "User"}
                   {isAdminRole && ` • ${websiteMode ? "Website" : "Course"}`}
                 </span>
               </div>
@@ -489,7 +1102,8 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                   className="w-8 h-8 rounded-md object-cover"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
+                    e.target.src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'%3E%3C/path%3E%3C/svg%3E";
                   }}
                 />
               </div>
@@ -545,7 +1159,11 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
                         location.pathname === result.path ? "bg-blue-50" : ""
                       }`}
                     >
-                      {result.icon && <result.icon className={`w-4 h-4 ${location.pathname === result.path ? "text-blue-600" : "text-gray-500"}`} />}
+                      {result.icon && (
+                        <result.icon
+                          className={`w-4 h-4 ${location.pathname === result.path ? "text-blue-600" : "text-gray-500"}`}
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
                         <div
                           className={`text-sm font-medium truncate ${
@@ -586,17 +1204,19 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
         )}
 
         <nav className="flex-1 overflow-y-auto py-4 px-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-          <Link
-            to={getDashboardPath()}
-            className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all ${
-              location.pathname === getDashboardPath() 
-                ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 font-semibold border-l-3 border-blue-500' 
-                : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
-            } ${isOpen ? 'ml-2' : 'justify-center'}`}
-          >
-            <Home className="w-5 h-5" />
-            {isOpen && <span className="text-sm font-medium">Dashboard</span>}
-          </Link>
+          {!isUserRole && (
+            <Link
+              to={getDashboardPath()}
+              className={`flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all ${
+                location.pathname === getDashboardPath()
+                  ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 font-semibold border-l-3 border-blue-500"
+                  : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
+              } ${isOpen ? "ml-2" : "justify-center"}`}
+            >
+              <Home className="w-5 h-5" />
+              {isOpen && <span className="text-sm font-medium">Dashboard</span>}
+            </Link>
+          )}
 
           <div className="">
             {Object.entries(sections).map(([key, section]) => (
@@ -620,7 +1240,7 @@ const Sidebar = ({ isOpen, onToggle, websiteMode, onModeToggle }) => {
               <User className="w-5 h-5" />
               {isOpen && <span className="text-sm font-medium">Profile</span>}
             </Link>
-            
+
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 transition-colors"

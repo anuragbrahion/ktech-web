@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const isLive = true;
+const isLive = false;
 
 export const apiUrl = isLive
     ? "http://147.93.19.238:4001/api/v1"
-    : "http://192.168.29.106:8004/api/v1";
+    : "http://localhost:4001/api/v1";
 
 const axiosPublic = axios.create({
     baseURL: apiUrl,
