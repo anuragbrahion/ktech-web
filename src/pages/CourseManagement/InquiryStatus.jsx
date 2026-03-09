@@ -114,11 +114,9 @@ export default function InquiryStatusManagement({roleData}) {
   const [deletingStatus, setDeletingStatus] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [filters, setFilters] = useState({
-    search: '',
-    status: ''
-  });
   const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+const [searchInput, setSearchInput] = useState('');
 
   const statusListData = useSelector(state => state.branch?.inquiryStatusListData);
   const enableDisableData = useSelector(state => state.branch?.enableDisableInquiryStatusData);
@@ -131,27 +129,43 @@ export default function InquiryStatusManagement({roleData}) {
   }, []);
 
   useEffect(() => {
-    if (!showModal) {
-      fetchStatuses();
-    }
-  }, [currentPage, enableDisableData, deleteData, createData, updateData]);
+  const delayDebounce = setTimeout(() => {
+    setSearch(searchInput);
+    setCurrentPage(1);
+  }, 500);
 
-  const fetchStatuses = () => {
-    setLoading(true);
-    const params = {
-      page: currentPage,
-      size: itemsPerPage,
-      ...(filters.search && { search: filters.search }),
-      ...(filters.status && { status: filters.status })
-    };
-    
-    dispatch(inquiryStatusList(params)).then((action) => {
-      if (action.error) {
-        toast.error(action.payload || 'Failed to fetch statuses');
-      }
-      setLoading(false);
-    });
+  return () => clearTimeout(delayDebounce);
+}, [searchInput]);
+
+ useEffect(() => {
+  if (!showModal) {
+    fetchStatuses();
+  }
+}, [
+  currentPage,
+  search,
+  enableDisableData,
+  deleteData,
+  createData,
+  updateData
+]);
+
+const fetchStatuses = () => {
+  setLoading(true);
+
+  const params = {
+    page: currentPage,
+    size: itemsPerPage,
+    keyWord: search
   };
+
+  dispatch(inquiryStatusList(params)).then((action) => {
+    if (action.error) {
+      toast.error(action.payload || 'Failed to fetch statuses');
+    }
+    setLoading(false);
+  });
+};
 
   const handleAddStatusClick = () => {
     setEditingStatus(null);
@@ -237,24 +251,6 @@ export default function InquiryStatusManagement({roleData}) {
     }
   };
 
-  const handleFilterChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFilter = () => {
-    setCurrentPage(1);
-    fetchStatuses();
-  };
-
-  const resetFilters = () => {
-    setFilters({
-      search: '',
-      status: ''
-    });
-    setCurrentPage(1);
-    fetchStatuses();
-  };
-
   const getStatusColor = (status) => {
     const statusLower = status.name.toLowerCase();
     
@@ -333,75 +329,32 @@ export default function InquiryStatusManagement({roleData}) {
         <h1 className="text-3xl font-bold text-gray-900">Status Management</h1>
         <p className="text-gray-600 mt-2">Manage inquiry statuses and their configurations</p>
       </div>
+ 
+     <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
 
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Filter Statuses</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                placeholder="Search statuses..."
-                disabled={loading}
-              />
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-            </div>
-          </div>
+  {/* Search */}
+  <div className="relative w-full md:w-80">
+    <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+    <input
+      type="text"
+      placeholder="Search status..."
+      value={searchInput}
+      onChange={(e) => setSearchInput(e.target.value)}
+      className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              System Status
-            </label>
-            <select
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all"
-              disabled={loading}
-            >
-              <option value="">--- no select ---</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-          </div>
+  {/* Add Button */}
+  <button
+    onClick={handleAddStatusClick}
+    className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+    disabled={loading}
+  >
+    <span>Add Status</span>
+    <Plus className="w-5 h-5" />
+  </button>
 
-          <div className="flex items-end gap-2">
-            <button
-              onClick={handleFilter}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50"
-              disabled={loading}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Filter className="w-4 h-4" />
-                {loading ? 'Loading...' : 'Filter'}
-              </div>
-            </button>
-            <button
-              onClick={resetFilters}
-              className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
-              disabled={loading}
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end items-center mb-6">
-        <button
-          onClick={handleAddStatusClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
-          disabled={loading}
-        >
-          <span>Add Status</span>
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
+</div>
 
       {loading && (
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -434,52 +387,7 @@ export default function InquiryStatusManagement({roleData}) {
             </tr>
           )}
         />
-      )}
-
-      <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mt-8">
-        <h3 className="text-lg font-semibold text-blue-700 mb-4 flex items-center gap-2">
-          <Tag className="w-5 h-5" />
-          Status Color Guide
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
-            <span className="text-black text-sm">Active</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
-            <span className="text-black text-sm">Pending</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
-            <span className="text-black text-sm">Cancelled</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-gray-500 mr-2"></span>
-            <span className="text-black text-sm">Inactive</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
-            <span className="text-black text-sm">Converted</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
-            <span className="text-black text-sm">Follow-up</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-indigo-500 mr-2"></span>
-            <span className="text-black text-sm">Enrolled</span>
-          </div>
-          <div className="flex items-center">
-            <span className="w-3 h-3 rounded-full bg-pink-500 mr-2"></span>
-            <span className="text-black text-sm">Not Interested</span>
-          </div>
-        </div>
-        <p className="text-sm text-gray-500 mt-4">
-          Status colors are determined automatically based on status name keywords.
-        </p>
-      </div>
-
+      )} 
       {showModal && (
         <StatusModal
           status={editingStatus}

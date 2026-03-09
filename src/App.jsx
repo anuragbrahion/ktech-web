@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -92,6 +92,8 @@ import StudentPastExams from "./pages/Students/PastExams";
 import StudentMyCourses from "./pages/Students/MyCourses";
 import StudentMyExams from "./pages/Students/MyExams";
 import StudentReferralAmount from "./pages/Students/ReferralAmount";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "./redux/slices/AuthSlice";
 
 const MainLayout = ({
   children,
@@ -125,6 +127,7 @@ const MainLayout = ({
 };
 
 const App = () => {
+  const dispatch = useDispatch();
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const [websiteMode, setWebsiteMode] = React.useState(false);
   const toggleWebsiteMode = () => setWebsiteMode(!websiteMode);
@@ -137,6 +140,15 @@ const App = () => {
 
   const role = getUserData();
   const roleData = role?.role?.toLowerCase();
+
+    useEffect(() => {
+     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+    const userData = JSON.parse(localStorage.getItem('data') || sessionStorage.getItem('data') || 'null');
+    if (token && userData) {
+      dispatch(setCredentials({ token, role }));
+    }
+  }, [dispatch]);
 
   const renderMainLayout = (Component) => (
     <MainLayout

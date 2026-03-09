@@ -78,6 +78,8 @@ export default function Login() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotErrors, setForgotErrors] = useState({});
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
 
   const validateLogin = () => {
     const e = {};
@@ -119,14 +121,15 @@ export default function Login() {
           role: res.data.role,
           id: res.data.id,
         };
-
-        // Store in sessionStorage
-        sessionStorage.setItem("data", JSON.stringify(userData));
-        sessionStorage.setItem("token", res.data.token);
-
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("data", JSON.stringify(userData));
+        storage.setItem("token", res.data.token);
+        if (rememberMe) {
+          localStorage.setItem("persistAuth", "true");
+        } else {
+          sessionStorage.setItem("persistAuth", "false");
+        }
         toast.success("Login successful!");
-
-        // Redirect based on role
         setTimeout(() => {
           switch (res.data.role.toLowerCase()) {
             case "student":
@@ -265,11 +268,10 @@ export default function Login() {
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   placeholder="Enter your registered email"
-                  className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
-                    forgotErrors.email
+                  className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${forgotErrors.email
                       ? "border-red-400 focus:ring-red-300"
                       : ""
-                  }`}
+                    }`}
                 />
               </div>
               {forgotErrors.email && (
@@ -338,9 +340,8 @@ export default function Login() {
                   value={email}
                   placeholder={c.placeholder}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
-                    errors.email ? "border-red-400 focus:ring-red-300" : ""
-                  }`}
+                  className={`w-full pl-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${errors.email ? "border-red-400 focus:ring-red-300" : ""
+                    }`}
                 />
               </div>
               {errors.email && (
@@ -360,9 +361,8 @@ export default function Login() {
                   type={isPasswordVisible ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full pl-9 pr-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${
-                    errors.password ? "border-red-400 focus:ring-red-300" : ""
-                  }`}
+                  className={`w-full pl-9 pr-9 py-2.5 text-sm rounded-lg border focus:ring-1 ${errors.password ? "border-red-400 focus:ring-red-300" : ""
+                    }`}
                 />
 
                 <button
@@ -392,14 +392,30 @@ export default function Login() {
                 Forgot Password?
               </button>
             </div>
-
+            <div className="flex items-center justify-between mb-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-600">Remember me</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Forgot Password?
+              </button>
+            </div>
             <button
               // onClick={submitLogin}
               type="submit"
               disabled={loading}
-              className={`w-full mt-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r ${c.btn} ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`w-full mt-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r ${c.btn} ${loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>

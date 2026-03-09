@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from "react";
 
-const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendance, onViewAttendance, teachData }) => {
+const AttendanceCalendarModal = ({ 
+  isOpen, 
+  onClose, 
+  studentData, 
+  onMarkAttendance, 
+  onViewAttendance,
+  attendanceData, 
+}) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [attendanceStatus, setAttendanceStatus] = useState('');
   const [attendanceRecords, setAttendanceRecords] = useState([]);
@@ -9,37 +17,29 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
   const [viewMode, setViewMode] = useState('calendar');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+
   const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
   const month = currentMonth.getMonth();
   const year = currentMonth.getFullYear();
 
-  const newTechData = teachData?.data?.data
-
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (year, month) => {
-    return new Date(year, month, 1).getDay();
-  };
-
   useEffect(() => {
-    if (teacherData && isOpen) {
-
-      const date = new Date(currentMonth);
-      const year = date.getFullYear();
-      const month = date.getMonth();
+    if (studentData && isOpen) {
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
-      const formattedStart = formatDate(firstDay);
-      const formattedEnd = formatDate(lastDay);
-
-      setStartDate(formattedStart);
-      setEndDate(formattedEnd);
-
-      fetchAttendanceData(formattedStart, formattedEnd);
+      
+      setStartDate(formatDate(firstDay));
+      setEndDate(formatDate(lastDay));
+      
+      fetchAttendanceData(formatDate(firstDay), formatDate(lastDay));
     }
-  }, [teacherData, isOpen, currentMonth]);
+  }, [studentData, isOpen, currentMonth]);
+
+  useEffect(() => {
+    if (attendanceData?.attendance) {
+      setAttendanceRecords(attendanceData.attendance);
+    }
+  }, [attendanceData]);
 
   const formatDate = (date) => {
     const d = new Date(date);
@@ -57,21 +57,27 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
     return `${year}-${month}-${day}`;
   };
 
-  const fetchAttendanceData = async (start, end) => {
-    if (!teacherData) return;
+  const formatDateForDisplay = (dateStr) => {
+    if (!dateStr) return '';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  };
 
+  const fetchAttendanceData = async (start, end) => {
+    if (!studentData) return;
+    
     setLoading(true);
     try {
-      const data = await onViewAttendance(teacherData.id || teacherData._id, start, end);
-      if (data) {
-        console.log("0000000000000000000000000000000000", data)
+      const data = await onViewAttendance(
+        studentData.id || studentData._id || studentData.user?._id, 
+        start, 
+        end
+      );
+      if (data && data.attendance) {
         setAttendanceRecords(data.attendance);
-      } else {
-        setAttendanceRecords([]);
       }
     } catch (error) {
       console.error('Error fetching attendance:', error);
-      setAttendanceRecords([]);
     } finally {
       setLoading(false);
     }
@@ -85,17 +91,17 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
 
   const handleStatusSubmit = async (e) => {
     e.preventDefault();
-    if (selectedDate && attendanceStatus && teacherData) {
+    if (selectedDate && attendanceStatus && studentData) {
       setLoading(true);
       try {
         await onMarkAttendance(
-          teacherData.id || teacherData._id,
+          studentData.id || studentData._id || studentData.user?._id,
           attendanceStatus,
           formatDateForAPI(selectedDate)
         );
-
+        
         await fetchAttendanceData(startDate, endDate);
-
+        
         setSelectedDate('');
         setAttendanceStatus('');
       } catch (error) {
@@ -113,59 +119,55 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
     }
   };
 
-  const getAttendanceColor = (dateStr, dayIndex) => {
-    if (dayIndex === 0) {
-      return "bg-gray-300 text-black font-semibold";
-    }
-
-    if (!newTechData || newTechData.length === 0) {
-      return "bg-gray-100 hover:bg-gray-200 text-gray-900";
-    }
-
-    const record = newTechData.find((r) => {
-      const [day, month, year] = r.date.split("-");
-      const formattedAPI = `${year}-${month}-${day}`;
-      return formattedAPI === dateStr;
+  const getAttendanceColor = (date) => {
+    const record = attendanceRecords.find(r => {
+      const recordDate = new Date(r.date).toDateString();
+      const currentDate = new Date(date).toDateString();
+      return recordDate === currentDate;
     });
-
-    if (!record) {
-      return "bg-gray-100 hover:bg-gray-200 text-gray-900";
+    
+    if (record) {
+      switch(record.status) {
+        case 'Present': return 'bg-green-500 text-white';
+        case 'Absent': return 'bg-red-500 text-white';
+        case 'Leave': return 'bg-yellow-500 text-white';
+        case 'Half-day': return 'bg-orange-500 text-white';
+        default: return 'bg-gray-100 hover:bg-gray-200 text-gray-900';
+      }
     }
-
-    switch (record.status) {
-      case "Present":
-        return "bg-green-500 text-white";
-      case "Absent":
-        return "bg-red-500 text-white";
-      case "Leave":
-        return "bg-yellow-500 text-white";
-      case "Half-day":
-        return "bg-orange-500 text-white";
-      default:
-        return "bg-gray-200 text-gray-900";
-    }
+    return 'bg-gray-100 hover:bg-gray-200 text-gray-900';
   };
+
+  const getDaysInMonth = (year, month) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+  
+  const getFirstDayOfMonth = (year, month) => {
+    return new Date(year, month, 1).getDay();
+  };
+
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);
-
+  
   const dates = [];
   for (let i = 0; i < firstDay; i++) {
     dates.push(null);
   }
-
+  
   for (let i = 1; i <= daysInMonth; i++) {
     dates.push(i);
   }
 
-
-  if (!isOpen || !teacherData) return null;
+  if (!isOpen || !studentData) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div className="bg-gradient-to-r from-sky-500 to-sky-600 text-white p-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Attendance Details - {teacherData.user.name}</h2>
+            <h2 className="text-xl font-semibold">
+              Attendance Details - {studentData.user?.name || studentData.name}
+            </h2>
             <button
               onClick={onClose}
               className="text-white hover:text-gray-200 transition-colors"
@@ -176,25 +178,27 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
             </button>
           </div>
         </div>
-
+        
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
           <div className="flex justify-end mb-4">
             <div className="inline-flex rounded-md shadow-sm">
               <button
                 onClick={() => setViewMode('calendar')}
-                className={`px-4 py-2 text-sm font-medium rounded-l-md ${viewMode === 'calendar'
+                className={`px-4 py-2 text-sm font-medium rounded-l-md ${
+                  viewMode === 'calendar'
                     ? 'bg-sky-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
-                  } border border-gray-300`}
+                } border border-gray-300`}
               >
                 Calendar View
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 text-sm font-medium rounded-r-md ${viewMode === 'list'
+                className={`px-4 py-2 text-sm font-medium rounded-r-md ${
+                  viewMode === 'list'
                     ? 'bg-sky-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-50'
-                  } border border-l-0 border-gray-300`}
+                } border border-l-0 border-gray-300`}
               >
                 List View
               </button>
@@ -205,15 +209,15 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Mark Attendance</h3>
             <form onSubmit={handleStatusSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-gray-700 mb-2 font-medium">Teacher Name</label>
+                <label className="block text-gray-700 mb-2 font-medium">Student Name</label>
                 <input
                   type="text"
-                  value={teacherData.user.name}
+                  value={studentData.user?.name || studentData.name || ''}
                   readOnly
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900"
                 />
               </div>
-
+              
               <div>
                 <label className="block text-gray-700 mb-2 font-medium">Status</label>
                 <select
@@ -229,7 +233,7 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
                   <option value="Half-day">Half-day</option>
                 </select>
               </div>
-
+              
               <div>
                 <label className="block text-gray-700 mb-2 font-medium">Date</label>
                 <input
@@ -241,7 +245,7 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
                   max={new Date().toISOString().split('T')[0]}
                 />
               </div>
-
+              
               <div className="md:col-span-3">
                 <button
                   type="submit"
@@ -254,7 +258,6 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
             </form>
           </div>
 
-          {/* Date Range Filter */}
           <div className="mb-6 bg-white border border-gray-200 p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Filter Attendance</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -296,6 +299,7 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
           {viewMode === 'calendar' ? (
             <div className="mt-8">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Attendance Calendar</h3>
+              
               <div className="bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex justify-between items-center mb-4">
                   <button
@@ -314,7 +318,7 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
                     »
                   </button>
                 </div>
-
+                
                 <div className="grid grid-cols-7 gap-1 mb-2">
                   {days.map((day, index) => (
                     <div key={index} className="text-center font-semibold text-gray-700 py-2">
@@ -322,32 +326,28 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
                     </div>
                   ))}
                 </div>
-
+                
                 <div className="grid grid-cols-7 gap-1">
                   {dates.map((day, index) => {
-                    const dateObj = day ? new Date(year, month, day) : null;
-                    const dateStr = dateObj
-                      ? dateObj.toISOString().split("T")[0]
-                      : null;
-
-                    const dayIndex = dateObj ? dateObj.getDay() : null;
+                    const dateStr = day ? new Date(year, month, day).toISOString().split('T')[0] : null;
                     return (
                       <div
                         key={index}
                         onClick={() => handleDateClick(day)}
-                        className={`text-center py-3 rounded cursor-pointer transition-colors ${day
+                        className={`text-center py-3 rounded cursor-pointer transition-colors ${
+                          day
                             ? selectedDate === dateStr
-                              ? "ring-2 ring-sky-500 " + getAttendanceColor(dateStr, dayIndex)
-                              : getAttendanceColor(dateStr, dayIndex)
-                            : "invisible"
-                          }`}
+                              ? 'ring-2 ring-sky-500 ' + getAttendanceColor(dateStr)
+                              : getAttendanceColor(dateStr)
+                            : 'invisible'
+                        }`}
                       >
                         {day || ''}
                       </div>
                     );
                   })}
                 </div>
-
+                
                 <div className="mt-6 flex flex-wrap justify-center gap-4">
                   <div className="flex items-center">
                     <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
@@ -365,82 +365,61 @@ const AttendanceCalendarModal = ({ isOpen, onClose, teacherData, onMarkAttendanc
                     <div className="w-4 h-4 bg-orange-500 rounded mr-2"></div>
                     <span className="text-gray-700">Half-day</span>
                   </div>
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
-                    <span className="text-gray-700">Sunday</span>
-                  </div>
                 </div>
               </div>
             </div>
           ) : (
-           <div className="mt-8">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4">
-      Attendance Records
-    </h3>
-
-    {loading ? (
-      <div className="text-center py-8">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
-        <p className="mt-2 text-gray-600">
-          Loading attendance records...
-        </p>
-      </div>
-    ) : newTechData && newTechData.length > 0 ? (
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="py-3 px-4 text-left border-b">Date</th>
-              <th className="py-3 px-4 text-left border-b">Status</th>
-              <th className="py-3 px-4 text-left border-b">Total Count</th>
-            </tr>
-          </thead>
-          <tbody>
-            {newTechData.map((record, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                {/* Date (already DD-MM-YYYY from API) */}
-                <td className="py-3 px-4 border-b text-gray-900">
-                  {record.date}
-                </td>
-
-                {/* Status Badge */}
-                <td className="py-3 px-4 border-b">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      record.status === "Present"
-                        ? "bg-green-100 text-green-800"
-                        : record.status === "Absent"
-                        ? "bg-red-100 text-red-800"
-                        : record.status === "Leave"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-orange-100 text-orange-800"
-                    }`}
-                  >
-                    {record.status}
-                  </span>
-                </td>
-
-                {/* Count */}
-                <td className="py-3 px-4 border-b text-gray-900">
-                  {record.count || 1}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    ) : (
-      <div className="text-center py-8 bg-gray-50 rounded-lg">
-        <p className="text-gray-600">
-          No attendance records found for the selected period.
-        </p>
-      </div>
-    )}
-  </div>
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Attendance Records</h3>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500"></div>
+                  <p className="mt-2 text-gray-600">Loading attendance records...</p>
+                </div>
+              ) : attendanceRecords.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="py-3 px-4 text-left text-gray-700 font-semibold border-b">Date</th>
+                        <th className="py-3 px-4 text-left text-gray-700 font-semibold border-b">Status</th>
+                        <th className="py-3 px-4 text-left text-gray-700 font-semibold border-b">Marked By</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceRecords.map((record, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="py-3 px-4 text-gray-900 border-b">
+                            {formatDateForDisplay(record.date?.split('T')[0])}
+                          </td>
+                          <td className="py-3 px-4 border-b">
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              record.status === 'Present' ? 'bg-green-100 text-green-800' :
+                              record.status === 'Absent' ? 'bg-red-100 text-red-800' :
+                              record.status === 'Leave' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-orange-100 text-orange-800'
+                            }`}>
+                              {record.status}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-gray-900 border-b">
+                            {record.markedBy || 'System'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                  <p className="text-gray-600">No attendance records found for the selected period.</p>
+                </div>
+              )}
+            </div>
           )}
-
+          
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex justiāfy-end">
+            <div className="flex justify-end">
               <button
                 onClick={onClose}
                 className="px-6 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
