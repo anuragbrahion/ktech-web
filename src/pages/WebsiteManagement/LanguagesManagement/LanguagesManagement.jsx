@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   websiteLanguagesList,
@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { Edit2, Trash2 } from "lucide-react";
 import Loader from "../../../components/Loader/Loader";
 import { formatDateForTable } from "../../../utils/globalFunction";
+import Table from "../../../components/Atoms/TableData/TableData";
 
 export default function LanguageManagement({ roleData }) {
   const dispatch = useDispatch();
@@ -23,8 +24,8 @@ export default function LanguageManagement({ roleData }) {
     name: "",
     status: true,
   });
-
-  // Redux selectors
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const websiteLanguagesListData = useSelector(
     (state) => state.website?.websiteLanguagesListData,
   );
@@ -40,23 +41,23 @@ export default function LanguageManagement({ roleData }) {
   const updateWebsiteLanguagesData = useSelector(
     (state) => state.website?.updateWebsiteLanguagesData,
   );
-
-  const isLoading = websiteLanguagesListData?.loading;
+  const isLoading = useSelector((state) => state.website?.loading);
   const loading =
     createWebsiteLanguagesData?.loading || updateWebsiteLanguagesData?.loading;
-
   const languages = websiteLanguagesListData?.data?.data?.list || [];
-  const totalEntries =
-    websiteLanguagesListData?.data?.data?.total || languages.length;
+  const totalCount = websiteLanguagesListData?.data?.data?.total || 0;
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const tableHeaders = ["Language", "Branch", "Status", "Action"];
+
   useEffect(() => {
     fetchLanguages();
-  }, []);
+  }, [currentPage]);
 
   const fetchLanguages = () => {
     dispatch(
       websiteLanguagesList({
-        page: 1,
-        size: 10,
+        page: currentPage,
+        size: itemsPerPage,
         select: "name status adminId updatedAt",
         populate: "adminId:name,role",
       }),
@@ -163,16 +164,6 @@ export default function LanguageManagement({ roleData }) {
     setDeleteTarget(null);
   };
 
-  const getFormattedDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const renderToggleSwitch = (language) => {
     const isActive = language.status == true;
     return (
@@ -213,120 +204,91 @@ export default function LanguageManagement({ roleData }) {
     );
   };
 
-  return (
-    <div className="">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8 flex justify-between">
+  const tableData = useMemo(
+    () =>
+      languages.map((language) => [
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold mr-3 capitalize">
+            {language.name?.charAt(0) || "?"}
+          </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Language Management
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Manage application languages and their status
-            </p>
-          </div>
-          <div className="flex justify-end items-center mb-6">
-            <button
-              onClick={handleAddLanguageClick}
-              className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-            >
-              <span>Add Language</span>
-              <span className="text-xl font-bold">+</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded shadow-lg overflow-hidden border border-gray-200">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader />
+            <div className="font-medium text-gray-900">
+              {language.name || "Unnamed Language"}
             </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-blue-600 to-blue-500 text-white">
-                      <th className="px-6 py-4 text-left font-semibold">
-                        Language
-                      </th>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        Status
-                      </th>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {languages.length > 0 ? (
-                      languages.map((language, index) => (
-                        <tr
-                          key={language.id || index}
-                          className={`border-b border-gray-100 hover:bg-gray-50 
-                              transition-colors ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
-                        >
-                          <td className="px-6 py-4 capitalize">
-                            <div className="flex items-center">
-                              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold mr-3">
-                                {language.name?.charAt(0) || "?"}
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {language.name || "Unnamed Language"}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  Last Updated:{" "}
-                                  {formatDateForTable(language.updatedAt)}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={`px-3 py-1 rounded-full text-sm font-medium ${language.status ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
-                            >
-                              {language.status ? "Active" : "Inactive"}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            {renderToggleSwitch(language)}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="3"
-                          className="px-6 py-12 text-center text-gray-500"
-                        >
-                          No languages found. Add your first language!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+            <div className="text-sm text-gray-500">
+              Last Updated: {formatDateForTable(language.updatedAt)}
+            </div>
+          </div>
+        </div>,
+        !language?.adminId ? (
+          "N/A"
+        ) : (
+          <div>
+            <div className="font-medium text-gray-900">
+              {language.adminId.name || "Branch"}
+            </div>
+            <div className="text-sm text-gray-500">
+              {language.adminId.role.toLowerCase() === "superadmin"
+                ? "Main Branch"
+                : "Branch"}
+            </div>
+          </div>
+        ),
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${language.status ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"}`}
+        >
+          {language.status ? "Active" : "Inactive"}
+        </span>,
 
-              {totalEntries > 10 && (
-                <div className="flex justify-end items-center px-6 py-4 border-t border-gray-200 bg-gray-50">
-                  <div className="flex gap-2">
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-all">
-                      Previous
-                    </button>
-                    <button className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-all">
-                      1
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-all">
-                      Next
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+        renderToggleSwitch(language),
+      ]),
+    [languages],
+  );
+
+  return (
+    <>
+      <Loader loading={isLoading} />
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Language Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Manage application languages and their status
+          </p>
+        </div>
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddLanguageClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <span>Add Language</span>
+            <span className="text-xl font-bold">+</span>
+          </button>
         </div>
       </div>
+
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalCount}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showAddPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -418,6 +380,6 @@ export default function LanguageManagement({ roleData }) {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

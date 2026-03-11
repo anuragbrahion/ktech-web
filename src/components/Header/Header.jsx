@@ -12,7 +12,18 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/dashboard": "Dashboard",
       "/student-dashboard": "Dashboard",
       "/website-dashboard": "Website Dashboard",
-      "/home-page": "Home Page Editor",
+      "/home-page": "Website Management > Home Page",
+      "/blogs": "Website Management > Blogs",
+      "/blogs-categrory": "Website Management > Blogs >  Category",
+      "/branches": "Website Management > Branches",
+      "/testimonials": "Website Management > Testimonials",
+      "/web-about": "Website Management > About Us",
+      "/why-us": "Website Management > Why Us",
+      "/terms-conditions": "Website Management > Terms & Conditions",
+      "/course-faq":"Website Management > Course FAQ",
+      "/privacy-policy": "Website Management > Privacy Policy",
+      "/company-details": "Website Management > Company Details",
+
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
       "/languages": "Languages",
@@ -35,6 +46,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/student/past-exams": "Exam Result",
       "/student/my-courses": "My Courses",
       "/student/referral-amount": "Referral Amount",
+      "/language":"Website Management > Languages",
     };
 
     return (
