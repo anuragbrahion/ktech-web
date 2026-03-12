@@ -9,6 +9,7 @@ import {
   teacherMarkAttendance,
   attendanceList
 } from '../../redux/slices/examination';
+import { toast } from 'react-toastify';
 
 const MarkTeacherAttendance = () => {
   const dispatch = useDispatch();
@@ -42,8 +43,7 @@ const MarkTeacherAttendance = () => {
           page: currentPage,
           size: itemsPerPage,
           type: "Teacher",
-          ...(searchTerm && { keyWord: searchTerm }),
-          searchFields: "name phoneNo role"
+          ...(searchTerm && { keyWord: searchTerm })
         })
       ).unwrap();
       if (result) {
@@ -75,11 +75,11 @@ const MarkTeacherAttendance = () => {
         date
       })).unwrap();
       if (result) {
-        alert('Attendance marked successfully');
+        toast.success('Attendance marked successfully');
       }
     } catch (error) {
       console.error('Error marking attendance:', error);
-      alert('Failed to mark attendance');
+      toast.error('Failed to mark attendance');
     }
   };
 
@@ -106,8 +106,7 @@ const MarkTeacherAttendance = () => {
     'Check Attendance'
   ];
 
-  console.log("total", totalPages);
-
+ 
   return (
     <div className="">
       <div className="mb-8">
@@ -116,7 +115,7 @@ const MarkTeacherAttendance = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        {/* <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div className="flex-1">
             <input
               type="text"
@@ -140,7 +139,7 @@ const MarkTeacherAttendance = () => {
               Refresh
             </button>
           </div>
-        </div>
+        </div> */}
 
         {loading ? (
           <div className="text-center py-8">

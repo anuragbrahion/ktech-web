@@ -300,10 +300,6 @@ const Complaints = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const handleAddComplaint = () => {
-    setShowAddModal(true);
-  };
-
   const handleSaveComplaint = (complaintData) => {
     const newComplaint = {
       id: complaints.length + 1,
@@ -315,25 +311,7 @@ const Complaints = () => {
     setShowAddModal(false);
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      complaintBy: '',
-      complaintType: '',
-      complaintStatus: '',
-      startDate: '',
-      endDate: ''
-    });
-  };
-
-  // Filter complaints
+ 
   const filteredComplaints = complaints.filter(complaint => {
     const matchesComplaintBy = filters.complaintBy === '' || 
       complaint.complaintBy.toLowerCase().includes(filters.complaintBy.toLowerCase());
@@ -391,101 +369,13 @@ const Complaints = () => {
   };
 
   return (
-    <div className="container mx-auto">
+    <div className="">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Complaints</h1>
         <p className="text-gray-600 mt-2">Manage and track customer complaints</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        {/* Filter Section */}
-        <div className="mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* Row 1 */}
-            <div>
-              <label className="block text-gray-700 mb-2">Complaint By</label>
-              <select
-                name="complaintBy"
-                value={filters.complaintBy}
-                onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select...</option>
-                {Array.from(new Set(complaints.map(c => c.complaintBy))).map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-gray-700 mb-2">Start Date</label>
-              <input
-                type="date"
-                name="startDate"
-                value={filters.startDate}
-                onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-gray-700 mb-2">Complaint Type</label>
-              <select
-                name="complaintType"
-                value={filters.complaintType}
-                onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select...</option>
-                <option value="Technical Issue">Technical Issue</option>
-                <option value="Billing Issue">Billing Issue</option>
-                <option value="Service Request">Service Request</option>
-                <option value="Quality Issue">Quality Issue</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {/* Row 2 */}
-            <div>
-              <label className="block text-gray-700 mb-2">Complaint Status</label>
-              <select
-                name="complaintStatus"
-                value={filters.complaintStatus}
-                onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select...</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-gray-700 mb-2">End Date</label>
-              <input
-                type="date"
-                name="endDate"
-                value={filters.endDate}
-                onChange={handleFilterChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="flex items-end">
-              <button
-                onClick={handleAddComplaint}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center justify-center gap-2"
-              >
-                <span>+</span> Raise Complaints
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
         <div className="overflow-x-auto">
           <Table
             headers={tableHeaders}
