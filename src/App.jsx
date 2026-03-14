@@ -136,6 +136,7 @@ const App = () => {
   };
 
   const role = getUserData();
+  console.log("role", role);
   const roleData = role?.role?.toLowerCase();
 
   const renderMainLayout = (Component) => (
@@ -370,7 +371,7 @@ const App = () => {
           path="/language"
           element={
             <ProtectedRoute>
-              {renderMainLayout(LanguageManagement)}
+              {renderMainLayout(() => (<LanguageManagement roleData={roleData} adminId={role.id}/>))}
             </ProtectedRoute>
           }
         />

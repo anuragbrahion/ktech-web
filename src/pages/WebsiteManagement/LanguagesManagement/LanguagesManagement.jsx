@@ -11,10 +11,13 @@ import {
 import { toast } from "react-toastify";
 import { Edit2, Trash2 } from "lucide-react";
 import Loader from "../../../components/Loader/Loader";
-import { formatDateForTable } from "../../../utils/globalFunction";
+import {
+  formatDateForTable,
+  hasPermission,
+} from "../../../utils/globalFunction";
 import Table from "../../../components/Atoms/TableData/TableData";
 
-export default function LanguageManagement({ roleData }) {
+export default function LanguageManagement({ roleData, adminId }) {
   const dispatch = useDispatch();
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
@@ -170,16 +173,23 @@ export default function LanguageManagement({ roleData }) {
       <div className="flex items-center space-x-6">
         <button
           onClick={() => handleEditLanguage(language)}
-          className="text-gray-600 hover:text-gray-900 transition-colors"
+          className="text-gray-600 hover:text-gray-900 transition-colors disabled:cursor-not-allowed"
           title="Edit"
+          disabled={
+            !hasPermission(roleData, adminId, language?.adminId?._id || null)
+          }
         >
           <Edit2 size={22} />
         </button>
 
         <button
           onClick={() => handleStatusToggle(language)}
-          disabled={enableDisableWebsiteLanguagesData?.loading}
+          disabled={
+            enableDisableWebsiteLanguagesData?.loading ||
+            !hasPermission(roleData, adminId, language?.adminId?._id || null)
+          }
           title="Active/Inactive"
+          className="disabled:cursor-not-allowed"
         >
           <div
             className={`w-12 h-6 flex items-center rounded-full p-1 ${isActive ? "bg-green-500" : "bg-gray-300"}`}
