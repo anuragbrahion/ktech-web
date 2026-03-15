@@ -14,7 +14,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/website-dashboard": "Website Dashboard",
       "/home-page": "Website Management > Home Page",
       "/blogs": "Website Management > Blogs",
-      "/blogs-categrory": "Website Management > Blogs >  Category",
+      "/category": "Website Management >  Category",
       "/branches": "Website Management > Branches",
       "/testimonials": "Website Management > Testimonials",
       "/web-about": "Website Management > About Us",

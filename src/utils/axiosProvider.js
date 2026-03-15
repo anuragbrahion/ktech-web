@@ -3,49 +3,51 @@ import axios from "axios";
 const isLive = false;
 
 export const apiUrl = isLive
-    ? "http://147.93.19.238:4001/api/v1"
-    : "http://localhost:4001/api/v1";
+  ? "http://147.93.19.238:4001/api/v1"
+  : "http://localhost:4001/api/v1";
+
+export const uploadApiUrl = isLive
+  ? "http://147.93.19.238:4001/api/v1"
+  : "http://localhost:4001/api/v1";
 
 const axiosPublic = axios.create({
-    baseURL: apiUrl,
-    headers: { "Content-Type": "application/json" },
+  baseURL: apiUrl,
+  headers: { "Content-Type": "application/json" },
 });
 
 const axiosPrivate = axios.create({
-    baseURL: apiUrl,
-    headers: { "Content-Type": "application/json" },
+  baseURL: apiUrl,
+  headers: { "Content-Type": "application/json" },
 });
 
 axiosPrivate.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
 );
 
 const axiosImage = axios.create({
-    baseURL: apiUrl,
-    headers: { "Content-Type": "multipart/form-data" },
+  baseURL: apiUrl,
+  headers: { "Content-Type": "multipart/form-data" },
 });
 
 axiosImage.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
 );
 
 export { axiosPrivate, axiosPublic, axiosImage };
-
-
 
 // import axios from "axios";
 // import { removeCookie, sessionStorageGetItem } from "./globalFunction";

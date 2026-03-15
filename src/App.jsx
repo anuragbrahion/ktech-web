@@ -136,7 +136,6 @@ const App = () => {
   };
 
   const role = getUserData();
-  console.log("role", role);
   const roleData = role?.role?.toLowerCase();
 
   const renderMainLayout = (Component) => (
@@ -334,14 +333,20 @@ const App = () => {
 
         <Route
           path="/blogs"
-          element={<ProtectedRoute>{renderMainLayout(Blogs)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Blogs roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route
-          path="/blogs-categrory"
+          path="/category"
           element={
             <ProtectedRoute>
-              {renderMainLayout(BlogCategoryManagement)}
+              {renderMainLayout(()=><BlogCategoryManagement roleData={roleData} adminId={role.id}/>)}
             </ProtectedRoute>
           }
         />
@@ -371,7 +376,9 @@ const App = () => {
           path="/language"
           element={
             <ProtectedRoute>
-              {renderMainLayout(() => (<LanguageManagement roleData={roleData} adminId={role.id}/>))}
+              {renderMainLayout(() => (
+                <LanguageManagement roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -817,7 +824,6 @@ const App = () => {
 
 export default App;
 
-
 // /* eslint-disable no-unused-vars */
 // import React, { useEffect } from "react";
 // import {
@@ -1169,7 +1175,7 @@ export default App;
 //         />
 
 //         <Route
-//           path="/blogs-categrory"
+//           path="/category"
 //           element={
 //             <ProtectedRoute>
 //               {renderMainLayout(BlogCategoryManagement)}
