@@ -24,6 +24,11 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/privacy-policy": "Website Management > Privacy Policy",
       "/company-details": "Website Management > Company Details",
 
+      "/designation": "Employee Management > Designation",
+      "/department": "Employee Management > Department",
+      "/leave-type": "Employee Management > Leave Type",
+      "/role": "Employee Management > Role",
+
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
       "/languages": "Languages",

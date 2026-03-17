@@ -1,38 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Plus, Edit2, Trash2, Calendar, Book } from 'lucide-react';
-import { toast } from 'react-toastify';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Plus, Edit2, Trash2, Calendar, Book } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   rolesList,
-  enableDisableRoles,
   deleteRoles,
   createRoles,
   updateRoles,
- } from '../../redux/slices/employee';
-import AlertModal from '../../components/Modal/AlertModal';
-import Table from '../../components/Atoms/TableData/TableData';
-import { coursesAllDocuments } from '../../redux/slices/course';
-
+} from "../../redux/slices/employee";
+import AlertModal from "../../components/Modal/AlertModal";
+import Table from "../../components/Atoms/TableData/TableData";
+import { coursesAllDocuments } from "../../redux/slices/course";
+import { formatDateForTable } from "../../utils/globalFunction";
+import Loader from "../../components/Loader/Loader";
 
 const RoleModal = ({ role, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    course: '',
-    days: ''
+    name: "",
+    course: "",
+    days: "",
   });
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
-  const coursesData = useSelector(state => state.course?.coursesAllDocumentsData);
+  const coursesData = useSelector(
+    (state) => state.course?.coursesAllDocumentsData,
+  );
 
   useEffect(() => {
     if (role) {
       setFormData({
-        name: role.name || '',
-        course: role.course || '',
-        days: role.days || ''
+        name: role.name || "",
+        course: role.course || "",
+        days: role.days || "",
       });
     }
   }, [role]);
@@ -50,27 +53,27 @@ const RoleModal = ({ role, onSave, onClose }) => {
 
   useEffect(() => {
     if (coursesData?.data?.data) {
-       setCourses(coursesData.data.data?.list);
+      setCourses(coursesData.data.data?.list);
     }
   }, [coursesData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.course || !formData.days) {
-      toast.error('Please fill all required fields');
+      toast.error("Please fill all required fields");
       return;
     }
 
     const payload = {
       name: formData.name,
       course: formData.course,
-      days: Number(formData.days)
+      days: Number(formData.days),
     };
 
     if (role) {
@@ -81,8 +84,8 @@ const RoleModal = ({ role, onSave, onClose }) => {
   };
 
   const getCourseName = (courseId) => {
-    const course = courses.find(c => c._id === courseId);
-    return course ? course.courseName : 'Unknown Course';
+    const course = courses.find((c) => c._id === courseId);
+    return course ? course.courseName : "Unknown Course";
   };
 
   return (
@@ -91,7 +94,7 @@ const RoleModal = ({ role, onSave, onClose }) => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {role ? 'Edit Role' : 'Add Role'}
+              {role ? "Edit Role" : "Add Role"}
             </h2>
             <button
               onClick={onClose}
@@ -100,7 +103,7 @@ const RoleModal = ({ role, onSave, onClose }) => {
               ×
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
@@ -183,7 +186,7 @@ const RoleModal = ({ role, onSave, onClose }) => {
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!formData.name || !formData.course || !formData.days}
               >
-                {role ? 'Update Role' : 'Create Role'}
+                {role ? "Update Role" : "Create Role"}
               </button>
             </div>
           </form>
@@ -193,7 +196,7 @@ const RoleModal = ({ role, onSave, onClose }) => {
   );
 };
 
-export default function RoleManagement({roleData}) {
+export default function RoleManagement({ roleData }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -203,13 +206,13 @@ export default function RoleManagement({roleData}) {
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  const rolesListData = useSelector(state => state.employee?.rolesListData);
-  const enableDisableData = useSelector(state => state.employee?.enableDisableRolesData);
-  const deleteData = useSelector(state => state.employee?.deleteRolesData);
-  const createData = useSelector(state => state.employee?.createRolesData);
-  const updateData = useSelector(state => state.employee?.updateRolesData);
-
-  const coursesData = useSelector(state => state.employee?.coursesAllDocumentsData);
+  const rolesListData = useSelector((state) => state.employee?.rolesListData);
+  const enableDisableData = useSelector(
+    (state) => state.employee?.enableDisableRolesData,
+  );
+  const deleteData = useSelector((state) => state.employee?.deleteRolesData);
+  const createData = useSelector((state) => state.employee?.createRolesData);
+  const updateData = useSelector((state) => state.employee?.updateRolesData);
 
   useEffect(() => {
     fetchRoles();
@@ -225,12 +228,13 @@ export default function RoleManagement({roleData}) {
     setLoading(true);
     const params = {
       page: currentPage,
-      size: itemsPerPage
+      size: itemsPerPage,
+      populate: "adminId:name,role|course:courseName",
     };
-    
+
     dispatch(rolesList(params)).then((action) => {
       if (action.error) {
-        toast.error(action.payload || 'Failed to fetch roles');
+        toast.error(action.payload || "Failed to fetch roles");
       }
       setLoading(false);
     });
@@ -238,11 +242,6 @@ export default function RoleManagement({roleData}) {
 
   const handleAddRoleClick = () => {
     setEditingRole(null);
-    setShowModal(true);
-  };
-
-  const handleEditRole = (role) => {
-    setEditingRole(role);
     setShowModal(true);
   };
 
@@ -256,34 +255,14 @@ export default function RoleManagement({roleData}) {
       setLoading(true);
       dispatch(deleteRoles({ _id: deletingRole._id })).then((action) => {
         if (!action.error) {
-          toast.success('Role deleted successfully');
+          toast.success("Role deleted successfully");
           fetchRoles();
         } else {
-          toast.error(action.payload || 'Failed to delete role');
+          toast.error(action.payload || "Failed to delete role");
         }
         setLoading(false);
         setShowDeleteModal(false);
         setDeletingRole(null);
-      });
-    }
-  };
-
-  const handleStatusToggle = (role) => {
-    const newStatus = !role.status;
-    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this role?`)) {
-      setLoading(true);
-      const payload = {
-        _id: role._id,
-        status: newStatus
-      };
-      dispatch(enableDisableRoles(payload)).then((action) => {
-        if (!action.error) {
-          toast.success(`Role ${newStatus ? 'activated' : 'deactivated'} successfully`);
-          fetchRoles();
-        } else {
-          toast.error(action.payload || 'Failed to update status');
-        }
-        setLoading(false);
       });
     }
   };
@@ -293,157 +272,132 @@ export default function RoleManagement({roleData}) {
     if (editingRole) {
       const payload = {
         ...formData,
-        _id: editingRole._id
+        _id: editingRole._id,
       };
       dispatch(updateRoles(payload)).then((action) => {
         if (!action.error) {
-          toast.success('Role updated successfully');
+          toast.success("Role updated successfully");
           setShowModal(false);
           setEditingRole(null);
           fetchRoles();
         } else {
-          toast.error(action.payload || 'Failed to update role');
+          toast.error(action.payload || "Failed to update role");
         }
         setLoading(false);
       });
     } else {
       dispatch(createRoles(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Role created successfully');
+          toast.success("Role created successfully");
           setShowModal(false);
           fetchRoles();
         } else {
-          toast.error(action.payload || 'Failed to create role');
+          toast.error(action.payload || "Failed to create role");
         }
         setLoading(false);
       });
     }
   };
 
-  const getStatusColor = (status) => {
-    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  };
-
-  const getCourseName = (courseId) => {
-    const courses = coursesData?.data?.data || [];
-    const course = courses.find(c => c._id === courseId);
-    return course ? course.courseName : 'Unknown Course';
-  };
-
   const roles = rolesListData?.data?.data?.list || [];
-  const totalRoles = rolesListData?.data?.total || 0;
+  const totalRoles = rolesListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalRoles / itemsPerPage);
 
-  const tableHeaders = ['Role Name', 'Course', 'Duration', 'Status', 'Created At', 'Actions'];
-  
-  const tableData = roles.map(role => [
-    <div className="font-medium text-gray-900">{role.name}</div>,
+  const tableHeaders = [
+    "Role",
+    "Course",
+    "Duration",
+    "Branch",
+    "Created At",
+    ...(roleData === "superadmin" ? ["Actions"] : []),
+  ];
+
+  const tableData = roles.map((role) => [
+    <div className="font-medium text-gray-900 capitalize">{role.name}</div>,
     <div className="flex items-center">
       <Book className="w-4 h-4 text-gray-400 mr-2" />
-      <span className="text-gray-700">{getCourseName(role.course)}</span>
+      <span className="text-gray-700">{role.course.courseName}</span>
     </div>,
     <div className="flex items-center">
       <Calendar className="w-4 h-4 text-gray-400 mr-2" />
       <span className="font-bold text-gray-900">{role.days} Days</span>
     </div>,
-    <div className="flex items-center">
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(role.status)}`}>
-        {role.status ? 'Active' : 'Inactive'}
-      </span>
-      <div className="ml-3 relative inline-block w-10 align-middle select-none">
-        <input
-          type="checkbox"
-          checked={role.status}
-          onChange={() => handleStatusToggle(role)}
-          className="sr-only"
-          id={`toggle-role-${role._id}`}
-          disabled={loading}
-        />
-        <label
-          htmlFor={`toggle-role-${role._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${role.status ? 'bg-green-500' : 'bg-gray-300'}`}
-        >
-          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${role.status ? 'translate-x-4' : 'translate-x-0'}`} />
-        </label>
+    !role?.adminId ? (
+      "N/A"
+    ) : (
+      <div>
+        <div className="font-medium text-gray-900 capitalize">
+          {role.adminId.name || "Branch"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {role.adminId.role.toLowerCase() === "superadmin"
+            ? "Main Branch"
+            : "Sub Branch"}
+        </div>
       </div>
-    </div>,
-    new Date(role.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }),
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => handleEditRole(role)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-        title="Edit"
-        disabled={loading}
-      >
-        <Edit2 className="w-4 h-4" />
-      </button>
-      {roleData==="superadmin" &&<button
-        onClick={() => handleDeleteClick(role)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>}
-    </div>
+    ),
+
+    formatDateForTable(role.createdAt),
+    ...(roleData === "superadmin"
+      ? [
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleDeleteClick(role)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+              title="Delete"
+              disabled={loading}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>,
+        ]
+      : []),
   ]);
 
   return (
-    <div className="">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Role Management</h1>
-        <p className="text-gray-600 mt-2">Manage roles and their configurations</p>
+    <>
+      <Loader loading={loading} />
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Role Management</h1>
+          <p className="text-gray-600 mt-2">
+            Manage roles and their configurations
+          </p>
+        </div>
+
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddRoleClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+            disabled={loading}
+          >
+            <span>Add Role</span>
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      <div className="flex justify-end items-center mb-6">
-        <button
-          onClick={handleAddRoleClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
-          disabled={loading}
-        >
-          <span>Add Role</span>
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
-
-      {loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Loading roles...</span>
-          </div>
-        </div>
-      )}
-
-      {!loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <Table
-            headers={tableHeaders}
-            data={tableData}
-            currentPage={currentPage}
-            size={itemsPerPage}
-            handlePageChange={setCurrentPage}
-            total={totalRoles}
-            totalPages={totalPages}
-            renderRow={(row, index) => (
-              <tr 
-                key={index} 
-                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-              >
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="py-4 px-4">
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            )}
-          />
-        </div>
-      )}
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalRoles}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showModal && (
         <RoleModal
@@ -473,6 +427,6 @@ export default function RoleManagement({roleData}) {
           isVisibleConfirmButton={true}
         />
       )}
-    </div>
+    </>
   );
 }

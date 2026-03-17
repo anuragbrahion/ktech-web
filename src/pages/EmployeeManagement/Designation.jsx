@@ -1,48 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Plus, Edit2, Trash2, DollarSign } from 'lucide-react';
-import { toast } from 'react-toastify';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Plus, Edit2, Trash2, DollarSign } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   designationsList,
   enableDisableDesignations,
   deleteDesignations,
   createDesignations,
-  updateDesignations
-} from '../../redux/slices/employee';
-import AlertModal from '../../components/Modal/AlertModal';
-import Table from '../../components/Atoms/TableData/TableData';
+  updateDesignations,
+} from "../../redux/slices/employee";
+import AlertModal from "../../components/Modal/AlertModal";
+import Table from "../../components/Atoms/TableData/TableData";
+import Loader from "../../components/Loader/Loader";
+import { formatDateForTable, hasPermission } from "../../utils/globalFunction";
 
 const DesignationModal = ({ designation, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    salary: ''
+    name: "",
+    salary: "",
   });
 
   useEffect(() => {
     if (designation) {
       setFormData({
-        name: designation.name || '',
-        salary: designation.salary || ''
+        name: designation.name || "",
+        salary: designation.salary || "",
       });
     }
   }, [designation]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.salary) {
-      toast.error('Please fill all required fields');
+      toast.error("Please fill all required fields");
       return;
     }
 
     const payload = {
       name: formData.name,
-      salary: Number(formData.salary)
+      salary: Number(formData.salary),
     };
 
     if (designation) {
@@ -58,7 +61,7 @@ const DesignationModal = ({ designation, onSave, onClose }) => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {designation ? 'Edit Designation' : 'Add Designation'}
+              {designation ? "Edit Designation" : "Add Designation"}
             </h2>
             <button
               onClick={onClose}
@@ -67,7 +70,7 @@ const DesignationModal = ({ designation, onSave, onClose }) => {
               ×
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
@@ -119,7 +122,7 @@ const DesignationModal = ({ designation, onSave, onClose }) => {
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!formData.name || !formData.salary}
               >
-                {designation ? 'Update Designation' : 'Create Designation'}
+                {designation ? "Update Designation" : "Create Designation"}
               </button>
             </div>
           </form>
@@ -129,7 +132,7 @@ const DesignationModal = ({ designation, onSave, onClose }) => {
   );
 };
 
-export default function DesignationManagement({roleData}) {
+export default function DesignationManagement({ roleData, adminId }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -139,11 +142,21 @@ export default function DesignationManagement({roleData}) {
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  const designationsListData = useSelector(state => state.employee?.designationsListData);
-  const enableDisableData = useSelector(state => state.employee?.enableDisableDesignationsData);
-  const deleteData = useSelector(state => state.employee?.deleteDesignationsData);
-  const createData = useSelector(state => state.employee?.createDesignationsData);
-  const updateData = useSelector(state => state.employee?.updateDesignationsData);
+  const designationsListData = useSelector(
+    (state) => state.employee?.designationsListData,
+  );
+  const enableDisableData = useSelector(
+    (state) => state.employee?.enableDisableDesignationsData,
+  );
+  const deleteData = useSelector(
+    (state) => state.employee?.deleteDesignationsData,
+  );
+  const createData = useSelector(
+    (state) => state.employee?.createDesignationsData,
+  );
+  const updateData = useSelector(
+    (state) => state.employee?.updateDesignationsData,
+  );
 
   useEffect(() => {
     fetchDesignations();
@@ -159,12 +172,13 @@ export default function DesignationManagement({roleData}) {
     setLoading(true);
     const params = {
       page: currentPage,
-      size: itemsPerPage
+      size: itemsPerPage,
+      populate: "adminId:name,role",
     };
-    
+
     dispatch(designationsList(params)).then((action) => {
       if (action.error) {
-        toast.error(action.payload || 'Failed to fetch designations');
+        toast.error(action.payload || "Failed to fetch designations");
       }
       setLoading(false);
     });
@@ -188,34 +202,42 @@ export default function DesignationManagement({roleData}) {
   const handleDeleteConfirm = () => {
     if (deletingDesignation) {
       setLoading(true);
-      dispatch(deleteDesignations({ _id: deletingDesignation._id })).then((action) => {
-        if (!action.error) {
-          toast.success('Designation deleted successfully');
-          fetchDesignations();
-        } else {
-          toast.error(action.payload || 'Failed to delete designation');
-        }
-        setLoading(false);
-        setShowDeleteModal(false);
-        setDeletingDesignation(null);
-      });
+      dispatch(deleteDesignations({ _id: deletingDesignation._id })).then(
+        (action) => {
+          if (!action.error) {
+            toast.success("Designation deleted successfully");
+            fetchDesignations();
+          } else {
+            toast.error(action.payload || "Failed to delete designation");
+          }
+          setLoading(false);
+          setShowDeleteModal(false);
+          setDeletingDesignation(null);
+        },
+      );
     }
   };
 
   const handleStatusToggle = (designation) => {
     const newStatus = !designation.status;
-    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this designation?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to ${newStatus ? "activate" : "deactivate"} this designation?`,
+      )
+    ) {
       setLoading(true);
       const payload = {
         _id: designation._id,
-        status: newStatus
+        status: newStatus,
       };
       dispatch(enableDisableDesignations(payload)).then((action) => {
         if (!action.error) {
-          toast.success(`Designation ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          toast.success(
+            `Designation ${newStatus ? "activated" : "deactivated"} successfully`,
+          );
           fetchDesignations();
         } else {
-          toast.error(action.payload || 'Failed to update status');
+          toast.error(action.payload || "Failed to update status");
         }
         setLoading(false);
       });
@@ -227,27 +249,27 @@ export default function DesignationManagement({roleData}) {
     if (editingDesignation) {
       const payload = {
         ...formData,
-        _id: editingDesignation._id
+        _id: editingDesignation._id,
       };
       dispatch(updateDesignations(payload)).then((action) => {
         if (!action.error) {
-          toast.success('Designation updated successfully');
+          toast.success("Designation updated successfully");
           setShowModal(false);
           setEditingDesignation(null);
           fetchDesignations();
         } else {
-          toast.error(action.payload || 'Failed to update designation');
+          toast.error(action.payload || "Failed to update designation");
         }
         setLoading(false);
       });
     } else {
       dispatch(createDesignations(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Designation created successfully');
+          toast.success("Designation created successfully");
           setShowModal(false);
           fetchDesignations();
         } else {
-          toast.error(action.payload || 'Failed to create designation');
+          toast.error(action.payload || "Failed to create designation");
         }
         setLoading(false);
       });
@@ -255,21 +277,46 @@ export default function DesignationManagement({roleData}) {
   };
 
   const getStatusColor = (status) => {
-    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    return status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
   const designations = designationsListData?.data?.data?.list || [];
-  const totalDesignations = designationsListData?.data?.total || 0;
+  const totalDesignations = designationsListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalDesignations / itemsPerPage);
 
-  const tableHeaders = ['Designation', 'Salary', 'Status', 'Created At', 'Actions'];
-  
-  const tableData = designations.map(designation => [
-    <div className="font-medium text-gray-900">{designation.name}</div>,
+  const tableHeaders = [
+    "Designation",
+    "Branch",
+    "Salary",
+    "Status",
+    "Created At",
+    "Actions",
+  ];
+
+  const tableData = designations.map((designation) => [
+    <div className="font-medium text-gray-900 capitalize">
+      {designation.name}
+    </div>,
+    !designation?.adminId ? (
+      "N/A"
+    ) : (
+      <div>
+        <div className="font-medium text-gray-900 capitalize">
+          {designation.adminId.name || "Branch"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {designation.adminId.role.toLowerCase() === "superadmin"
+            ? "Main Branch"
+            : "Sub Branch"}
+        </div>
+      </div>
+    ),
     <div className="font-bold text-green-600">₹{designation.salary}</div>,
     <div className="flex items-center">
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(designation.status)}`}>
-        {designation.status ? 'Active' : 'Inactive'}
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(designation.status)}`}
+      >
+        {designation.status ? "Active" : "Inactive"}
       </span>
       <div className="ml-3 relative inline-block w-10 align-middle select-none">
         <input
@@ -278,111 +325,92 @@ export default function DesignationManagement({roleData}) {
           onChange={() => handleStatusToggle(designation)}
           className="sr-only"
           id={`toggle-designation-${designation._id}`}
-          disabled={loading}
+          disabled={
+            loading ||
+            !hasPermission(roleData, adminId, designation?.adminId?._id || null)
+          }
         />
         <label
           htmlFor={`toggle-designation-${designation._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${designation.status ? 'bg-green-500' : 'bg-gray-300'}`}
+          className={`block overflow-hidden h-6 rounded-full ${!hasPermission(roleData, adminId, designation?.adminId?._id || null) ? "cursor-not-allowed" : "cursor-pointer"} ${designation.status ? "bg-green-500" : "bg-gray-300"}`}
         >
-          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${designation.status ? 'translate-x-4' : 'translate-x-0'}`} />
+          <span
+            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${designation.status ? "translate-x-4" : "translate-x-0"}`}
+          />
         </label>
       </div>
     </div>,
-    new Date(designation.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }),
+    formatDateForTable(designation.createdAt),
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleEditDesignation(designation)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:cursor-not-allowed"
         title="Edit"
-        disabled={loading}
+        disabled={
+          loading ||
+          !hasPermission(roleData, adminId, designation?.adminId?._id || null)
+        }
       >
         <Edit2 className="w-4 h-4" />
       </button>
-     {roleData==="superadmin" && <button
-        onClick={() => handleDeleteClick(designation)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>}
-    </div>
-  ]);
-
-  const activeDesignations = designations.filter(des => des.status).length;
-  const totalSalary = designations.reduce((total, des) => total + (Number(des.salary) || 0), 0);
-
-  return (
-    <div className="">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Designation</h1>
-        <p className="text-gray-600 mt-2">Manage designations and their salaries</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Total Designations</h3>
-          <p className="text-3xl font-bold text-black mt-2">{designations.length}</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Active</h3>
-          <p className="text-3xl font-bold text-black mt-2">{activeDesignations}</p>
-        </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Total Salary</h3>
-          <p className="text-3xl font-bold text-black mt-2">₹{totalSalary}</p>
-        </div>
-      </div>
-
-      <div className="flex justify-end items-center mb-6">
+      {roleData === "superadmin" && (
         <button
-          onClick={handleAddDesignationClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          onClick={() => handleDeleteClick(designation)}
+          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+          title="Delete"
           disabled={loading}
         >
-          <span>Add Designation</span>
-          <Plus className="w-5 h-5" />
+          <Trash2 className="w-4 h-4" />
         </button>
+      )}
+    </div>,
+  ]);
+
+  return (
+    <>
+      <Loader loading={loading} />
+
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Designation</h1>
+          <p className="text-gray-600 mt-2">
+            Manage designations and their salaries
+          </p>
+        </div>
+
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddDesignationClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+            disabled={loading}
+          >
+            <span>Add Designation</span>
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Loading designations...</span>
-          </div>
-        </div>
-      )}
-
-      {!loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <Table
-            headers={tableHeaders}
-            data={tableData}
-            currentPage={currentPage}
-            size={itemsPerPage}
-            handlePageChange={setCurrentPage}
-            total={totalDesignations}
-            totalPages={totalPages}
-            renderRow={(row, index) => (
-              <tr 
-                key={index} 
-                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-              >
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="py-4 px-4">
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            )}
-          />
-        </div>
-      )}
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalDesignations}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showModal && (
         <DesignationModal
@@ -412,6 +440,6 @@ export default function DesignationManagement({roleData}) {
           isVisibleConfirmButton={true}
         />
       )}
-    </div>
+    </>
   );
 }

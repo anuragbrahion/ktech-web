@@ -468,7 +468,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Designation roleData={roleData} />
+                <Designation roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -479,7 +479,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Department roleData={roleData} />
+                <Department roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -499,7 +499,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <LeaveType roleData={roleData} />
+                <LeaveType roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
