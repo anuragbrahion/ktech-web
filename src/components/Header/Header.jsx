@@ -20,7 +20,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/web-about": "Website Management > About Us",
       "/why-us": "Website Management > Why Us",
       "/terms-conditions": "Website Management > Terms & Conditions",
-      "/course-faq":"Website Management > Course FAQ",
+      "/course-faq": "Website Management > Course FAQ",
       "/privacy-policy": "Website Management > Privacy Policy",
       "/company-details": "Website Management > Company Details",
 
@@ -28,6 +28,13 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/department": "Employee Management > Department",
       "/leave-type": "Employee Management > Leave Type",
       "/role": "Employee Management > Role",
+
+      "/referral-amount": "Branch Management > Referral Amount",
+      "/inquiry-status": "Branch Management > Inquiry Status",
+      "/inquiry-source": "Branch Management > Inquiry Source",
+      "/visitors-book": "Branch Management > Visitors Book",
+
+      "/inquiry": "Student Management > Inquiry",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
@@ -51,7 +58,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/student/past-exams": "Exam Result",
       "/student/my-courses": "My Courses",
       "/student/referral-amount": "Referral Amount",
-      "/language":"Website Management > Languages",
+      "/language": "Website Management > Languages",
     };
 
     return (

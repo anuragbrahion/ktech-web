@@ -346,7 +346,9 @@ const App = () => {
           path="/category"
           element={
             <ProtectedRoute>
-              {renderMainLayout(()=><BlogCategoryManagement roleData={roleData} adminId={role.id}/>)}
+              {renderMainLayout(() => (
+                <BlogCategoryManagement roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -535,14 +537,22 @@ const App = () => {
         <Route
           path="/visitors-book"
           element={
-            <ProtectedRoute>{renderMainLayout(VisitorsBook)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <VisitorsBook roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/referral-amount"
           element={
-            <ProtectedRoute>{renderMainLayout(ReferralAmount)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <ReferralAmount roleData={roleData} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -594,7 +604,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <InquirySource roleData={roleData} />
+                <InquirySource roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -605,7 +615,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <InquiryStatus roleData={roleData} />
+                <InquiryStatus roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -638,7 +648,13 @@ const App = () => {
 
         <Route
           path="/inquiry"
-          element={<ProtectedRoute>{renderMainLayout(Inquiry)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Inquiry adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route

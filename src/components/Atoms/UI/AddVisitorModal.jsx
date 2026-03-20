@@ -1,56 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const AddVisitorModal = ({ isOpen, onClose, onSubmit, loading }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    phoneNo: '',
-    meetingWith: '',
-    date: '',
-    followUpDate: '',
-    purpose: '',
-    totalPerson: '1',
-    inTime: '',
-    outTime: ''
+    name: "",
+    phoneNo: "",
+    meetingWith: "",
+    date: "",
+    followUpDate: "",
+    purpose: "",
+    totalPerson: "1",
+    inTime: "",
+    outTime: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Format the data to match API payload
     const formattedData = {
       name: formData.name,
       meetingWith: formData.meetingWith,
       phoneNo: formData.phoneNo,
-      totalPerson: parseInt(formData.totalPerson, 10), // Note: API expects 'totalPerson' not 'totalPerson'
-      date: formatDateForAPI(formData.date), // Format date as DD-MM-YYYY
-      followUpDate: formData.followUpDate ? formatDateForAPI(formData.followUpDate) : undefined,
+      totalPerson: parseInt(formData.totalPerson, 10),
+      date: formData.date ? new Date(formData.date) : undefined,
+      followUpDate: formData.followUpDate
+        ? new Date(formData.followUpDate)
+        : undefined,
       inTime: formData.inTime || undefined,
       outTime: formData.outTime || undefined,
-      purpose: formData.purpose
+      purpose: formData.purpose,
     };
-    
-    onSubmit(formattedData);
-    
-    // Reset form only if submission is successful
-    // (Reset will be handled by parent component after successful API call)
-  };
 
-  // Format date from YYYY-MM-DD to DD-MM-YYYY for API
-  const formatDateForAPI = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    onSubmit(formattedData);
   };
 
   if (!isOpen) return null;
@@ -169,8 +158,10 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit, loading }) => {
                   required
                   disabled={loading}
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                    <option key={num} value={num}>{num}</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                    <option key={num} value={num}>
+                      {num}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -194,7 +185,9 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit, loading }) => {
                   <option value="Student Progress">Student Progress</option>
                   <option value="Course Information">Course Information</option>
                   <option value="Interview">Interview</option>
-                  <option value="Document Submission">Document Submission</option>
+                  <option value="Document Submission">
+                    Document Submission
+                  </option>
                   <option value="Meeting">Meeting</option>
                   <option value="Complaint">Complaint</option>
                   <option value="Others">Others</option>
@@ -245,7 +238,7 @@ const AddVisitorModal = ({ isOpen, onClose, onSubmit, loading }) => {
                 className="px-6 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 font-medium disabled:opacity-50"
                 disabled={loading}
               >
-                {loading ? 'Creating...' : 'Create Visitor'}
+                {loading ? "Creating..." : "Create Visitor"}
               </button>
             </div>
           </form>
