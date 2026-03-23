@@ -333,14 +333,22 @@ const App = () => {
 
         <Route
           path="/blogs"
-          element={<ProtectedRoute>{renderMainLayout(Blogs)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Blogs roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route
-          path="/blogs-categrory"
+          path="/category"
           element={
             <ProtectedRoute>
-              {renderMainLayout(BlogCategoryManagement)}
+              {renderMainLayout(() => (
+                <BlogCategoryManagement roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -370,7 +378,9 @@ const App = () => {
           path="/language"
           element={
             <ProtectedRoute>
-              {renderMainLayout(LanguageManagement)}
+              {renderMainLayout(() => (
+                <LanguageManagement roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -460,7 +470,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Designation roleData={roleData} />
+                <Designation roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -471,7 +481,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Department roleData={roleData} />
+                <Department roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -491,7 +501,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <LeaveType roleData={roleData} />
+                <LeaveType roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -527,14 +537,22 @@ const App = () => {
         <Route
           path="/visitors-book"
           element={
-            <ProtectedRoute>{renderMainLayout(VisitorsBook)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <VisitorsBook roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/referral-amount"
           element={
-            <ProtectedRoute>{renderMainLayout(ReferralAmount)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <ReferralAmount roleData={roleData} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -586,7 +604,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <InquirySource roleData={roleData} />
+                <InquirySource roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -597,7 +615,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <InquiryStatus roleData={roleData} />
+                <InquiryStatus roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -630,7 +648,13 @@ const App = () => {
 
         <Route
           path="/inquiry"
-          element={<ProtectedRoute>{renderMainLayout(Inquiry)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Inquiry adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route
@@ -815,7 +839,6 @@ const App = () => {
 };
 
 export default App;
-
 
 // /* eslint-disable no-unused-vars */
 // import React, { useEffect } from "react";
@@ -1168,7 +1191,7 @@ export default App;
 //         />
 
 //         <Route
-//           path="/blogs-categrory"
+//           path="/category"
 //           element={
 //             <ProtectedRoute>
 //               {renderMainLayout(BlogCategoryManagement)}

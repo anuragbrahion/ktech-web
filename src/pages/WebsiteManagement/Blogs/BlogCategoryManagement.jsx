@@ -1,32 +1,38 @@
-// pages/BlogCategoryManagement.jsx
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Eye, ChevronLeft } from 'lucide-react';
-import { websiteCategoryList,
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { Plus, Edit2, Trash2, ChevronLeft } from "lucide-react";
+import {
+  websiteCategoryList,
   enableDisableWebsiteCategory,
   deleteWebsiteCategory,
   createWebsiteCategory,
   updateWebsiteCategory,
-  websiteCategoryAllDocuments } from '../../../redux/slices/website';
-import TableData from '../../../components/Atoms/Table';
- 
+  websiteCategoryAllDocuments,
+} from "../../../redux/slices/website";
+import TableData from "../../../components/Atoms/Table";
+import {
+  formatDateForTable,
+  hasPermission,
+} from "../../../utils/globalFunction";
+
 const AddEditCategoryModal = ({ category, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: ''
+    name: "",
   });
 
   useEffect(() => {
     if (category) {
       setFormData({
-        name: category.name || '',
+        name: category.name || "",
       });
     }
   }, [category]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
@@ -40,7 +46,7 @@ const AddEditCategoryModal = ({ category, onSave, onClose }) => {
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-800">
-              {category ? 'Edit Category' : 'Add Category'}
+              {category ? "Edit Category" : "Add Category"}
             </h2>
           </div>
           <button
@@ -65,7 +71,7 @@ const AddEditCategoryModal = ({ category, onSave, onClose }) => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
-          </div> 
+          </div>
           <div className="flex gap-3 pt-4">
             <button
               type="button"
@@ -78,7 +84,7 @@ const AddEditCategoryModal = ({ category, onSave, onClose }) => {
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
-              {category ? 'Update' : 'Create'}
+              {category ? "Update" : "Create"}
             </button>
           </div>
         </form>
@@ -87,7 +93,7 @@ const AddEditCategoryModal = ({ category, onSave, onClose }) => {
   );
 };
 
-const BlogCategoryManagement = () => {
+const BlogCategoryManagement = ({ roleData, adminId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
@@ -97,16 +103,26 @@ const BlogCategoryManagement = () => {
   const [categoriesData, setCategoriesData] = useState([]);
   const [, setAllCategories] = useState([]);
 
-  const categoryListData = useSelector(state => state.website?.websiteCategoryListData);
-  const allDocumentsData = useSelector(state => state.website?.websiteCategoryAllDocumentsData);
+  const categoryListData = useSelector(
+    (state) => state.website?.websiteCategoryListData,
+  );
+  const allDocumentsData = useSelector(
+    (state) => state.website?.websiteCategoryAllDocumentsData,
+  );
 
   useEffect(() => {
     fetchCategories();
     fetchAllDocuments();
-  }, [dispatch]);
+  }, [dispatch, currentPage]);
 
   const fetchCategories = () => {
-    dispatch(websiteCategoryList({ page: currentPage, size: itemsPerPage }));
+    dispatch(
+      websiteCategoryList({
+        page: currentPage,
+        size: itemsPerPage,
+        populate: "adminId:name,role",
+      }),
+    );
   };
 
   const fetchAllDocuments = () => {
@@ -136,7 +152,7 @@ const BlogCategoryManagement = () => {
   };
 
   const handleDeleteCategory = (id) => {
-    if (window.confirm('Are you sure you want to delete this category?')) {
+    if (window.confirm("Are you sure you want to delete this category?")) {
       dispatch(deleteWebsiteCategory({ id })).then((action) => {
         if (!action.error) {
           fetchCategories();
@@ -149,7 +165,7 @@ const BlogCategoryManagement = () => {
   const handleStatusToggle = (category) => {
     const payload = {
       _id: category._id,
-      status: !category.status
+      status: !category.status,
     };
     dispatch(enableDisableWebsiteCategory(payload)).then((action) => {
       if (!action.error) {
@@ -161,10 +177,12 @@ const BlogCategoryManagement = () => {
 
   const handleSaveCategory = (categoryData) => {
     if (editingCategory) {
-      dispatch(updateWebsiteCategory({
-        id: editingCategory._id,
-        ...categoryData
-      })).then((action) => {
+      dispatch(
+        updateWebsiteCategory({
+          id: editingCategory._id,
+          ...categoryData,
+        }),
+      ).then((action) => {
         if (!action.error) {
           fetchCategories();
           fetchAllDocuments();
@@ -182,67 +200,109 @@ const BlogCategoryManagement = () => {
     }
   };
 
-  const tableHeadings = ['Name', 'Status', 'Created At', 'Actions'];
-  
-  const tableData = categoriesData.map(category => [
-    category.name,
-    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-      category.status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-    }`}>
-      {category.status ? 'Active' : 'Inactive'}
-    </span>,
-    new Date(category.createdAt).toLocaleDateString(),
+  const tableHeadings = ["Name", "Branch", "Status", "Created At", "Actions"];
+
+  const tableData = categoriesData.map((category) => [
+    <span className="capitalize">{category.name}</span>,
+    !category?.adminId ? (
+      "N/A"
+    ) : (
+      <div>
+        <div className="font-medium text-gray-900 capitalize">
+          {category.adminId.name || "Branch"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {category.adminId.role.toLowerCase() === "superadmin"
+            ? "Main Branch"
+            : "Sub Branch"}
+        </div>
+      </div>
+    ),
+
+    <div className="flex items-center">
+      <span
+        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+          category.status
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+        }`}
+      >
+        {category.status ? "Active" : "Inactive"}
+      </span>
+      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+        <input
+          type="checkbox"
+          checked={category.status === "active"}
+          onChange={() => handleStatusToggle(category)}
+          className="sr-only disabled:cursor-not-allowed"
+          id={`toggle-${category._id}`}
+          disabled={
+            !hasPermission(roleData, adminId, category?.adminId?._id || null)
+          }
+        />
+        <label
+          htmlFor={`toggle-${category._id}`}
+          className={`block overflow-hidden h-6 rounded-full ${!hasPermission(roleData, adminId, category?.adminId?._id || null) ? "cursor-not-allowed" : "cursor-pointer"} ${category.status ? "bg-green-500" : "bg-gray-300"}`}
+        >
+          <span
+            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${category.status ? "translate-x-4" : "translate-x-0"}`}
+          />
+        </label>
+      </div>
+    </div>,
+    formatDateForTable(category.createdAt),
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleEditCategory(category)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:cursor-not-allowed"
         title="Edit"
+        disabled={
+          !hasPermission(roleData, adminId, category?.adminId?._id || null)
+        }
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
-        onClick={() => handleStatusToggle(category)}
-        className={`p-2 rounded-lg transition ${
-          category.status ? 'text-yellow-600 hover:bg-yellow-50' : 'text-green-600 hover:bg-green-50'
-        }`}
-        title={category.status ? 'Deactivate' : 'Activate'}
-      >
-        <Eye className="w-4 h-4" />
-      </button>
-      <button
-        onClick={() => handleDeleteCategory(category._id)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
-    </div>
+
+      {roleData === "superadmin" && (
+        <button
+          onClick={() => handleDeleteCategory(category._id)}
+          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+          title="Delete"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>,
   ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            Back
-          </button>
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Blog Categories</h1>
-              <p className="text-gray-600">Manage your blog categories</p>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-4">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            {/* Back Button */}
             <button
-              onClick={handleAddCategory}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              onClick={() => navigate(-1)}
+              className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition text-gray-700"
             >
-              <Plus className="w-4 h-4" />
-              Add Category
+              <ChevronLeft size={20} />
             </button>
+
+            {/* Title */}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">Categories</h1>
+              <p className="text-gray-600 text-sm">Manage your categories</p>
+            </div>
           </div>
+
+          {/* Add Button */}
+          <button
+            onClick={handleAddCategory}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Add Category
+          </button>
         </div>
 
         <TableData
@@ -251,7 +311,7 @@ const BlogCategoryManagement = () => {
           currentPage={currentPage}
           size={itemsPerPage}
           handlePageChange={setCurrentPage}
-          total={categoryListData?.data?.total || 0}
+          total={categoryListData?.data?.data?.total || 0}
         />
       </div>
 

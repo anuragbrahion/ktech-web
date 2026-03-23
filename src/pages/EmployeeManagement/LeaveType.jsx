@@ -1,45 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Plus, Edit2, Trash2, Calendar } from 'lucide-react';
-import { toast } from 'react-toastify';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Plus, Edit2, Trash2, Calendar } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   leaveTypesList,
   enableDisableLeaveTypes,
   deleteLeaveTypes,
   createLeaveTypes,
-  updateLeaveTypes
-} from '../../redux/slices/employee';
-import AlertModal from '../../components/Modal/AlertModal';
-import Table from '../../components/Atoms/TableData/TableData';
+  updateLeaveTypes,
+} from "../../redux/slices/employee";
+import AlertModal from "../../components/Modal/AlertModal";
+import Table from "../../components/Atoms/TableData/TableData";
+import { formatDateForTable, hasPermission } from "../../utils/globalFunction";
+import Loader from "../../components/Loader/Loader";
 
 const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: ''
+    name: "",
   });
 
   useEffect(() => {
     if (leaveType) {
       setFormData({
-        name: leaveType.name || ''
+        name: leaveType.name || "",
       });
     }
   }, [leaveType]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!formData.name) {
-      toast.error('Please enter leave type name');
+      toast.error("Please enter leave type name");
       return;
     }
 
     const payload = {
-      name: formData.name
+      name: formData.name,
     };
 
     if (leaveType) {
@@ -55,7 +58,7 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {leaveType ? 'Edit Leave Type' : 'Add Leave Type'}
+              {leaveType ? "Edit Leave Type" : "Add Leave Type"}
             </h2>
             <button
               onClick={onClose}
@@ -64,7 +67,7 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
               ×
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
@@ -96,7 +99,7 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!formData.name}
               >
-                {leaveType ? 'Update Type' : 'Create Type'}
+                {leaveType ? "Update Type" : "Create Type"}
               </button>
             </div>
           </form>
@@ -106,7 +109,7 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
   );
 };
 
-export default function LeaveTypeManagement({roleData}) {
+export default function LeaveTypeManagement({ roleData, adminId }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -116,11 +119,21 @@ export default function LeaveTypeManagement({roleData}) {
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  const leaveTypesListData = useSelector(state => state.employee?.leaveTypesListData);
-  const enableDisableData = useSelector(state => state.employee?.enableDisableLeaveTypesData);
-  const deleteData = useSelector(state => state.employee?.deleteLeaveTypesData);
-  const createData = useSelector(state => state.employee?.createLeaveTypesData);
-  const updateData = useSelector(state => state.employee?.updateLeaveTypesData);
+  const leaveTypesListData = useSelector(
+    (state) => state.employee?.leaveTypesListData,
+  );
+  const enableDisableData = useSelector(
+    (state) => state.employee?.enableDisableLeaveTypesData,
+  );
+  const deleteData = useSelector(
+    (state) => state.employee?.deleteLeaveTypesData,
+  );
+  const createData = useSelector(
+    (state) => state.employee?.createLeaveTypesData,
+  );
+  const updateData = useSelector(
+    (state) => state.employee?.updateLeaveTypesData,
+  );
 
   useEffect(() => {
     fetchLeaveTypes();
@@ -136,12 +149,13 @@ export default function LeaveTypeManagement({roleData}) {
     setLoading(true);
     const params = {
       page: currentPage,
-      size: itemsPerPage
+      size: itemsPerPage,
+      populate: "adminId:name,role",
     };
-    
+
     dispatch(leaveTypesList(params)).then((action) => {
       if (action.error) {
-        toast.error(action.payload || 'Failed to fetch leave types');
+        toast.error(action.payload || "Failed to fetch leave types");
       }
       setLoading(false);
     });
@@ -165,34 +179,42 @@ export default function LeaveTypeManagement({roleData}) {
   const handleDeleteConfirm = () => {
     if (deletingLeaveType) {
       setLoading(true);
-      dispatch(deleteLeaveTypes({ _id: deletingLeaveType._id })).then((action) => {
-        if (!action.error) {
-          toast.success('Leave type deleted successfully');
-          fetchLeaveTypes();
-        } else {
-          toast.error(action.payload || 'Failed to delete leave type');
-        }
-        setLoading(false);
-        setShowDeleteModal(false);
-        setDeletingLeaveType(null);
-      });
+      dispatch(deleteLeaveTypes({ _id: deletingLeaveType._id })).then(
+        (action) => {
+          if (!action.error) {
+            toast.success("Leave type deleted successfully");
+            fetchLeaveTypes();
+          } else {
+            toast.error(action.payload || "Failed to delete leave type");
+          }
+          setLoading(false);
+          setShowDeleteModal(false);
+          setDeletingLeaveType(null);
+        },
+      );
     }
   };
 
   const handleStatusToggle = (leaveType) => {
     const newStatus = !leaveType.status;
-    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this leave type?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to ${newStatus ? "activate" : "deactivate"} this leave type?`,
+      )
+    ) {
       setLoading(true);
       const payload = {
         _id: leaveType._id,
-        status: newStatus
+        status: newStatus,
       };
       dispatch(enableDisableLeaveTypes(payload)).then((action) => {
         if (!action.error) {
-          toast.success(`Leave type ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          toast.success(
+            `Leave type ${newStatus ? "activated" : "deactivated"} successfully`,
+          );
           fetchLeaveTypes();
         } else {
-          toast.error(action.payload || 'Failed to update status');
+          toast.error(action.payload || "Failed to update status");
         }
         setLoading(false);
       });
@@ -204,27 +226,27 @@ export default function LeaveTypeManagement({roleData}) {
     if (editingLeaveType) {
       const payload = {
         ...formData,
-        _id: editingLeaveType._id
+        _id: editingLeaveType._id,
       };
       dispatch(updateLeaveTypes(payload)).then((action) => {
         if (!action.error) {
-          toast.success('Leave type updated successfully');
+          toast.success("Leave type updated successfully");
           setShowModal(false);
           setEditingLeaveType(null);
           fetchLeaveTypes();
         } else {
-          toast.error(action.payload || 'Failed to update leave type');
+          toast.error(action.payload || "Failed to update leave type");
         }
         setLoading(false);
       });
     } else {
       dispatch(createLeaveTypes(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Leave type created successfully');
+          toast.success("Leave type created successfully");
           setShowModal(false);
           fetchLeaveTypes();
         } else {
-          toast.error(action.payload || 'Failed to create leave type');
+          toast.error(action.payload || "Failed to create leave type");
         }
         setLoading(false);
       });
@@ -232,23 +254,47 @@ export default function LeaveTypeManagement({roleData}) {
   };
 
   const getStatusColor = (status) => {
-    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    return status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
   const leaveTypes = leaveTypesListData?.data?.data?.list || [];
-  const totalLeaveTypes = leaveTypesListData?.data?.total || 0;
+  const totalLeaveTypes = leaveTypesListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalLeaveTypes / itemsPerPage);
 
-  const tableHeaders = ['Leave Type', 'Status', 'Created At', 'Actions'];
-  
-  const tableData = leaveTypes.map(leaveType => [
+  const tableHeaders = [
+    "Leave Type",
+    "Branch",
+    "Status",
+    "Created At",
+    "Actions",
+  ];
+
+  const tableData = leaveTypes.map((leaveType) => [
     <div className="flex items-center">
       <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-      <div className="font-medium text-gray-900">{leaveType.name}</div>
+      <div className="font-medium text-gray-900 capitalize">
+        {leaveType.name}
+      </div>
     </div>,
+    !leaveType?.adminId ? (
+      "N/A"
+    ) : (
+      <div>
+        <div className="font-medium text-gray-900 capitalize">
+          {leaveType.adminId.name || "Branch"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {leaveType.adminId.role.toLowerCase() === "superadmin"
+            ? "Main Branch"
+            : "Sub Branch"}
+        </div>
+      </div>
+    ),
     <div className="flex items-center">
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(leaveType.status)}`}>
-        {leaveType.status ? 'Active' : 'Inactive'}
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(leaveType.status)}`}
+      >
+        {leaveType.status ? "Active" : "Inactive"}
       </span>
       <div className="ml-3 relative inline-block w-10 align-middle select-none">
         <input
@@ -257,93 +303,90 @@ export default function LeaveTypeManagement({roleData}) {
           onChange={() => handleStatusToggle(leaveType)}
           className="sr-only"
           id={`toggle-leave-type-${leaveType._id}`}
-          disabled={loading}
+          disabled={
+            loading ||
+            !hasPermission(roleData, adminId, leaveType?.adminId?._id || null)
+          }
         />
         <label
           htmlFor={`toggle-leave-type-${leaveType._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${leaveType.status ? 'bg-green-500' : 'bg-gray-300'}`}
+          className={`block overflow-hidden h-6 rounded-full ${!hasPermission(roleData, adminId, leaveType?.adminId?._id || null) ? "cursor-not-allowed" : "cursor-pointer"} ${leaveType.status ? "bg-green-500" : "bg-gray-300"}`}
         >
-          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${leaveType.status ? 'translate-x-4' : 'translate-x-0'}`} />
+          <span
+            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${leaveType.status ? "translate-x-4" : "translate-x-0"}`}
+          />
         </label>
       </div>
     </div>,
-    new Date(leaveType.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }),
+    formatDateForTable(leaveType.createdAt),
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleEditLeaveType(leaveType)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:cursor-not-allowed"
         title="Edit"
-        disabled={loading}
+        disabled={
+          loading ||
+          !hasPermission(roleData, adminId, leaveType?.adminId?._id || null)
+        }
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      {roleData==="superadmin" &&<button
-        onClick={() => handleDeleteClick(leaveType)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>}
-    </div>
-  ]);
- 
-
-  return (
-    <div className="">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Leave Type</h1>
-        <p className="text-gray-600 mt-2">Manage leave types and their status</p>
-      </div> 
-      <div className="flex justify-end items-center mb-6">
+      {roleData === "superadmin" && (
         <button
-          onClick={handleAddLeaveTypeClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          onClick={() => handleDeleteClick(leaveType)}
+          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+          title="Delete"
           disabled={loading}
         >
-          <span>Add Type</span>
-          <Plus className="w-5 h-5" />
+          <Trash2 className="w-4 h-4" />
         </button>
+      )}
+    </div>,
+  ]);
+
+  return (
+    <>
+      <Loader loading={loading} />
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Leave Type</h1>
+          <p className="text-gray-600 mt-2">
+            Manage leave types and their status
+          </p>
+        </div>
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddLeaveTypeClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+            disabled={loading}
+          >
+            <span>Add Type</span>
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Loading leave types...</span>
-          </div>
-        </div>
-      )}
-
-      {!loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <Table
-            headers={tableHeaders}
-            data={tableData}
-            currentPage={currentPage}
-            size={itemsPerPage}
-            handlePageChange={setCurrentPage}
-            total={totalLeaveTypes}
-            totalPages={totalPages}
-            renderRow={(row, index) => (
-              <tr 
-                key={index} 
-                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-              >
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="py-4 px-4">
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            )}
-          />
-        </div>
-      )}
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalLeaveTypes}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showModal && (
         <LeaveTypeModal
@@ -373,6 +416,6 @@ export default function LeaveTypeManagement({roleData}) {
           isVisibleConfirmButton={true}
         />
       )}
-    </div>
+    </>
   );
 }

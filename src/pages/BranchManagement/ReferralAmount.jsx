@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getEmpRefAmount,
-  updateEmpRefAmount,
-} from "../../redux/slices/branch";
+import { getEmpRefAmount, updateEmpRefAmount } from "../../redux/slices/branch";
 import { toast } from "react-toastify";
 
-const ReferralAmount = () => {
+const ReferralAmount = ({ roleData }) => {
   const dispatch = useDispatch();
 
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
 
-   useEffect(() => {
+  useEffect(() => {
     setLoading(true);
     dispatch(getEmpRefAmount())
       .then((action) => {
@@ -30,7 +27,7 @@ const ReferralAmount = () => {
       });
   }, [dispatch]);
 
-   const handleUpdate = async () => {
+  const handleUpdate = async () => {
     if (!amount) {
       toast.warning("Please enter an amount");
       return;
@@ -67,23 +64,25 @@ const ReferralAmount = () => {
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black disabled:cursor-not-allowed"
               placeholder="Enter amount"
+              disabled={roleData !== "superadmin"}
             />
-
-            <div className="flex justify-center mt-6">
-              <button
-                onClick={handleUpdate}
-                disabled={updating}
-                className={`px-6 py-2 rounded-md text-white transition ${
-                  updating
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-black hover:bg-gray-800"
-                }`}
-              >
-                {updating ? "Updating..." : "Update"}
-              </button>
-            </div>
+            {roleData === "superadmin" && (
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={handleUpdate}
+                  disabled={updating}
+                  className={`px-6 py-2 rounded-md text-white transition ${
+                    updating
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-black hover:bg-gray-800"
+                  }`}
+                >
+                  {updating ? "Updating..." : "Update"}
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

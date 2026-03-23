@@ -12,7 +12,30 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/dashboard": "Dashboard",
       "/student-dashboard": "Dashboard",
       "/website-dashboard": "Website Dashboard",
-      "/home-page": "Home Page Editor",
+      "/home-page": "Website Management > Home Page",
+      "/blogs": "Website Management > Blogs",
+      "/category": "Website Management >  Category",
+      "/branches": "Website Management > Branches",
+      "/testimonials": "Website Management > Testimonials",
+      "/web-about": "Website Management > About Us",
+      "/why-us": "Website Management > Why Us",
+      "/terms-conditions": "Website Management > Terms & Conditions",
+      "/course-faq": "Website Management > Course FAQ",
+      "/privacy-policy": "Website Management > Privacy Policy",
+      "/company-details": "Website Management > Company Details",
+
+      "/designation": "Employee Management > Designation",
+      "/department": "Employee Management > Department",
+      "/leave-type": "Employee Management > Leave Type",
+      "/role": "Employee Management > Role",
+
+      "/referral-amount": "Branch Management > Referral Amount",
+      "/inquiry-status": "Branch Management > Inquiry Status",
+      "/inquiry-source": "Branch Management > Inquiry Source",
+      "/visitors-book": "Branch Management > Visitors Book",
+
+      "/inquiry": "Student Management > Inquiry",
+
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
       "/languages": "Languages",
@@ -35,6 +58,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/student/past-exams": "Exam Result",
       "/student/my-courses": "My Courses",
       "/student/referral-amount": "Referral Amount",
+      "/language": "Website Management > Languages",
     };
 
     return (

@@ -235,15 +235,24 @@ export const getDaysLeft = (assignDate, value, unit = "days") => {
   };
 };
 
-  export const getStoredAuth = () => {
-   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+export const getStoredAuth = () => {
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
   const role = localStorage.getItem("role") || sessionStorage.getItem("role");
   const persistAuth = localStorage.getItem("persistAuth") === "true";
-  
+
   return {
     token,
     role,
     isAuthenticated: !!token,
-    persistAuth
+    persistAuth,
   };
+};
+
+export const hasPermission = (role, adminId, requestId) => {
+  if (role === "superadmin") return true;
+
+  if (!requestId) return false;
+
+  return role === "admin" && adminId === requestId;
 };
