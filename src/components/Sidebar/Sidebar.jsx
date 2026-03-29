@@ -51,6 +51,7 @@ import {
   Eye,
   UserRoundCog,
   UserRoundPlus,
+  Ruler,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Clipboard } from "lucide-react";
@@ -59,7 +60,6 @@ const getUserData = () => {
   const userData = sessionStorage.getItem("data");
   return userData ? JSON.parse(userData) : null;
 };
-
 const adminSections = {
   websiteOptions: {
     title: "Website Management",
@@ -188,6 +188,12 @@ const adminSections = {
         label: "All Assign Task",
         icon: ClipboardList,
         path: "/all-assign-task",
+      },
+      {
+        id: "ruleAndRegulation",
+        label: "Rule And Regulation",
+        icon: Ruler,
+        path: "/rules-and-regulations",
       },
     ],
   },

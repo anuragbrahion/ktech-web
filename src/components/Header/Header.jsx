@@ -28,6 +28,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/department": "Employee Management > Department",
       "/leave-type": "Employee Management > Leave Type",
       "/role": "Employee Management > Role",
+      "/rules-and-regulations": "Employee Management > Rules & Regulations",
 
       "/referral-amount": "Branch Management > Referral Amount",
       "/inquiry-status": "Branch Management > Inquiry Status",

@@ -92,6 +92,7 @@ import StudentPastExams from "./pages/Students/PastExams";
 import StudentMyCourses from "./pages/Students/MyCourses";
 import StudentMyExams from "./pages/Students/MyExams";
 import StudentReferralAmount from "./pages/Students/ReferralAmount";
+import RuleAndRegulation from "./pages/EmployeeManagement/RuleAndRegulation";
 
 const MainLayout = ({
   children,
@@ -520,6 +521,17 @@ const App = () => {
             <ProtectedRoute>
               {renderMainLayout(() => (
                 <AllAssignTask roleData={roleData} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <RuleAndRegulation roleData={roleData} />
               ))}
             </ProtectedRoute>
           }
