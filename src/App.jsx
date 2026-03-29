@@ -92,6 +92,8 @@ import StudentPastExams from "./pages/Students/PastExams";
 import StudentMyCourses from "./pages/Students/MyCourses";
 import StudentMyExams from "./pages/Students/MyExams";
 import StudentReferralAmount from "./pages/Students/ReferralAmount";
+import RuleAndRegulation from "./pages/EmployeeManagement/RuleAndRegulation";
+import EmployeeRulesAndRegulations from "./pages/EmployeeManagement/EmployeeRulesAndRegulations";
 
 const MainLayout = ({
   children,
@@ -264,6 +266,17 @@ const App = () => {
         />
 
         <Route
+          path="/teacher/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <EmployeeRulesAndRegulations roleData={roleData} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/student-dashboard"
           element={
             <ProtectedRoute>
@@ -320,6 +333,17 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(StudentPastExams)}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <EmployeeRulesAndRegulations roleData={roleData} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -526,6 +550,17 @@ const App = () => {
         />
 
         <Route
+          path="/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <RuleAndRegulation roleData={roleData} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/branch-management"
           element={
             <ProtectedRoute>
@@ -568,7 +603,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <CourseList roleData={roleData} />
+                <CourseList roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -584,7 +619,11 @@ const App = () => {
         <Route
           path="/course-plans"
           element={
-            <ProtectedRoute>{renderMainLayout(CoursePlans)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <CoursePlans roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -593,7 +632,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <CourseBatches roleData={roleData} />
+                <CourseBatches roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }

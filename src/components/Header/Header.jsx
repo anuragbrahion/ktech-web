@@ -28,6 +28,7 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/department": "Employee Management > Department",
       "/leave-type": "Employee Management > Leave Type",
       "/role": "Employee Management > Role",
+      "/rules-and-regulations": "Employee Management > Rules & Regulations",
 
       "/referral-amount": "Branch Management > Referral Amount",
       "/inquiry-status": "Branch Management > Inquiry Status",
@@ -35,6 +36,10 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/visitors-book": "Branch Management > Visitors Book",
 
       "/inquiry": "Student Management > Inquiry",
+
+      "/course-list": "Course Management > Courses",
+      "/course-plans": "Course Management > Plans",
+      "/course-batches": "Course Management > Batches",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
@@ -59,6 +64,9 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/student/my-courses": "My Courses",
       "/student/referral-amount": "Referral Amount",
       "/language": "Website Management > Languages",
+
+      "/teacher/rules-and-regulations": "Rules & Regulations",
+      "/student/rules-and-regulations": "Rules & Regulations",
     };
 
     return (

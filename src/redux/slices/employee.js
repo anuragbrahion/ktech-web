@@ -74,6 +74,17 @@ const initialState = {
   createUsersData: {},
   updateUsersData: {},
   enableDisableUsersData: {},
+
+  /* =========================
+     Rules and Regulations
+  ========================= */
+  rulesListData: {},
+  rulesAllDocumentsData: {},
+  rulesSingleDocumentData: {},
+  enableDisableRulesData: {},
+  deleteRulesData: {},
+  createRulesData: {},
+  updateRulesData: {},
 };
 
 /* =========================
@@ -348,6 +359,49 @@ export const enableDisableUsers = createApiThunkPrivate(
 );
 
 /* =========================
+   Rule And Regulation APIs
+========================= */
+
+export const rulesList = createApiThunkPrivate(
+  "rulesList",
+  "/employee/rules/list",
+  "GET",
+);
+
+export const rulesAllDocuments = createApiThunkPrivate(
+  "rulesAllDocuments",
+  "/employee/rules/all-documents",
+  "GET",
+);
+
+export const rulesSingleDocument = createApiThunkPrivate(
+  "rulesSingleDocument",
+  "/employee/rules/single-document",
+  "GET",
+);
+
+export const enableDisableRules = createApiThunkPrivate(
+  "enableDisableRules",
+  "/employee/rules/enable-disable",
+);
+
+export const deleteRules = createApiThunkPrivate(
+  "deleteRules",
+  "/employee/rules/soft-delete",
+  "DELETE",
+);
+
+export const createRules = createApiThunkPrivate(
+  "createRules",
+  "/employee/rules/create",
+);
+
+export const updateRules = createApiThunkPrivate(
+  "updateRules",
+  "/employee/rules/update",
+);
+
+/* =========================
    Slice
 ========================= */
 
@@ -531,6 +585,26 @@ export const employeeSlice = createSlice({
       enableDisableUsers,
       "enableDisableUsersData",
     );
+    // Rules And Regulations
+    createExtraReducersForThunk(builder, rulesList, "rulesListData");
+    createExtraReducersForThunk(
+      builder,
+      rulesAllDocuments,
+      "rulesAllDocumentsData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      rulesSingleDocument,
+      "rulesSingleDocumentData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      enableDisableRules,
+      "enableDisableRulesData",
+    );
+    createExtraReducersForThunk(builder, deleteRules, "deleteRulesData");
+    createExtraReducersForThunk(builder, createRules, "createRulesData");
+    createExtraReducersForThunk(builder, updateRules, "updateRulesData");
   },
 });
 
