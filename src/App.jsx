@@ -568,7 +568,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <CourseList roleData={roleData} />
+                <CourseList roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -584,7 +584,11 @@ const App = () => {
         <Route
           path="/course-plans"
           element={
-            <ProtectedRoute>{renderMainLayout(CoursePlans)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <CoursePlans roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -593,7 +597,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <CourseBatches roleData={roleData} />
+                <CourseBatches roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
