@@ -37,9 +37,9 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
 
       "/inquiry": "Student Management > Inquiry",
 
-      "/course-list":"Course Management > Courses",
-      "/course-plans":"Course Management > Plans",
-      "/course-batches":"Course Management > Batches",
+      "/course-list": "Course Management > Courses",
+      "/course-plans": "Course Management > Plans",
+      "/course-batches": "Course Management > Batches",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
@@ -64,6 +64,9 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/student/my-courses": "My Courses",
       "/student/referral-amount": "Referral Amount",
       "/language": "Website Management > Languages",
+
+      "/teacher/rules-and-regulations": "Rules & Regulations",
+      "/student/rules-and-regulations": "Rules & Regulations",
     };
 
     return (

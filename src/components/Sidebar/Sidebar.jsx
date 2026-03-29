@@ -737,6 +737,12 @@ const teacherSections = {
         icon: Calendar,
         path: "/teacher/leave-request",
       },
+      {
+        id: "ruleAndRegulation",
+        label: "Rule And Regulation",
+        icon: Ruler,
+        path: "/teacher/rules-and-regulations",
+      },
     ],
   },
   studentInfo: {
@@ -817,6 +823,12 @@ const studentSections = {
         label: "Leave Request",
         icon: Calendar,
         path: "/student/leave-request",
+      },
+      {
+        id: "ruleAndRegulation",
+        label: "Rule And Regulation",
+        icon: Ruler,
+        path: "/student/rules-and-regulations",
       },
     ],
   },
