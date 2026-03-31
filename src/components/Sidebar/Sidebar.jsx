@@ -354,54 +354,6 @@ const adminSections = {
       { id: "users", label: "Users", icon: UserRoundPlus, path: "/users" },
     ],
   },
-  financial: {
-    title: "Financial Management",
-    icon: Wallet,
-    items: [
-      {
-        id: "category",
-        label: "Category",
-        icon: Grid,
-        path: "/financial-category",
-      },
-      {
-        id: "transactions",
-        label: "Transactions",
-        icon: CreditCard,
-        path: "/transactions",
-      },
-    ],
-  },
-  ecommerce: {
-    title: "Ecommerce",
-    icon: ShoppingCart,
-    items: [
-      {
-        id: "productCategory",
-        label: "Product Category",
-        icon: Package,
-        path: "/product-category",
-      },
-      {
-        id: "ecommerce",
-        label: "E-commerce",
-        icon: ShoppingCart,
-        path: "/ecommerce",
-      },
-      {
-        id: "myOrders",
-        label: "My Orders",
-        icon: ShoppingBag,
-        path: "/my-orders",
-      },
-      {
-        id: "contactUs",
-        label: "Contact Us",
-        icon: Phone,
-        path: "/contact-us",
-      },
-    ],
-  },
 };
 
 const branchSections = {

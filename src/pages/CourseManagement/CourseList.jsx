@@ -646,35 +646,36 @@ export default function CourseManagement({ roleData, adminId }) {
   };
 
   const tableHeaders = [
-    "Branch",
+    // "Branch",
     "Course",
     "Categories",
+    "languages",
     "Status",
     "Created At",
-    "Actions",
+    ...(roleData === "superadmin" ? ["Action"] : []),
   ];
 
   const tableData = courses.map((course) => [
-    !course?.adminId ? (
-      <span className="text-gray-400 italic">N/A</span>
-    ) : (
-      <div className="flex flex-col">
-        <span className="font-semibold text-gray-800 capitalize">
-          {course.adminId.name || "Branch"}
-        </span>
-        <span
-          className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
-            course.adminId.role.toLowerCase() === "superadmin"
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
-          {course.adminId.role.toLowerCase() === "superadmin"
-            ? "Main Branch"
-            : "Sub Branch"}
-        </span>
-      </div>
-    ),
+    // !course?.adminId ? (
+    //   <span className="text-gray-400 italic">N/A</span>
+    // ) : (
+    //   <div className="flex flex-col">
+    //     <span className="font-semibold text-gray-800 capitalize">
+    //       {course.adminId.name || "Branch"}
+    //     </span>
+    //     <span
+    //       className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
+    //         course.adminId.role.toLowerCase() === "superadmin"
+    //           ? "bg-green-100 text-green-700"
+    //           : "bg-yellow-100 text-yellow-700"
+    //       }`}
+    //     >
+    //       {course.adminId.role.toLowerCase() === "superadmin"
+    //         ? "Main Branch"
+    //         : "Sub Branch"}
+    //     </span>
+    //   </div>
+    // ),
 
     <div className="flex items-start gap-3">
       <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center overflow-hidden shadow-sm">
@@ -704,13 +705,27 @@ export default function CourseManagement({ roleData, adminId }) {
         course.category.map((catId, index) => (
           <span
             key={index}
-            className="px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100 rounded-full"
+            className="px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100 rounded-full capitalize"
           >
             {catId.name}
           </span>
         ))
       ) : (
         <span className="text-gray-400 text-xs">No Category</span>
+      )}
+    </div>,
+    <div className="flex flex-wrap gap-1 max-w-xs">
+      {course.language?.length ? (
+        course.language.map((catId, index) => (
+          <span
+            key={index}
+            className="px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100 rounded-full capitalize"
+          >
+            {catId.name}
+          </span>
+        ))
+      ) : (
+        <span className="text-gray-400 text-xs">No Language</span>
       )}
     </div>,
 
@@ -726,17 +741,18 @@ export default function CourseManagement({ roleData, adminId }) {
       </span>
 
       <label
-        className={`relative inline-flex items-center ${hasPermission(roleData, adminId, course?.adminId?._id || null) ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
+        className={`relative inline-flex items-center ${roleData === "superadmin" ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}
       >
         <input
           type="checkbox"
           checked={course.status}
           onChange={() => handleStatusToggle(course)}
           className="sr-only peer"
-          disabled={
-            loading ||
-            !hasPermission(roleData, adminId, course?.adminId?._id || null)
-          }
+          // disabled={
+          //   loading ||
+          //   !hasPermission(roleData, adminId, course?.adminId?._id || null)
+          // }
+          disabled={loading || roleData !== "superadmin"}
         />
         <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-green-500 transition-all"></div>
         <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
@@ -746,29 +762,29 @@ export default function CourseManagement({ roleData, adminId }) {
     <span className="text-sm text-gray-600">
       {formatDateForTable(course.createdAt)}
     </span>,
-
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => handleEditCourse(course)}
-        className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={
-          loading ||
-          !hasPermission(roleData, adminId, course?.adminId?._id || null)
-        }
-      >
-        <Edit2 className="w-4 h-4" />
-      </button>
-
-      {roleData === "superadmin" && (
-        <button
-          onClick={() => handleDeleteClick(course)}
-          className="p-2 rounded-lg text-red-600 hover:bg-red-50 hover:scale-105 transition disabled:opacity-50"
-          disabled={loading}
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
-    </div>,
+    roleData === "superadmin" && (
+      <>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => handleEditCourse(course)}
+            className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={
+              loading ||
+              !hasPermission(roleData, adminId, course?.adminId?._id || null)
+            }
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDeleteClick(course)}
+            className="p-2 rounded-lg text-red-600 hover:bg-red-50 hover:scale-105 transition disabled:opacity-50"
+            disabled={loading}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </>
+    ),
   ]);
 
   return (
@@ -784,16 +800,18 @@ export default function CourseManagement({ roleData, adminId }) {
             Manage all courses and their details
           </p>
         </div>
-        <div className="flex justify-end items-center mb-6">
-          <button
-            onClick={handleAddCourseClick}
-            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
-            disabled={loading}
-          >
-            <span>Add Course</span>
-            <Plus className="w-5 h-5" />
-          </button>
-        </div>
+        {roleData === "superadmin" && (
+          <div className="flex justify-end items-center mb-6">
+            <button
+              onClick={handleAddCourseClick}
+              className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+              disabled={loading}
+            >
+              <span>Add Course</span>
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-6">
