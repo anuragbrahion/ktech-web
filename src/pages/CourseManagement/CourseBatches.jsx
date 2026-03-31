@@ -466,6 +466,7 @@ export default function CourseBatchesManagement({ roleData, adminId }) {
         searchFields: "startTime,endTime",
       }),
       populate: "courses:courseName|adminId:name,role",
+      query: JSON.stringify({ adminId }),
     };
 
     dispatch(courseBatchesList(params)).then((action) => {
@@ -604,7 +605,7 @@ export default function CourseBatchesManagement({ roleData, adminId }) {
   const totalBatches = batchesListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalBatches / itemsPerPage);
   const tableHeaders = [
-    "Branch",
+    // "Branch",
     "Start Time",
     "End Time",
     "Total Seats",
@@ -616,26 +617,26 @@ export default function CourseBatchesManagement({ roleData, adminId }) {
   ];
 
   const tableData = batches.map((batch) => [
-    !batch?.adminId ? (
-      <span className="text-gray-400 italic">N/A</span>
-    ) : (
-      <div className="flex flex-col">
-        <span className="font-semibold text-gray-800 capitalize">
-          {batch.adminId.name || "Branch"}
-        </span>
-        <span
-          className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
-            batch.adminId.role.toLowerCase() === "superadmin"
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
-          {batch.adminId.role.toLowerCase() === "superadmin"
-            ? "Main Branch"
-            : "Sub Branch"}
-        </span>
-      </div>
-    ),
+    // !batch?.adminId ? (
+    //   <span className="text-gray-400 italic">N/A</span>
+    // ) : (
+    //   <div className="flex flex-col">
+    //     <span className="font-semibold text-gray-800 capitalize">
+    //       {batch.adminId.name || "Branch"}
+    //     </span>
+    //     <span
+    //       className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
+    //         batch.adminId.role.toLowerCase() === "superadmin"
+    //           ? "bg-green-100 text-green-700"
+    //           : "bg-yellow-100 text-yellow-700"
+    //       }`}
+    //     >
+    //       {batch.adminId.role.toLowerCase() === "superadmin"
+    //         ? "Main Branch"
+    //         : "Sub Branch"}
+    //     </span>
+    //   </div>
+    // ),
 
     <div className="font-medium text-gray-900">
       {formatTimeForDisplay(batch.startTime)}

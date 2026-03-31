@@ -29,6 +29,8 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/leave-type": "Employee Management > Leave Type",
       "/role": "Employee Management > Role",
       "/rules-and-regulations": "Employee Management > Rules & Regulations",
+      "/teacher-directory": "Employee Management > Teacher Directory",
+      "/assign-task":"Employee Management > Assign Task",
 
       "/referral-amount": "Branch Management > Referral Amount",
       "/inquiry-status": "Branch Management > Inquiry Status",
@@ -40,6 +42,8 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/course-list": "Course Management > Courses",
       "/course-plans": "Course Management > Plans",
       "/course-batches": "Course Management > Batches",
+
+      "/users": "Users Management > Users",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",

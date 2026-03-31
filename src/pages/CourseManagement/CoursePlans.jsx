@@ -271,6 +271,7 @@ export default function CoursePlansManagement({ roleData, adminId }) {
           keyWord: filters.search,
           searchFields: "name",
         }),
+        query: JSON.stringify({ adminId }),
       }),
     ).then((action) => {
       if (action.error) {
@@ -374,7 +375,7 @@ export default function CoursePlansManagement({ roleData, adminId }) {
   const totalPlans = plansListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalPlans / itemsPerPage);
   const tableHeaders = [
-    "Branch",
+    // "Branch",
     "Plan",
     "Courses",
     "Status",
@@ -382,26 +383,26 @@ export default function CoursePlansManagement({ roleData, adminId }) {
     "Actions",
   ];
   const tableData = plans.map((plan) => [
-    !plan?.adminId ? (
-      <span className="text-gray-400 italic">N/A</span>
-    ) : (
-      <div className="flex flex-col">
-        <span className="font-semibold text-gray-800 capitalize">
-          {plan.adminId.name || "Branch"}
-        </span>
-        <span
-          className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
-            plan.adminId.role.toLowerCase() === "superadmin"
-              ? "bg-green-100 text-green-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
-          {plan.adminId.role.toLowerCase() === "superadmin"
-            ? "Main Branch"
-            : "Sub Branch"}
-        </span>
-      </div>
-    ),
+    // !plan?.adminId ? (
+    //   <span className="text-gray-400 italic">N/A</span>
+    // ) : (
+    //   <div className="flex flex-col">
+    //     <span className="font-semibold text-gray-800 capitalize">
+    //       {plan.adminId.name || "Branch"}
+    //     </span>
+    //     <span
+    //       className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
+    //         plan.adminId.role.toLowerCase() === "superadmin"
+    //           ? "bg-green-100 text-green-700"
+    //           : "bg-yellow-100 text-yellow-700"
+    //       }`}
+    //     >
+    //       {plan.adminId.role.toLowerCase() === "superadmin"
+    //         ? "Main Branch"
+    //         : "Sub Branch"}
+    //     </span>
+    //   </div>
+    // ),
 
     <div className="flex flex-col">
       <span className="font-semibold text-gray-900 capitalize">

@@ -515,7 +515,9 @@ const App = () => {
           path="/teacher-directory"
           element={
             <ProtectedRoute>
-              {renderMainLayout(TeacherDirectory)}
+              {renderMainLayout(() => (
+                <TeacherDirectory roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -534,7 +536,11 @@ const App = () => {
         <Route
           path="/assign-task"
           element={
-            <ProtectedRoute>{renderMainLayout(AssignTask)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <AssignTask roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -813,7 +819,13 @@ const App = () => {
 
         <Route
           path="/users"
-          element={<ProtectedRoute>{renderMainLayout(Users)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Users roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route
