@@ -94,6 +94,8 @@ import StudentMyExams from "./pages/Students/MyExams";
 import StudentReferralAmount from "./pages/Students/ReferralAmount";
 import ExamPage from "./pages/Students/ExamPage";
 import ExamResults from "./components/ExamResults";
+import RuleAndRegulation from "./pages/EmployeeManagement/RuleAndRegulation";
+import EmployeeRulesAndRegulations from "./pages/EmployeeManagement/EmployeeRulesAndRegulations";
 
 const MainLayout = ({
   children,
@@ -266,6 +268,17 @@ const App = () => {
         />
 
         <Route
+          path="/teacher/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <EmployeeRulesAndRegulations roleData={roleData} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/student-dashboard"
           element={
             <ProtectedRoute>
@@ -343,6 +356,17 @@ const App = () => {
         />
 
         <Route
+          path="/student/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <EmployeeRulesAndRegulations roleData={roleData} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/dashboard"
           element={
             <ProtectedRoute>{renderMainLayout(Dashboard)}</ProtectedRoute>
@@ -351,14 +375,22 @@ const App = () => {
 
         <Route
           path="/blogs"
-          element={<ProtectedRoute>{renderMainLayout(Blogs)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Blogs roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route
-          path="/blogs-categrory"
+          path="/category"
           element={
             <ProtectedRoute>
-              {renderMainLayout(BlogCategoryManagement)}
+              {renderMainLayout(() => (
+                <BlogCategoryManagement roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -388,7 +420,9 @@ const App = () => {
           path="/language"
           element={
             <ProtectedRoute>
-              {renderMainLayout(LanguageManagement)}
+              {renderMainLayout(() => (
+                <LanguageManagement roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -478,7 +512,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Designation roleData={roleData} />
+                <Designation roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -489,7 +523,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Department roleData={roleData} />
+                <Department roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -499,7 +533,9 @@ const App = () => {
           path="/teacher-directory"
           element={
             <ProtectedRoute>
-              {renderMainLayout(TeacherDirectory)}
+              {renderMainLayout(() => (
+                <TeacherDirectory roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -509,7 +545,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <LeaveType roleData={roleData} />
+                <LeaveType roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -518,7 +554,11 @@ const App = () => {
         <Route
           path="/assign-task"
           element={
-            <ProtectedRoute>{renderMainLayout(AssignTask)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <AssignTask roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -528,6 +568,17 @@ const App = () => {
             <ProtectedRoute>
               {renderMainLayout(() => (
                 <AllAssignTask roleData={roleData} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/rules-and-regulations"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <RuleAndRegulation roleData={roleData} />
               ))}
             </ProtectedRoute>
           }
@@ -545,14 +596,22 @@ const App = () => {
         <Route
           path="/visitors-book"
           element={
-            <ProtectedRoute>{renderMainLayout(VisitorsBook)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <VisitorsBook roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/referral-amount"
           element={
-            <ProtectedRoute>{renderMainLayout(ReferralAmount)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <ReferralAmount roleData={roleData} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -568,7 +627,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <CourseList roleData={roleData} />
+                <CourseList roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -584,7 +643,11 @@ const App = () => {
         <Route
           path="/course-plans"
           element={
-            <ProtectedRoute>{renderMainLayout(CoursePlans)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <CoursePlans roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -593,7 +656,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <CourseBatches roleData={roleData} />
+                <CourseBatches roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -604,7 +667,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <InquirySource roleData={roleData} />
+                <InquirySource roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -615,7 +678,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <InquiryStatus roleData={roleData} />
+                <InquiryStatus roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -648,7 +711,13 @@ const App = () => {
 
         <Route
           path="/inquiry"
-          element={<ProtectedRoute>{renderMainLayout(Inquiry)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Inquiry adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route
@@ -768,7 +837,13 @@ const App = () => {
 
         <Route
           path="/users"
-          element={<ProtectedRoute>{renderMainLayout(Users)}</ProtectedRoute>}
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Users roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
         />
 
         <Route

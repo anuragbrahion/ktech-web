@@ -1,13 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  Plus,
-  Edit2,
-  Trash2,
-  Eye, 
-  Search,
-} from "lucide-react";
+import { Plus, Edit2, Trash2, Eye, Search, Filter } from "lucide-react";
 import { toast } from "react-toastify";
 import {
   courseBatchesList,
@@ -19,6 +13,8 @@ import {
 } from "../../redux/slices/course";
 import Table from "../../components/Atoms/TableData/TableData";
 import AlertModal from "../../components/Modal/AlertModal";
+import { formatDateForTable, hasPermission } from "../../utils/globalFunction";
+import Loader from "../../components/Loader/Loader";
 
 const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
   const [formData, setFormData] = useState({
@@ -39,7 +35,7 @@ const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
 
   useEffect(() => {
     if (batch) {
-       setFormData({
+      setFormData({
         startTime: batch.startTime || "",
         endTime: batch.endTime || "",
         totalSeat: batch.totalSeat || "",
@@ -420,7 +416,7 @@ const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
   );
 };
 
-export default function CourseBatchesManagement({roleData}) {
+export default function CourseBatchesManagement({ roleData, adminId }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -430,7 +426,7 @@ export default function CourseBatchesManagement({roleData}) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [filters, setFilters] = useState({
-    search: ""
+    search: "",
   });
   const [loading, setLoading] = useState(false);
 
@@ -448,25 +444,29 @@ export default function CourseBatchesManagement({roleData}) {
   );
   const updateData = useSelector(
     (state) => state.course?.updateCourseBatchesData,
-  ); 
+  );
   useEffect(() => {
-    fetchBatches();
+    fetchBatches(filters);
   }, []);
 
   useEffect(() => {
     if (!showModal) {
-      fetchBatches();
+      fetchBatches(filters);
     }
   }, [currentPage, enableDisableData, deleteData, createData, updateData]);
 
-  const fetchBatches = () => {
+  const fetchBatches = (filters) => {
     setLoading(true);
 
     const params = {
       page: currentPage,
       size: itemsPerPage,
-      ...(filters.search && { keyWord: filters.search }),
-      populate: "courses",
+      ...(filters.search && {
+        keyWord: filters.search,
+        searchFields: "startTime,endTime",
+      }),
+      populate: "courses:courseName|adminId:name,role",
+      query: JSON.stringify({ adminId }),
     };
 
     dispatch(courseBatchesList(params)).then((action) => {
@@ -521,7 +521,7 @@ export default function CourseBatchesManagement({roleData}) {
         (action) => {
           if (!action.error) {
             toast.success("Batch deleted successfully");
-            fetchBatches();
+            fetchBatches(filters);
           } else {
             toast.error(action.payload || "Failed to delete batch");
           }
@@ -550,7 +550,7 @@ export default function CourseBatchesManagement({roleData}) {
           toast.success(
             `Batch ${newStatus ? "activated" : "deactivated"} successfully`,
           );
-          fetchBatches();
+          fetchBatches(filters);
         } else {
           toast.error(action.payload || "Failed to update status");
         }
@@ -576,7 +576,7 @@ export default function CourseBatchesManagement({roleData}) {
 
         setShowModal(false);
         setSelectedBatch(null);
-        fetchBatches();
+        fetchBatches(filters);
       } else {
         toast.error(
           action.payload || action.error?.message || "Something went wrong",
@@ -597,10 +597,6 @@ export default function CourseBatchesManagement({roleData}) {
     return `${displayHours}:${minutes.toString().padStart(2, "0")} ${period}`;
   };
 
-  const getStatusColor = (status) => {
-    return status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
-  };
- 
   const getAvailableSeats = (batch) => {
     return batch.totalSeat || 0;
   };
@@ -609,6 +605,7 @@ export default function CourseBatchesManagement({roleData}) {
   const totalBatches = batchesListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalBatches / itemsPerPage);
   const tableHeaders = [
+    // "Branch",
     "Start Time",
     "End Time",
     "Total Seats",
@@ -620,191 +617,244 @@ export default function CourseBatchesManagement({roleData}) {
   ];
 
   const tableData = batches.map((batch) => [
-    <div className="flex items-center">
-      <span className="text-gray-900">
-        {formatTimeForDisplay(batch.startTime)}
-      </span>
+    // !batch?.adminId ? (
+    //   <span className="text-gray-400 italic">N/A</span>
+    // ) : (
+    //   <div className="flex flex-col">
+    //     <span className="font-semibold text-gray-800 capitalize">
+    //       {batch.adminId.name || "Branch"}
+    //     </span>
+    //     <span
+    //       className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
+    //         batch.adminId.role.toLowerCase() === "superadmin"
+    //           ? "bg-green-100 text-green-700"
+    //           : "bg-yellow-100 text-yellow-700"
+    //       }`}
+    //     >
+    //       {batch.adminId.role.toLowerCase() === "superadmin"
+    //         ? "Main Branch"
+    //         : "Sub Branch"}
+    //     </span>
+    //   </div>
+    // ),
+
+    <div className="font-medium text-gray-900">
+      {formatTimeForDisplay(batch.startTime)}
     </div>,
-    <div className="flex items-center">
-      <span className="text-gray-900">
-        {formatTimeForDisplay(batch.endTime)}
-      </span>
+
+    <div className="font-medium text-gray-900">
+      {formatTimeForDisplay(batch.endTime)}
     </div>,
-    <div className="flex items-center">
-      <span className="inline-flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-800 rounded-full text-lg">
+
+    <div className="flex items-center justify-center">
+      <span className="w-10 h-10 flex items-center justify-center rounded-xl bg-blue-100 text-blue-700 font-semibold shadow-sm">
         {batch.totalSeat}
       </span>
     </div>,
-    <div className="flex items-center">
+
+    <div className="flex items-center justify-center">
       <span
-        className={`inline-flex items-center justify-center w-10 h-10 rounded-full text-lg ${
+        className={`w-10 h-10 flex items-center justify-center rounded-xl font-semibold shadow-sm ${
           getAvailableSeats(batch) > 0
-            ? "bg-green-100 text-green-800"
-            : "bg-red-100 text-red-800"
+            ? "bg-green-100 text-green-700"
+            : "bg-red-100 text-red-700"
         }`}
       >
         {getAvailableSeats(batch)}
       </span>
     </div>,
-    <div className="max-w-xs text-gray-700 capitalize">
-      {batch.courses?.length > 0 ? (
+
+    <div className="flex flex-wrap gap-1 max-w-xs">
+      {batch.courses?.length ? (
         <>
-          {batch.courses[0]?.courseName}
-          {batch.courses.length > 1 && ` +${batch.courses.length - 1}`}
+          <span className="px-2 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100 rounded-full">
+            {batch.courses[0]?.courseName}
+          </span>
+          {batch.courses.length > 1 && (
+            <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+              +{batch.courses.length - 1}
+            </span>
+          )}
         </>
       ) : (
-        "—"
+        <span className="text-gray-400 text-xs">No Course</span>
       )}
     </div>,
-    <div className="flex items-center">
+
+    <div className="flex items-center gap-3">
       <span
-        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(batch.status)}`}
+        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+          batch.status
+            ? "bg-green-100 text-green-700"
+            : "bg-gray-200 text-gray-600"
+        }`}
       >
         {batch.status ? "Active" : "Inactive"}
       </span>
-      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+
+      <label className="relative inline-flex items-center">
         <input
           type="checkbox"
           checked={batch.status}
           onChange={() => handleStatusToggle(batch)}
-          className="sr-only"
+          className="sr-only peer"
           id={`toggle-batch-${batch._id}`}
-          disabled={loading}
+          disabled={
+            loading ||
+            !hasPermission(roleData, adminId, batch?.adminId?._id || null)
+          }
         />
-        <label
-          htmlFor={`toggle-batch-${batch._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${batch.status ? "bg-green-500" : "bg-gray-300"}`}
-        >
-          <span
-            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${batch.status ? "translate-x-4" : "translate-x-0"}`}
-          />
-        </label>
-      </div>
+
+        <div
+          className={`w-11 h-6 rounded-full transition-all ${
+            batch.status ? "bg-green-500" : "bg-gray-300"
+          } ${
+            hasPermission(roleData, adminId, batch?.adminId?._id || null)
+              ? "cursor-pointer"
+              : "cursor-not-allowed opacity-60"
+          }`}
+        ></div>
+
+        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+      </label>
     </div>,
-    <div className="flex items-center">
-      {new Date(batch.createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })}
-    </div>,
+
+    <span className="text-sm text-gray-600">
+      {formatDateForTable(batch.createdAt)}
+    </span>,
+
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleViewBatch(batch)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-        title="View Details"
+        className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 hover:scale-105 transition"
         disabled={loading}
       >
         <Eye className="w-4 h-4" />
       </button>
+
       <button
         onClick={() => handleEditBatch(batch)}
-        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-        title="Edit"
-        disabled={loading}
+        className="p-2 rounded-lg text-green-600 hover:bg-green-50 hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={
+          loading ||
+          !hasPermission(roleData, adminId, batch?.adminId?._id || null)
+        }
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      {roleData === "superadmin" && <button
-        onClick={() => handleDeleteClick(batch)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>}
-    </div>
+
+      {roleData === "superadmin" && (
+        <button
+          onClick={() => handleDeleteClick(batch)}
+          className="p-2 rounded-lg text-red-600 hover:bg-red-50 hover:scale-105 transition disabled:opacity-50"
+          disabled={loading}
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>,
   ]);
 
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFilter = () => {
+    setCurrentPage(1);
+    fetchBatches(filters);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: "",
+    });
+    setCurrentPage(1);
+    fetchBatches({
+      search: "",
+    });
+  };
+
   return (
-    <div className="">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Course Batches</h1>
-        <p className="text-gray-600 mt-2">
-          Manage all course batches and schedules
-        </p>
+    <>
+      <Loader loading={loading} />
+
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Course Batches</h1>
+          <p className="text-gray-600 mt-2">
+            Manage all course batches and schedules
+          </p>
+        </div>
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddBatchClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+            disabled={loading}
+          >
+            <span>Add Batch</span>
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Filter Batches
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search
-            </label>
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(e) => handleFilterChange("search", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Search batches..."
-              disabled={loading}
-            />
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="bg-blue-100 p-2 rounded-lg">
+            <Filter className="w-5 h-5 text-blue-600" />
           </div>
-          <div className="flex gap-3 mt-6">
+          <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => handleFilterChange("search", e.target.value)}
+            placeholder="Search name..."
+            disabled={loading}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <div className="flex justify-end gap-2">
             <button
               onClick={handleFilter}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 w-24"
               disabled={loading}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
             >
-              {loading ? "Loading..." : "Filter"}
+              {loading ? "..." : "Apply"}
             </button>
             <button
               onClick={resetFilters}
-              className="px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
               disabled={loading}
+              className="px-4 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
             >
               Reset
             </button>
           </div>
         </div>
-      </div> */}
-
-      <div className="flex justify-end items-center mb-6">
-        <button
-          onClick={handleAddBatchClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
-          disabled={loading}
-        >
-          <span>Add Batch</span>
-          <Plus className="w-5 h-5" />
-        </button>
       </div>
 
-      {loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Loading batches...</span>
-          </div>
-        </div>
-      )}
-
-      {!loading && (
-        <Table
-          headers={tableHeaders}
-          data={tableData}
-          currentPage={currentPage}
-          size={itemsPerPage}
-          handlePageChange={setCurrentPage}
-          total={totalBatches}
-          totalPages={totalPages}
-          renderRow={(row, index) => (
-            <tr
-              key={index}
-              className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
-            >
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="py-4 px-4">
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          )}
-        />
-      )}
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalBatches}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showModal && (
         <BatchModal
@@ -835,6 +885,6 @@ export default function CourseBatchesManagement({roleData}) {
           isVisibleConfirmButton={true}
         />
       )}
-    </div>
+    </>
   );
 }

@@ -1,51 +1,56 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Edit2, Trash2, Eye, Calendar, ChevronLeft, ChevronRight, Tag } from 'lucide-react';
-import { X, Globe, FileText, Check, Image as ImageIcon, Upload } from 'lucide-react';
-import { 
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { Plus, Filter, Edit2, Trash2, Tag } from "lucide-react";
+import { X, FileText, Image as ImageIcon, Upload } from "lucide-react";
+import {
   websiteBlogsList,
   enableDisableWebsiteBlogs,
   deleteWebsiteBlogs,
   createWebsiteBlogs,
   updateWebsiteBlogs,
   websiteLanguagesAllDocuments,
-  websiteCategoryAllDocuments 
-} from '../../../redux/slices/website';
-import TableData from '../../../components/Atoms/Table';
-import { toast } from 'react-toastify';
-import axios from 'axios';
- 
+  websiteCategoryAllDocuments,
+} from "../../../redux/slices/website";
+import TableData from "../../../components/Atoms/Table";
+import { toast } from "react-toastify";
+import axios from "axios";
+import Loader from "../../../components/Loader/Loader";
+import { uploadApiUrl } from "../../../utils/axiosProvider";
+import {
+  formatDateForTable,
+  hasPermission,
+} from "../../../utils/globalFunction";
+
 const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    shortDescription: '',
-    description: '',
+    title: "",
+    shortDescription: "",
+    description: "",
     language: [],
     category: [],
     thumbnailImage: null,
-    mainImageUrl: null
+    mainImageUrl: null,
   });
 
-  const [activeTab, setActiveTab] = useState('basic');
-  const [thumbnailFile, setThumbnailFile] = useState(null);
-  const [mainImageFile, setMainImageFile] = useState(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState('');
-  const [mainImagePreview, setMainImagePreview] = useState('');
+  const [activeTab, setActiveTab] = useState("basic");
+  const [thumbnailPreview, setThumbnailPreview] = useState("");
+  const [mainImagePreview, setMainImagePreview] = useState("");
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (blog) {
       setFormData({
-        title: blog.title || '',
-        shortDescription: blog.shortDescription || '',
-        description: blog.description || '',
-        language: blog.language ? blog.language.map(l => l._id || l) : [],
-        category: blog.category ? blog.category.map(c => c._id || c) : [],
+        title: blog.title || "",
+        shortDescription: blog.shortDescription || "",
+        description: blog.description || "",
+        language: blog.language ? blog.language.map((l) => l._id || l) : [],
+        category: blog.category ? blog.category.map((c) => c._id || c) : [],
         thumbnailImage: blog.thumbnailImage || null,
-        mainImageUrl: blog.mainImageUrl || null
+        mainImageUrl: blog.mainImageUrl || null,
       });
-      
+
       if (blog.thumbnailImage?.url) {
         setThumbnailPreview(blog.thumbnailImage.url);
       }
@@ -57,46 +62,51 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleArrayChange = (field, values) => {
-    setFormData(prev => ({ ...prev, [field]: values }));
+    setFormData((prev) => ({ ...prev, [field]: values }));
   };
 
   const handleImageUpload = async (file, type) => {
     setUploading(true);
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append("files", file);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('https://ktech-backend-ten.vercel.app/api/v1/upload/image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${uploadApiUrl}/files/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-      if (response.data.success && response.data.data) {
-        if (type === 'thumbnail') {
-          setFormData(prev => ({
+      if (!response.data.error && response.data.data) {
+        if (type === "thumbnail") {
+          setFormData((prev) => ({
             ...prev,
-            thumbnailImage: response.data.data
+            thumbnailImage: response.data.data[0],
           }));
-          setThumbnailPreview(response.data.data.url);
-          toast.success('Thumbnail uploaded successfully');
-        } else if (type === 'main') {
-          setFormData(prev => ({
+          setThumbnailPreview(response.data.data[0].url);
+          toast.success("Thumbnail uploaded successfully");
+        } else if (type === "main") {
+          setFormData((prev) => ({
             ...prev,
-            mainImageUrl: response.data.data
+            mainImageUrl: response.data.data[0],
           }));
-          setMainImagePreview(response.data.data.url);
-          toast.success('Main image uploaded successfully');
+          setMainImagePreview(response.data.data[0].url);
+          toast.success("Main image uploaded successfully");
         }
       }
     } catch (error) {
-      toast.error('Failed to upload image');
+      console.error(error);
+      toast.error("Failed to upload image");
     } finally {
       setUploading(false);
     }
@@ -105,39 +115,41 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
   const handleImageChange = (field, e, type) => {
     const file = e.target.files[0];
     if (file) {
-      if (type === 'thumbnail') {
-        setThumbnailFile(file);
+      if (type === "thumbnail") {
         const previewUrl = URL.createObjectURL(file);
         setThumbnailPreview(previewUrl);
-        handleImageUpload(file, 'thumbnail');
-      } else if (type === 'main') {
-        setMainImageFile(file);
+        handleImageUpload(file, "thumbnail");
+      } else if (type === "main") {
         const previewUrl = URL.createObjectURL(file);
         setMainImagePreview(previewUrl);
-        handleImageUpload(file, 'main');
+        handleImageUpload(file, "main");
       }
     }
   };
 
   const removeImage = (type) => {
-    if (type === 'thumbnail') {
-      setThumbnailPreview('');
-      setThumbnailFile(null);
-      setFormData(prev => ({ ...prev, thumbnailImage: null }));
-    } else if (type === 'main') {
-      setMainImagePreview('');
-      setMainImageFile(null);
-      setFormData(prev => ({ ...prev, mainImageUrl: null }));
+    if (type === "thumbnail") {
+      setThumbnailPreview("");
+      setFormData((prev) => ({ ...prev, thumbnailImage: null }));
+    } else if (type === "main") {
+      setMainImagePreview("");
+      setFormData((prev) => ({ ...prev, mainImageUrl: null }));
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (!formData.title || !formData.shortDescription || !formData.description || 
-        formData.language.length === 0 || formData.category.length === 0 || 
-        !formData.thumbnailImage || !formData.mainImageUrl) {
-      toast.error('Please fill all required fields');
+
+    if (
+      !formData.title ||
+      !formData.shortDescription ||
+      !formData.description ||
+      formData.language.length === 0 ||
+      formData.category.length === 0 ||
+      !formData.thumbnailImage ||
+      !formData.mainImageUrl
+    ) {
+      toast.error("Please fill all required fields");
       return;
     }
 
@@ -148,7 +160,7 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
       language: formData.language,
       category: formData.category,
       thumbnailImage: formData.thumbnailImage,
-      mainImageUrl: formData.mainImageUrl
+      mainImageUrl: formData.mainImageUrl,
     };
 
     if (blog) {
@@ -159,9 +171,9 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
   };
 
   const tabs = [
-    { id: 'basic', label: 'Basic Info', icon: FileText },
-    { id: 'content', label: 'Content', icon: FileText },
-    { id: 'media', label: 'Media', icon: ImageIcon }
+    { id: "basic", label: "Basic Info", icon: FileText },
+    { id: "content", label: "Content", icon: FileText },
+    { id: "media", label: "Media", icon: ImageIcon },
   ];
 
   return (
@@ -170,7 +182,7 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
         <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
-              {blog ? 'Edit Blog' : 'Add New Blog'}
+              {blog ? "Edit Blog" : "Add New Blog"}
             </h2>
             <p className="text-gray-600 text-sm">Add your blogs here</p>
           </div>
@@ -190,8 +202,8 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-3 text-sm font-medium border-b-2 transition ${
                   activeTab === tab.id
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -205,7 +217,7 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
 
         <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[60vh]">
           <div className="p-6 space-y-6">
-            {activeTab === 'basic' && (
+            {activeTab === "basic" && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -245,18 +257,30 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                     <select
                       multiple
                       value={formData.language}
-                      onChange={(e) => handleArrayChange('language', Array.from(e.target.selectedOptions, option => option.value))}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          "language",
+                          Array.from(
+                            e.target.selectedOptions,
+                            (option) => option.value,
+                          ),
+                        )
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
-                      <option value="" disabled>Select languages</option>
+                      <option value="" disabled>
+                        Select languages
+                      </option>
                       {languages.map((lang) => (
                         <option key={lang._id} value={lang._id}>
                           {lang.name}
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Hold Ctrl/Cmd to select multiple
+                    </p>
                   </div>
 
                   <div>
@@ -266,24 +290,36 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                     <select
                       multiple
                       value={formData.category}
-                      onChange={(e) => handleArrayChange('category', Array.from(e.target.selectedOptions, option => option.value))}
+                      onChange={(e) =>
+                        handleArrayChange(
+                          "category",
+                          Array.from(
+                            e.target.selectedOptions,
+                            (option) => option.value,
+                          ),
+                        )
+                      }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       required
                     >
-                      <option value="" disabled>Select categories</option>
+                      <option value="" disabled>
+                        Select categories
+                      </option>
                       {categories.map((cat) => (
                         <option key={cat._id} value={cat._id}>
                           {cat.name}
                         </option>
                       ))}
                     </select>
-                    <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Hold Ctrl/Cmd to select multiple
+                    </p>
                   </div>
                 </div>
               </>
             )}
 
-            {activeTab === 'content' && (
+            {activeTab === "content" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Full Description *
@@ -300,7 +336,7 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
               </div>
             )}
 
-            {activeTab === 'media' && (
+            {activeTab === "media" && (
               <>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -310,7 +346,9 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                     {uploading ? (
                       <div className="py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="text-sm text-gray-600 mt-3">Uploading...</p>
+                        <p className="text-sm text-gray-600 mt-3">
+                          Uploading...
+                        </p>
                       </div>
                     ) : thumbnailPreview || formData.thumbnailImage?.url ? (
                       <div className="relative">
@@ -323,16 +361,25 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => handleImageChange('thumbnailImage', e, 'thumbnail')}
+                            onChange={(e) =>
+                              handleImageChange(
+                                "thumbnailImage",
+                                e,
+                                "thumbnail",
+                              )
+                            }
                             className="hidden"
                             id="thumbnail-upload"
                           />
-                          <label htmlFor="thumbnail-upload" className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                          <label
+                            htmlFor="thumbnail-upload"
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                          >
                             Change
                           </label>
                           <button
                             type="button"
-                            onClick={() => removeImage('thumbnail')}
+                            onClick={() => removeImage("thumbnail")}
                             className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                           >
                             Remove
@@ -344,15 +391,24 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleImageChange('thumbnailImage', e, 'thumbnail')}
+                          onChange={(e) =>
+                            handleImageChange("thumbnailImage", e, "thumbnail")
+                          }
                           className="hidden"
                           id="thumbnail-upload"
                         />
-                        <label htmlFor="thumbnail-upload" className="cursor-pointer block">
+                        <label
+                          htmlFor="thumbnail-upload"
+                          className="cursor-pointer block"
+                        >
                           <div className="space-y-3">
                             <Upload className="w-12 h-12 text-gray-400 mx-auto" />
-                            <p className="text-gray-500">Click to upload thumbnail image</p>
-                            <p className="text-xs text-gray-400">Supported: JPG, PNG, WebP</p>
+                            <p className="text-gray-500">
+                              Click to upload thumbnail image
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Supported: JPG, PNG, WebP
+                            </p>
                           </div>
                         </label>
                       </>
@@ -368,7 +424,9 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                     {uploading ? (
                       <div className="py-12">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                        <p className="text-sm text-gray-600 mt-3">Uploading...</p>
+                        <p className="text-sm text-gray-600 mt-3">
+                          Uploading...
+                        </p>
                       </div>
                     ) : mainImagePreview || formData.mainImageUrl?.url ? (
                       <div className="relative">
@@ -381,16 +439,21 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => handleImageChange('mainImageUrl', e, 'main')}
+                            onChange={(e) =>
+                              handleImageChange("mainImageUrl", e, "main")
+                            }
                             className="hidden"
                             id="main-upload"
                           />
-                          <label htmlFor="main-upload" className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer">
+                          <label
+                            htmlFor="main-upload"
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer"
+                          >
                             Change
                           </label>
                           <button
                             type="button"
-                            onClick={() => removeImage('main')}
+                            onClick={() => removeImage("main")}
                             className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
                           >
                             Remove
@@ -402,15 +465,24 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleImageChange('mainImageUrl', e, 'main')}
+                          onChange={(e) =>
+                            handleImageChange("mainImageUrl", e, "main")
+                          }
                           className="hidden"
                           id="main-upload"
                         />
-                        <label htmlFor="main-upload" className="cursor-pointer block">
+                        <label
+                          htmlFor="main-upload"
+                          className="cursor-pointer block"
+                        >
                           <div className="space-y-3">
                             <Upload className="w-12 h-12 text-gray-400 mx-auto" />
-                            <p className="text-gray-500">Click to upload main image</p>
-                            <p className="text-xs text-gray-400">Supported: JPG, PNG, WebP</p>
+                            <p className="text-gray-500">
+                              Click to upload main image
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              Supported: JPG, PNG, WebP
+                            </p>
                           </div>
                         </label>
                       </>
@@ -432,9 +504,18 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
             <button
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={uploading || !formData.title || !formData.shortDescription || !formData.description || formData.language.length === 0 || formData.category.length === 0 || !formData.thumbnailImage || !formData.mainImageUrl}
+              disabled={
+                uploading ||
+                !formData.title ||
+                !formData.shortDescription ||
+                !formData.description ||
+                formData.language.length === 0 ||
+                formData.category.length === 0 ||
+                !formData.thumbnailImage ||
+                !formData.mainImageUrl
+              }
             >
-              {uploading ? 'Uploading...' : blog ? 'Update Blog' : 'Add Blog'}
+              {uploading ? "Uploading..." : blog ? "Update Blog" : "Add Blog"}
             </button>
           </div>
         </form>
@@ -443,7 +524,7 @@ const AddEditBlogModal = ({ blog, onSave, onClose, languages, categories }) => {
   );
 };
 
-const Blogs = () => {
+const Blogs = ({ roleData, adminId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
@@ -451,23 +532,36 @@ const Blogs = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [filters, setFilters] = useState({
-    title: '',
-    status: ''
+    title: "",
+    status: "",
   });
   const [languages, setLanguages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const blogsListData = useSelector(state => state.website?.websiteBlogsListData);
-  const languagesData = useSelector(state => state.website?.websiteLanguagesAllDocumentsData);
-  const categoriesData = useSelector(state => state.website?.websiteCategoryAllDocumentsData);
-  const enableDisableData = useSelector(state => state.website?.enableDisableWebsiteBlogsData);
-  const deleteData = useSelector(state => state.website?.deleteWebsiteBlogsData);
-  const createData = useSelector(state => state.website?.createWebsiteBlogsData);
-  const updateData = useSelector(state => state.website?.updateWebsiteBlogsData);
+  const blogsListData = useSelector(
+    (state) => state.website?.websiteBlogsListData,
+  );
+  const languagesData = useSelector(
+    (state) => state.website?.websiteLanguagesAllDocumentsData,
+  );
+  const categoriesData = useSelector(
+    (state) => state.website?.websiteCategoryAllDocumentsData,
+  );
+  const enableDisableData = useSelector(
+    (state) => state.website?.enableDisableWebsiteBlogsData,
+  );
+  const deleteData = useSelector(
+    (state) => state.website?.deleteWebsiteBlogsData,
+  );
+  const createData = useSelector(
+    (state) => state.website?.createWebsiteBlogsData,
+  );
+  const updateData = useSelector(
+    (state) => state.website?.updateWebsiteBlogsData,
+  );
 
   useEffect(() => {
-    fetchBlogs();
     fetchLanguages();
     fetchCategories();
   }, []);
@@ -478,11 +572,12 @@ const Blogs = () => {
     }
   }, [currentPage, enableDisableData, deleteData, createData, updateData]);
 
-  const fetchBlogs = () => {
+  const fetchBlogs = (filters) => {
     const params = {
       page: currentPage,
       size: itemsPerPage,
-      ...(filters.title && { title: filters.title })
+      populate: "adminId:name,role",
+      ...(filters?.title && { keyWord: filters.title, searchFields: "title" }),
     };
     dispatch(websiteBlogsList(params));
   };
@@ -518,14 +613,14 @@ const Blogs = () => {
   };
 
   const handleDeleteBlog = (id) => {
-    if (window.confirm('Are you sure you want to delete this blog?')) {
+    if (window.confirm("Are you sure you want to delete this blog?")) {
       setLoading(true);
       dispatch(deleteWebsiteBlogs({ id })).then((action) => {
         if (!action.error) {
-          toast.success('Blog deleted successfully');
+          toast.success("Blog deleted successfully");
           fetchBlogs();
         } else {
-          toast.error(action.payload || 'Failed to delete blog');
+          toast.error(action.payload || "Failed to delete blog");
         }
         setLoading(false);
       });
@@ -533,19 +628,25 @@ const Blogs = () => {
   };
 
   const handleStatusToggle = (blog) => {
-    const newStatus = blog.status ? 'inactive' : 'active';
-    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this blog?`)) {
+    const newStatus = blog.status ? "inactive" : "active";
+    if (
+      window.confirm(
+        `Are you sure you want to ${newStatus ? "activate" : "deactivate"} this blog?`,
+      )
+    ) {
       setLoading(true);
       const payload = {
         _id: blog._id,
-        status: blog.status ? false : true
+        status: blog.status ? false : true,
       };
       dispatch(enableDisableWebsiteBlogs(payload)).then((action) => {
         if (!action.error) {
-          toast.success(`Blog ${newStatus ? 'activated' : 'deactivated'} successfully`);
+          toast.success(
+            `Blog ${newStatus ? "activated" : "deactivated"} successfully`,
+          );
           fetchBlogs();
         } else {
-          toast.error(action.payload || 'Failed to update status');
+          toast.error(action.payload || "Failed to update status");
         }
         setLoading(false);
       });
@@ -557,23 +658,23 @@ const Blogs = () => {
     if (editingBlog) {
       dispatch(updateWebsiteBlogs(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Blog updated successfully');
+          toast.success("Blog updated successfully");
           setShowModal(false);
           setEditingBlog(null);
           fetchBlogs();
         } else {
-          toast.error(action.payload || 'Failed to update blog');
+          toast.error(action.payload || "Failed to update blog");
         }
         setLoading(false);
       });
     } else {
       dispatch(createWebsiteBlogs(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Blog created successfully');
+          toast.success("Blog created successfully");
           setShowModal(false);
           fetchBlogs();
         } else {
-          toast.error(action.payload || 'Failed to create blog');
+          toast.error(action.payload || "Failed to create blog");
         }
         setLoading(false);
       });
@@ -581,176 +682,187 @@ const Blogs = () => {
   };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleFilter = () => {
     setCurrentPage(1);
-    fetchBlogs();
+    fetchBlogs(filters);
   };
 
   const resetFilters = () => {
     setFilters({
-      title: '',
-      status: ''
+      title: "",
+      status: "",
     });
     setCurrentPage(1);
     fetchBlogs();
   };
 
   const navigateToCategories = () => {
-    navigate('/blogs-categrory');
+    navigate("/category");
   };
 
   const blogs = blogsListData?.data?.data?.list || [];
   const totalBlogs = blogsListData?.data?.total || 0;
   const totalPages = Math.ceil(totalBlogs / itemsPerPage);
 
-  const tableHeadings = ['Title', 'Short Description', 'Status', 'Created At', 'Actions'];
-  
-  const tableData = blogs.map(blog => [
-    <div className="font-medium text-gray-800">{blog.title}</div>,
-    <div className="max-w-xs truncate text-gray-600">{blog.shortDescription || 'No description'}</div>,
+  const tableHeadings = ["Title", "Branch", "Status", "Created At", "Actions"];
+
+  const tableData = blogs.map((blog) => [
+    <div className="font-medium text-gray-800 capitalize">{blog.title}</div>,
+
+    !blog?.adminId ? (
+      "N/A"
+    ) : (
+      <div>
+        <div className="font-medium text-gray-900 capitalize">
+          {blog.adminId.name || "Branch"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {blog.adminId.role.toLowerCase() === "superadmin"
+            ? "Main Branch"
+            : "Sub Branch"}
+        </div>
+      </div>
+    ),
     <div className="flex items-center">
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-        blog.status
-          ? 'bg-green-100 text-green-800'
-          : 'bg-red-100 text-red-800'
-      }`}>
-        {blog.status? 'Active' : 'Inactive'}
+      <span
+        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+          blog.status
+            ? "bg-green-100 text-green-800"
+            : "bg-red-100 text-red-800"
+        }`}
+      >
+        {blog.status ? "Active" : "Inactive"}
       </span>
       <div className="ml-3 relative inline-block w-10 align-middle select-none">
         <input
           type="checkbox"
-          checked={blog.status === 'active'}
+          checked={blog.status === "active"}
           onChange={() => handleStatusToggle(blog)}
-          className="sr-only"
+          className="sr-only disabled:cursor-not-allowed"
           id={`toggle-${blog._id}`}
+          disabled={
+            !hasPermission(roleData, adminId, blog?.adminId?._id || null)
+          }
         />
         <label
           htmlFor={`toggle-${blog._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${blog.status ? 'bg-green-500' : 'bg-gray-300'}`}
+          className={`block overflow-hidden h-6 rounded-full ${!hasPermission(roleData, adminId, blog?.adminId?._id || null) ? "cursor-not-allowed" : "cursor-pointer"} ${blog.status ? "bg-green-500" : "bg-gray-300"}`}
         >
-          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${blog.status ? 'translate-x-4' : 'translate-x-0'}`} />
+          <span
+            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${blog.status ? "translate-x-4" : "translate-x-0"}`}
+          />
         </label>
       </div>
     </div>,
-    new Date(blog.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }),
+    formatDateForTable(blog.createdAt),
+
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleEditBlog(blog)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:cursor-not-allowed cursor-pointer"
         title="Edit"
-        disabled={loading}
+        disabled={loading || !hasPermission(roleData, adminId, blog?.adminId?._id || null)}
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      <button
-        onClick={() => handleDeleteBlog(blog._id)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>
-    </div>
+      {roleData === "superadmin" && (
+        <button
+          onClick={() => handleDeleteBlog(blog._id)}
+          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+          title="Delete"
+          disabled={loading}
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+    </div>,
   ]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Blogs</h1>
-          <p className="text-gray-600">Manage your blog posts here</p>
+    <>
+      <Loader loading={loading} />
+
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Blogs Management</h1>
+          <p className="text-gray-600 mt-2">
+            Manage application blogs and their status
+          </p>
         </div>
-
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <Filter className="w-5 h-5 text-blue-600" />
-              <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
-            </div>
-            <button
-              onClick={resetFilters}
-              className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-              disabled={loading}
-            >
-              Reset Filters
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search by Title
-              </label>
-              <input
-                type="text"
-                value={filters.title}
-                onChange={(e) => handleFilterChange('title', e.target.value)}
-                placeholder="Search by title..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={loading}
-              />
-            </div>
-
-            <div className="flex items-end">
-              <button
-                onClick={handleFilter}
-                className="w-full px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-                disabled={loading}
-              >
-                {loading ? 'Loading...' : 'Apply Filter'}
-              </button>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap gap-4">
-            <button
-              onClick={handleAddBlog}
-              className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-              disabled={loading}
-            >
-              <Plus className="w-5 h-5" />
-              <span className="font-medium">Add Blog</span>
-            </button>
-            <button
-              onClick={navigateToCategories}
-              className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition disabled:opacity-50"
-              disabled={loading}
-            >
-              <Tag className="w-5 h-5" />
-              <span className="font-medium">Manage Categories</span>
-            </button>
-          </div>
+        <div className="flex justify-end items-center mb-6 gap-2">
+          <button
+            onClick={handleAddBlog}
+            className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            disabled={loading}
+          >
+            <Plus className="w-5 h-5" />
+            <span className="font-medium">Add Blog</span>
+          </button>
+          <button
+            onClick={navigateToCategories}
+            className="flex items-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition disabled:opacity-50"
+            disabled={loading}
+          >
+            <Tag className="w-5 h-5" />
+            <span className="font-medium">Manage Categories</span>
+          </button>
         </div>
-
-        {loading && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-3 text-gray-600">Loading blogs...</span>
-            </div>
-          </div>
-        )}
-
-        {!loading && (
-          <TableData
-            tableHeadings={tableHeadings}
-            data={tableData}
-            currentPage={currentPage}
-            size={itemsPerPage}
-            handlePageChange={setCurrentPage}
-            total={totalBlogs}
-            totalPages={totalPages}
-          />
-        )}
       </div>
 
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="bg-blue-100 p-2 rounded-lg">
+            <Filter className="w-5 h-5 text-blue-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              value={filters.title}
+              onChange={(e) => handleFilterChange("title", e.target.value)}
+              placeholder="Search title..."
+              disabled={loading}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleFilter}
+              disabled={loading}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? "..." : "Apply"}
+            </button>
+            <button
+              onClick={resetFilters}
+              disabled={loading}
+              className="px-4 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <TableData
+        tableHeadings={tableHeadings}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalBlogs}
+        totalPages={totalPages}
+      />
       {showModal && (
         <AddEditBlogModal
           blog={editingBlog}
@@ -763,7 +875,7 @@ const Blogs = () => {
           categories={categories}
         />
       )}
-    </div>
+    </>
   );
 };
 

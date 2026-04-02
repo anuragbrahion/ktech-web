@@ -51,6 +51,7 @@ import {
   Eye,
   UserRoundCog,
   UserRoundPlus,
+  Ruler,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Clipboard } from "lucide-react";
@@ -59,7 +60,6 @@ const getUserData = () => {
   const userData = sessionStorage.getItem("data");
   return userData ? JSON.parse(userData) : null;
 };
-
 const adminSections = {
   websiteOptions: {
     title: "Website Management",
@@ -188,6 +188,12 @@ const adminSections = {
         label: "All Assign Task",
         icon: ClipboardList,
         path: "/all-assign-task",
+      },
+      {
+        id: "ruleAndRegulation",
+        label: "Rule And Regulation",
+        icon: Ruler,
+        path: "/rules-and-regulations",
       },
     ],
   },
@@ -346,54 +352,6 @@ const adminSections = {
     icon: UserRoundCog,
     items: [
       { id: "users", label: "Users", icon: UserRoundPlus, path: "/users" },
-    ],
-  },
-  financial: {
-    title: "Financial Management",
-    icon: Wallet,
-    items: [
-      {
-        id: "category",
-        label: "Category",
-        icon: Grid,
-        path: "/financial-category",
-      },
-      {
-        id: "transactions",
-        label: "Transactions",
-        icon: CreditCard,
-        path: "/transactions",
-      },
-    ],
-  },
-  ecommerce: {
-    title: "Ecommerce",
-    icon: ShoppingCart,
-    items: [
-      {
-        id: "productCategory",
-        label: "Product Category",
-        icon: Package,
-        path: "/product-category",
-      },
-      {
-        id: "ecommerce",
-        label: "E-commerce",
-        icon: ShoppingCart,
-        path: "/ecommerce",
-      },
-      {
-        id: "myOrders",
-        label: "My Orders",
-        icon: ShoppingBag,
-        path: "/my-orders",
-      },
-      {
-        id: "contactUs",
-        label: "Contact Us",
-        icon: Phone,
-        path: "/contact-us",
-      },
     ],
   },
 };
@@ -731,6 +689,12 @@ const teacherSections = {
         icon: Calendar,
         path: "/teacher/leave-request",
       },
+      {
+        id: "ruleAndRegulation",
+        label: "Rule And Regulation",
+        icon: Ruler,
+        path: "/teacher/rules-and-regulations",
+      },
     ],
   },
   studentInfo: {
@@ -811,6 +775,12 @@ const studentSections = {
         label: "Leave Request",
         icon: Calendar,
         path: "/student/leave-request",
+      },
+      {
+        id: "ruleAndRegulation",
+        label: "Rule And Regulation",
+        icon: Ruler,
+        path: "/student/rules-and-regulations",
       },
     ],
   },

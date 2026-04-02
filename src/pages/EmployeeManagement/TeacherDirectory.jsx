@@ -421,7 +421,6 @@ const PasswordUpdateModal = ({ teacher, onSave, onClose }) => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -553,13 +552,12 @@ const PasswordUpdateModal = ({ teacher, onSave, onClose }) => {
                 type="submit"
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={
-                  loading ||
                   !formData.password ||
                   !formData.confirmPassword ||
                   formData.password !== formData.confirmPassword
                 }
               >
-                {loading ? "Updating..." : "Update Password"}
+                Update Password
               </button>
             </div>
           </form>
@@ -569,7 +567,7 @@ const PasswordUpdateModal = ({ teacher, onSave, onClose }) => {
   );
 };
 
-export default function TeacherDirectory() {
+export default function TeacherDirectory({ adminId }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
@@ -631,9 +629,14 @@ export default function TeacherDirectory() {
     const params = {
       page: currentPage,
       size: itemsPerPage,
-      ...(filters.search && { search: filters.search }),
-      ...(filters.department && { department: filters.department }),
+      ...(filters.search && { keyWord: filters.search }),
     };
+
+    const query = { adminId };
+
+    if (filters.department !== "") query.department = filters.department;
+
+    params.query = JSON.stringify(query);
 
     dispatch(teachersList(params)).then((action) => {
       if (action.error) {

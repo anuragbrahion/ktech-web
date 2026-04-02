@@ -1,35 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Plus, Edit2, Trash2, DollarSign } from 'lucide-react';
-import { toast } from 'react-toastify';
-import { coursePlansList,
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Plus, Edit2, Trash2, IndianRupeeIcon, Filter } from "lucide-react";
+import { toast } from "react-toastify";
+import {
+  coursePlansList,
   enableDisableCoursePlans,
   deleteCoursePlans,
   createCoursePlans,
   updateCoursePlans,
-  coursesAllDocuments } from '../../redux/slices/course';
-import Table from '../../components/Atoms/TableData/TableData';
-import AlertModal from '../../components/Modal/AlertModal';
+  coursesAllDocuments,
+} from "../../redux/slices/course";
+import Table from "../../components/Atoms/TableData/TableData";
+import AlertModal from "../../components/Modal/AlertModal";
+import { formatDateForTable, hasPermission } from "../../utils/globalFunction";
+import Loader from "../../components/Loader/Loader";
 
 const CoursePlanModal = ({ plan, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    amount: '',
-    course: []
+    name: "",
+    amount: "",
+    course: [],
   });
-console.log("object22222222",formData)
 
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const coursesData = useSelector(state => state.course?.coursesAllDocumentsData);
+  const coursesData = useSelector(
+    (state) => state.course?.coursesAllDocumentsData,
+  );
 
   useEffect(() => {
     if (plan) {
       setFormData({
-        name: plan.name || '',
-        amount: plan.amount || '',
-        course: plan.course.map(item => item._id) || []
+        name: plan.name || "",
+        amount: plan.amount || "",
+        course: plan.course.map((item) => item._id) || [],
       });
     }
   }, [plan]);
@@ -53,23 +59,23 @@ console.log("object22222222",formData)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleMultiSelect = (value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const currentValues = prev.course;
       const isSelected = currentValues.includes(value);
-      
+
       if (isSelected) {
         return {
           ...prev,
-          course: currentValues.filter(item => item !== value)
+          course: currentValues.filter((item) => item !== value),
         };
       } else {
         return {
           ...prev,
-          course: [...currentValues, value]
+          course: [...currentValues, value],
         };
       }
     });
@@ -77,16 +83,16 @@ console.log("object22222222",formData)
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!formData.name || !formData.amount || formData.course.length === 0) {
-      toast.error('Please fill all required fields');
+      toast.error("Please fill all required fields");
       return;
     }
 
     const payload = {
       name: formData.name,
       amount: Number(formData.amount),
-      course: formData.course
+      course: formData.course,
     };
 
     if (plan) {
@@ -101,7 +107,7 @@ console.log("object22222222",formData)
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {plan ? 'Edit Course Plan' : 'Add Course Plan'}
+              {plan ? "Edit Course Plan" : "Add Course Plan"}
             </h2>
             <button
               onClick={onClose}
@@ -110,7 +116,7 @@ console.log("object22222222",formData)
               ×
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
@@ -143,7 +149,7 @@ console.log("object22222222",formData)
                     required
                   />
                   <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                    <DollarSign className="w-5 h-5 text-gray-400" />
+                    <IndianRupeeIcon className="w-5 h-5 text-gray-400" />
                   </div>
                 </div>
               </div>
@@ -163,14 +169,19 @@ console.log("object22222222",formData)
                     </div>
                   ) : (
                     courses?.list.map((course) => (
-                      <label key={course._id} className="flex items-center space-x-2 cursor-pointer">
+                      <label
+                        key={course._id}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.course.includes(course._id)}
                           onChange={() => handleMultiSelect(course._id)}
                           className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-gray-700">{course.courseName}</span>
+                        <span className="text-gray-700">
+                          {course.courseName}
+                        </span>
                       </label>
                     ))
                   )}
@@ -194,9 +205,14 @@ console.log("object22222222",formData)
               <button
                 type="submit"
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={loading || !formData.name || !formData.amount || formData.course.length === 0}
+                disabled={
+                  loading ||
+                  !formData.name ||
+                  !formData.amount ||
+                  formData.course.length === 0
+                }
               >
-                {plan ? 'Update Plan' : 'Create Plan'}
+                {plan ? "Update Plan" : "Create Plan"}
               </button>
             </div>
           </form>
@@ -206,7 +222,7 @@ console.log("object22222222",formData)
   );
 };
 
-export default function CoursePlansManagement({roleData}) {
+export default function CoursePlansManagement({ roleData, adminId }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -214,30 +230,52 @@ export default function CoursePlansManagement({roleData}) {
   const [deletingPlan, setDeletingPlan] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
+  const [filters, setFilters] = useState({
+    search: "",
+  });
   const [loading, setLoading] = useState(false);
-   const plansListData = useSelector(state => state.course?.coursePlansListData);
-  const enableDisableData = useSelector(state => state.course?.enableDisableCoursePlansData);
-  const deleteData = useSelector(state => state.course?.deleteCoursePlansData);
-  const createData = useSelector(state => state.course?.createCoursePlansData);
-  const updateData = useSelector(state => state.course?.updateCoursePlansData);
+  const plansListData = useSelector(
+    (state) => state.course?.coursePlansListData,
+  );
+  const enableDisableData = useSelector(
+    (state) => state.course?.enableDisableCoursePlansData,
+  );
+  const deleteData = useSelector(
+    (state) => state.course?.deleteCoursePlansData,
+  );
+  const createData = useSelector(
+    (state) => state.course?.createCoursePlansData,
+  );
+  const updateData = useSelector(
+    (state) => state.course?.updateCoursePlansData,
+  );
 
   useEffect(() => {
-    fetchPlans();
+    fetchPlans(filters);
   }, []);
 
   useEffect(() => {
     if (!showModal) {
-      fetchPlans();
+      fetchPlans(filters);
     }
   }, [currentPage, enableDisableData, deleteData, createData, updateData]);
 
   const fetchPlans = () => {
     setLoading(true);
-    dispatch(coursePlansList({page: currentPage,
-      size: itemsPerPage,populate:'course'})).then((action) => {
+    dispatch(
+      coursePlansList({
+        page: currentPage,
+        size: itemsPerPage,
+        populate: "course:courseName|adminId:name,role",
+        ...(filters.search && {
+          keyWord: filters.search,
+          searchFields: "name",
+        }),
+        query: JSON.stringify({ adminId }),
+      }),
+    ).then((action) => {
       if (action.error) {
-        toast.error(action.payload || 'Failed to fetch plans');
+        toast.error(action.payload || "Failed to fetch plans");
       }
       setLoading(false);
     });
@@ -263,10 +301,10 @@ export default function CoursePlansManagement({roleData}) {
       setLoading(true);
       dispatch(deleteCoursePlans({ _id: deletingPlan._id })).then((action) => {
         if (!action.error) {
-          toast.success('Plan deleted successfully');
-          fetchPlans();
+          toast.success("Plan deleted successfully");
+          fetchPlans(filters);
         } else {
-          toast.error(action.payload || 'Failed to delete plan');
+          toast.error(action.payload || "Failed to delete plan");
         }
         setLoading(false);
         setShowDeleteModal(false);
@@ -277,18 +315,24 @@ export default function CoursePlansManagement({roleData}) {
 
   const handleStatusToggle = (plan) => {
     const newStatus = !plan.status;
-    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this plan?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to ${newStatus ? "activate" : "deactivate"} this plan?`,
+      )
+    ) {
       setLoading(true);
       const payload = {
         _id: plan._id,
-        status: newStatus
+        status: newStatus,
       };
       dispatch(enableDisableCoursePlans(payload)).then((action) => {
         if (!action.error) {
-          toast.success(`Plan ${newStatus ? 'activated' : 'deactivated'} successfully`);
-          fetchPlans();
+          toast.success(
+            `Plan ${newStatus ? "activated" : "deactivated"} successfully`,
+          );
+          fetchPlans(filters);
         } else {
-          toast.error(action.payload || 'Failed to update status');
+          toast.error(action.payload || "Failed to update status");
         }
         setLoading(false);
       });
@@ -300,146 +344,258 @@ export default function CoursePlansManagement({roleData}) {
     if (editingPlan) {
       const payload = {
         ...formData,
-        _id: editingPlan._id
+        _id: editingPlan._id,
       };
       dispatch(updateCoursePlans(payload)).then((action) => {
         if (!action.error) {
-          toast.success('Plan updated successfully');
+          toast.success("Plan updated successfully");
           setShowModal(false);
           setEditingPlan(null);
-          fetchPlans();
+          fetchPlans(filters);
         } else {
-          toast.error(action.payload || 'Failed to update plan');
+          toast.error(action.payload || "Failed to update plan");
         }
         setLoading(false);
       });
     } else {
       dispatch(createCoursePlans(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Plan created successfully');
+          toast.success("Plan created successfully");
           setShowModal(false);
-          fetchPlans();
+          fetchPlans(filters);
         } else {
-          toast.error(action.payload || 'Failed to create plan');
+          toast.error(action.payload || "Failed to create plan");
         }
         setLoading(false);
       });
     }
   };
 
-  const getStatusColor = (status) => {
-    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  };
-
   const plans = plansListData?.data?.data?.list || [];
-  const totalPlans = plansListData?.data?.total || 0;
+  const totalPlans = plansListData?.data?.data?.total || 0;
   const totalPages = Math.ceil(totalPlans / itemsPerPage);
-  const tableHeaders = ['Plan Name', 'Amount', 'Courses', 'Status', 'Created At', 'Actions'];
-   const tableData = plans.map(plan => [
-    <div className="font-medium text-gray-900 capitalize">{plan.name}</div>,
-    <div className="font-bold text-green-600 text-lg capitalize">
-       ₹{plan.amount}
-    </div>,
-    <div className="max-w-xs">
-        {plan.course.map((data, index) => (
-          <div key={index} className='capitalize'>{data.courseName?? "N/A"}</div>
-        ))}
-    </div>,
-    <div className="flex items-center">
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(plan.status)}`}>
-        {plan.status ? 'Active' : 'Inactive'}
+  const tableHeaders = [
+    // "Branch",
+    "Plan",
+    "Courses",
+    "Status",
+    "Created At",
+    "Actions",
+  ];
+  const tableData = plans.map((plan) => [
+    // !plan?.adminId ? (
+    //   <span className="text-gray-400 italic">N/A</span>
+    // ) : (
+    //   <div className="flex flex-col">
+    //     <span className="font-semibold text-gray-800 capitalize">
+    //       {plan.adminId.name || "Branch"}
+    //     </span>
+    //     <span
+    //       className={`text-xs font-medium mt-1 px-2 py-0.5 rounded-full w-fit ${
+    //         plan.adminId.role.toLowerCase() === "superadmin"
+    //           ? "bg-green-100 text-green-700"
+    //           : "bg-yellow-100 text-yellow-700"
+    //       }`}
+    //     >
+    //       {plan.adminId.role.toLowerCase() === "superadmin"
+    //         ? "Main Branch"
+    //         : "Sub Branch"}
+    //     </span>
+    //   </div>
+    // ),
+
+    <div className="flex flex-col">
+      <span className="font-semibold text-gray-900 capitalize">
+        {plan.name}
       </span>
-      <div className="ml-3 relative inline-block w-10 align-middle select-none">
+      <span className="text-lg font-bold text-green-600 mt-1">
+        ₹{plan.amount}
+      </span>
+    </div>,
+
+    <div className="flex flex-wrap gap-1 max-w-xs">
+      {plan.course?.length ? (
+        plan.course.map((data, index) => (
+          <span
+            key={index}
+            className="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 rounded-full capitalize"
+          >
+            {data.courseName ?? "N/A"}
+          </span>
+        ))
+      ) : (
+        <span className="text-gray-400 text-xs">No Courses</span>
+      )}
+    </div>,
+
+    <div className="flex items-center gap-3">
+      <span
+        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+          plan.status
+            ? "bg-green-100 text-green-700"
+            : "bg-gray-200 text-gray-600"
+        }`}
+      >
+        {plan.status ? "Active" : "Inactive"}
+      </span>
+
+      <label className="relative inline-flex items-center">
         <input
           type="checkbox"
           checked={plan.status}
           onChange={() => handleStatusToggle(plan)}
-          className="sr-only"
+          className="sr-only peer"
           id={`toggle-plan-${plan._id}`}
-          disabled={loading}
+          disabled={
+            loading ||
+            !hasPermission(roleData, adminId, plan?.adminId?._id || null)
+          }
         />
-        <label
-          htmlFor={`toggle-plan-${plan._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${plan.status ? 'bg-green-500' : 'bg-gray-300'}`}
-        >
-          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${plan.status ? 'translate-x-4' : 'translate-x-0'}`} />
-        </label>
-      </div>
+
+        <div
+          className={`w-11 h-6 rounded-full transition-all ${
+            plan.status ? "bg-green-500" : "bg-gray-300"
+          } ${
+            hasPermission(roleData, adminId, plan?.adminId?._id || null)
+              ? "cursor-pointer"
+              : "cursor-not-allowed opacity-60"
+          }`}
+        ></div>
+
+        <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+      </label>
     </div>,
-    new Date(plan.createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }),
+
+    <span className="text-sm text-gray-600">
+      {formatDateForTable(plan.createdAt)}
+    </span>,
+
     <div className="flex items-center gap-2">
       <button
         onClick={() => handleEditPlan(plan)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-        title="Edit"
-        disabled={loading}
+        className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={
+          loading ||
+          !hasPermission(roleData, adminId, plan?.adminId?._id || null)
+        }
       >
         <Edit2 className="w-4 h-4" />
       </button>
-      {roleData==="superadmin" &&<button
-        onClick={() => handleDeleteClick(plan)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>}
-    </div>
-  ]);
 
-  return (
-    <div className="">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Course Plans Management</h1>
-        <p className="text-gray-600 mt-2">Manage pricing plans for all courses</p>
-      </div>
-      <div className="flex justify-end items-center mb-6">
+      {roleData === "superadmin" && (
         <button
-          onClick={handleAddPlanClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+          onClick={() => handleDeleteClick(plan)}
+          className="p-2 rounded-lg text-red-600 hover:bg-red-50 hover:scale-105 transition disabled:opacity-50"
           disabled={loading}
         >
-          <span>Add Plan</span>
-          <Plus className="w-5 h-5" />
+          <Trash2 className="w-4 h-4" />
         </button>
+      )}
+    </div>,
+  ]);
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleFilter = () => {
+    setCurrentPage(1);
+    fetchPlans(filters);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      search: "",
+    });
+    setCurrentPage(1);
+    fetchPlans({
+      search: "",
+    });
+  };
+
+  return (
+    <>
+      <Loader loading={loading} />
+
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Course Plans Management
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Manage pricing plans for all courses
+          </p>
+        </div>
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddPlanClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+            disabled={loading}
+          >
+            <span>Add Plan</span>
+            <Plus className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Loading plans...</span>
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-6">
+          <div className="bg-blue-100 p-2 rounded-lg">
+            <Filter className="w-5 h-5 text-blue-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => handleFilterChange("search", e.target.value)}
+            placeholder="Search name..."
+            disabled={loading}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleFilter}
+              disabled={loading}
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? "..." : "Apply"}
+            </button>
+            <button
+              onClick={resetFilters}
+              disabled={loading}
+              className="px-4 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition"
+            >
+              Reset
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
-      {!loading && (
-        <Table
-          headers={tableHeaders}
-          data={tableData}
-          currentPage={currentPage}
-          size={itemsPerPage}
-          handlePageChange={setCurrentPage}
-          total={totalPlans}
-          totalPages={totalPages}
-          renderRow={(row, index) => (
-            <tr 
-              key={index} 
-              className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-            >
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="py-4 px-4">
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          )}
-        />
-      )}
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalPlans}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showModal && (
         <CoursePlanModal
@@ -469,6 +625,6 @@ export default function CoursePlansManagement({roleData}) {
           isVisibleConfirmButton={true}
         />
       )}
-    </div>
+    </>
   );
 }

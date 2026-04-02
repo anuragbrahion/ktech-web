@@ -267,4 +267,30 @@ export const getDaysLeft = (assignDate, value, unit = "days") => {
     daysLeft: totalDaysLeft,
     label,
   };
+<<<<<<< HEAD
 };
+=======
+};
+
+export const getStoredAuth = () => {
+  const token =
+    localStorage.getItem("token") || sessionStorage.getItem("token");
+  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+  const persistAuth = localStorage.getItem("persistAuth") === "true";
+
+  return {
+    token,
+    role,
+    isAuthenticated: !!token,
+    persistAuth,
+  };
+};
+
+export const hasPermission = (role, adminId, requestId) => {
+  if (role === "superadmin") return true;
+
+  if (!requestId) return false;
+
+  return role === "admin" && adminId === requestId;
+};
+>>>>>>> 61883bf22e93264aaaa2b2391d6dedd50992fe42

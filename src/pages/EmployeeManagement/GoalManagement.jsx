@@ -1,28 +1,35 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Plus, Edit2, Trash2, Target, Building, Briefcase, Users, DollarSign, Calendar } from 'lucide-react';
-import { toast } from 'react-toastify';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  Plus,
+  Trash2,
+  DollarSign,
+  Calendar,
+} from "lucide-react";
+import { toast } from "react-toastify";
 import {
   goalsList,
-  enableDisableGoals,
   deleteGoals,
   createGoals,
   updateGoals,
   departmentsAllDocuments,
   designationsAllDocuments,
-  rolesAllDocuments, 
-} from '../../redux/slices/employee';
-import AlertModal from '../../components/Modal/AlertModal';
-import Table from '../../components/Atoms/TableData/TableData';
+  rolesAllDocuments,
+} from "../../redux/slices/employee";
+import AlertModal from "../../components/Modal/AlertModal";
+import Table from "../../components/Atoms/TableData/TableData";
+import { formatDateForTable } from "../../utils/globalFunction";
+import Loader from "../../components/Loader/Loader";
 
 const GoalModal = ({ goal, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    designation: '',
-    department: '',
+    name: "",
+    designation: "",
+    department: "",
     role: [],
-    salary: '',
-    duration: ''
+    salary: "",
+    duration: "",
   });
 
   const [departments, setDepartments] = useState([]);
@@ -31,19 +38,25 @@ const GoalModal = ({ goal, onSave, onClose }) => {
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
-  const departmentsData = useSelector(state => state.employee?.departmentsAllDocumentsData);
-  const designationsData = useSelector(state => state.employee?.designationsAllDocumentsData);
-  const rolesData = useSelector(state => state.employee?.rolesAllDocumentsData);
+  const departmentsData = useSelector(
+    (state) => state.employee?.departmentsAllDocumentsData,
+  );
+  const designationsData = useSelector(
+    (state) => state.employee?.designationsAllDocumentsData,
+  );
+  const rolesData = useSelector(
+    (state) => state.employee?.rolesAllDocumentsData,
+  );
 
   useEffect(() => {
     if (goal) {
       setFormData({
-        name: goal.name || '',
-        designation: goal.designation || '',
-        department: goal.department || '',
+        name: goal.name || "",
+        designation: goal.designation || "",
+        department: goal.department || "",
         role: goal.role || [],
-        salary: goal.salary || '',
-        duration: goal.duration || ''
+        salary: goal.salary || "",
+        duration: goal.duration || "",
       });
     }
   }, [goal]);
@@ -57,7 +70,7 @@ const GoalModal = ({ goal, onSave, onClose }) => {
     Promise.all([
       dispatch(departmentsAllDocuments()),
       dispatch(designationsAllDocuments()),
-      dispatch(rolesAllDocuments())
+      dispatch(rolesAllDocuments()),
     ]).then(() => {
       setLoading(false);
     });
@@ -83,23 +96,23 @@ const GoalModal = ({ goal, onSave, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleMultiSelect = (value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const currentValues = prev.role;
       const isSelected = currentValues.includes(value);
-      
+
       if (isSelected) {
         return {
           ...prev,
-          role: currentValues.filter(item => item !== value)
+          role: currentValues.filter((item) => item !== value),
         };
       } else {
         return {
           ...prev,
-          role: [...currentValues, value]
+          role: [...currentValues, value],
         };
       }
     });
@@ -107,9 +120,16 @@ const GoalModal = ({ goal, onSave, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.designation || !formData.department || formData.role.length === 0 || !formData.salary || !formData.duration) {
-      toast.error('Please fill all required fields');
+
+    if (
+      !formData.name ||
+      !formData.designation ||
+      !formData.department ||
+      formData.role.length === 0 ||
+      !formData.salary ||
+      !formData.duration
+    ) {
+      toast.error("Please fill all required fields");
       return;
     }
 
@@ -119,7 +139,7 @@ const GoalModal = ({ goal, onSave, onClose }) => {
       department: formData.department,
       role: formData.role,
       salary: Number(formData.salary),
-      duration: formData.duration
+      duration: formData.duration,
     };
 
     if (goal) {
@@ -130,21 +150,21 @@ const GoalModal = ({ goal, onSave, onClose }) => {
   };
 
   const getDepartmentName = (deptId) => {
-    const dept = departments.find(d => d._id === deptId);
-    return dept ? dept.name : 'Unknown Department';
+    const dept = departments.find((d) => d._id === deptId);
+    return dept ? dept.name : "Unknown Department";
   };
 
   const getDesignationName = (desId) => {
-    const des = designations.find(d => d._id === desId);
-    return des ? des.name : 'Unknown Designation';
+    const des = designations.find((d) => d._id === desId);
+    return des ? des.name : "Unknown Designation";
   };
 
   const getRoleNames = (roleIds) => {
-    const roleNames = roleIds.map(roleId => {
-      const role = roles.find(r => r._id === roleId);
-      return role ? role.name : 'Unknown Role';
+    const roleNames = roleIds.map((roleId) => {
+      const role = roles.find((r) => r._id === roleId);
+      return role ? role.name : "Unknown Role";
     });
-    return roleNames.join(', ');
+    return roleNames.join(", ");
   };
 
   return (
@@ -153,7 +173,7 @@ const GoalModal = ({ goal, onSave, onClose }) => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {goal ? 'Edit Goal' : 'Add Goal'}
+              {goal ? "Edit Goal" : "Add Goal"}
             </h2>
             <button
               onClick={onClose}
@@ -162,7 +182,7 @@ const GoalModal = ({ goal, onSave, onClose }) => {
               ×
             </button>
           </div>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
@@ -259,7 +279,10 @@ const GoalModal = ({ goal, onSave, onClose }) => {
                     </div>
                   ) : (
                     roles.map((role) => (
-                      <label key={role._id} className="flex items-center space-x-2 cursor-pointer">
+                      <label
+                        key={role._id}
+                        className="flex items-center space-x-2 cursor-pointer"
+                      >
                         <input
                           type="checkbox"
                           checked={formData.role.includes(role._id)}
@@ -273,7 +296,8 @@ const GoalModal = ({ goal, onSave, onClose }) => {
                 </div>
                 {formData.role.length > 0 && (
                   <div className="mt-2 text-sm text-gray-500">
-                    Selected: {formData.role.length} role(s) - {getRoleNames(formData.role)}
+                    Selected: {formData.role.length} role(s) -{" "}
+                    {getRoleNames(formData.role)}
                   </div>
                 )}
               </div>
@@ -332,9 +356,17 @@ const GoalModal = ({ goal, onSave, onClose }) => {
               <button
                 type="submit"
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={loading || !formData.name || !formData.designation || !formData.department || formData.role.length === 0 || !formData.salary || !formData.duration}
+                disabled={
+                  loading ||
+                  !formData.name ||
+                  !formData.designation ||
+                  !formData.department ||
+                  formData.role.length === 0 ||
+                  !formData.salary ||
+                  !formData.duration
+                }
               >
-                {goal ? 'Update Goal' : 'Create Goal'}
+                {goal ? "Update Goal" : "Create Goal"}
               </button>
             </div>
           </form>
@@ -344,7 +376,7 @@ const GoalModal = ({ goal, onSave, onClose }) => {
   );
 };
 
-export default function GoalManagement({roleData}) {
+export default function GoalManagement({ roleData }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -354,15 +386,13 @@ export default function GoalManagement({roleData}) {
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  const goalsListData = useSelector(state => state.employee?.goalsListData);
-  const enableDisableData = useSelector(state => state.employee?.enableDisableGoalsData);
-  const deleteData = useSelector(state => state.employee?.deleteGoalsData);
-  const createData = useSelector(state => state.employee?.createGoalsData);
-  const updateData = useSelector(state => state.employee?.updateGoalsData);
-
-  const departmentsData = useSelector(state => state.employee?.departmentsAllDocumentsData);
-  const designationsData = useSelector(state => state.employee?.designationsAllDocumentsData);
-  const rolesData = useSelector(state => state.employee?.rolesAllDocumentsData);
+  const goalsListData = useSelector((state) => state.employee?.goalsListData);
+  const enableDisableData = useSelector(
+    (state) => state.employee?.enableDisableGoalsData,
+  );
+  const deleteData = useSelector((state) => state.employee?.deleteGoalsData);
+  const createData = useSelector((state) => state.employee?.createGoalsData);
+  const updateData = useSelector((state) => state.employee?.updateGoalsData);
 
   useEffect(() => {
     fetchGoals();
@@ -378,12 +408,13 @@ export default function GoalManagement({roleData}) {
     setLoading(true);
     const params = {
       page: currentPage,
-      size: itemsPerPage
+      size: itemsPerPage,
+      populate: "designation:name|role:name",
     };
-    
+
     dispatch(goalsList(params)).then((action) => {
       if (action.error) {
-        toast.error(action.payload || 'Failed to fetch goals');
+        toast.error(action.payload || "Failed to fetch goals");
       }
       setLoading(false);
     });
@@ -391,11 +422,6 @@ export default function GoalManagement({roleData}) {
 
   const handleAddGoalClick = () => {
     setEditingGoal(null);
-    setShowModal(true);
-  };
-
-  const handleEditGoal = (goal) => {
-    setEditingGoal(goal);
     setShowModal(true);
   };
 
@@ -409,34 +435,14 @@ export default function GoalManagement({roleData}) {
       setLoading(true);
       dispatch(deleteGoals({ _id: deletingGoal._id })).then((action) => {
         if (!action.error) {
-          toast.success('Goal deleted successfully');
+          toast.success("Goal deleted successfully");
           fetchGoals();
         } else {
-          toast.error(action.payload || 'Failed to delete goal');
+          toast.error(action.payload || "Failed to delete goal");
         }
         setLoading(false);
         setShowDeleteModal(false);
         setDeletingGoal(null);
-      });
-    }
-  };
-
-  const handleStatusToggle = (goal) => {
-    const newStatus = !goal.status;
-    if (window.confirm(`Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} this goal?`)) {
-      setLoading(true);
-      const payload = {
-        _id: goal._id,
-        status: newStatus
-      };
-      dispatch(enableDisableGoals(payload)).then((action) => {
-        if (!action.error) {
-          toast.success(`Goal ${newStatus ? 'activated' : 'deactivated'} successfully`);
-          fetchGoals();
-        } else {
-          toast.error(action.payload || 'Failed to update status');
-        }
-        setLoading(false);
       });
     }
   };
@@ -446,219 +452,150 @@ export default function GoalManagement({roleData}) {
     if (editingGoal) {
       const payload = {
         ...formData,
-        _id: editingGoal._id
+        _id: editingGoal._id,
       };
       dispatch(updateGoals(payload)).then((action) => {
         if (!action.error) {
-          toast.success('Goal updated successfully');
+          toast.success("Goal updated successfully");
           setShowModal(false);
           setEditingGoal(null);
           fetchGoals();
         } else {
-          toast.error(action.payload || 'Failed to update goal');
+          toast.error(action.payload || "Failed to update goal");
         }
         setLoading(false);
       });
     } else {
       dispatch(createGoals(formData)).then((action) => {
         if (!action.error) {
-          toast.success('Goal created successfully');
+          toast.success("Goal created successfully");
           setShowModal(false);
           fetchGoals();
         } else {
-          toast.error(action.payload || 'Failed to create goal');
+          toast.error(action.payload || "Failed to create goal");
         }
         setLoading(false);
       });
     }
   };
 
-  const getStatusColor = (status) => {
-    return status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  };
-
-  const getDepartmentName = (deptId) => {
-    const departments = departmentsData?.data?.data?.list || [];
-    const dept = departments.find(d => d._id === deptId);
-    return dept ? dept.name : 'Unknown Department';
-  };
-
-  const getDesignationName = (desId) => {
-    const designations = designationsData?.data?.data?.list || [];
-    const des = designations.find(d => d._id === desId);
-    return des ? des.name : 'Unknown Designation';
-  };
-
   const goals = goalsListData?.data?.data?.list || [];
   const totalGoals = goalsListData?.data?.total || 0;
   const totalPages = Math.ceil(totalGoals / itemsPerPage);
 
-  const tableHeaders = ['Goal Name', 'Designation', 'Department', 'Roles', 'Salary', 'Duration', 'Status', 'Actions'];
-  
-  const tableData = goals.map(goal => [
-    <div className="flex items-center">
-      <Target className="w-4 h-4 text-gray-400 mr-2" />
-      <div className="font-medium text-gray-900">{goal.name}</div>
-    </div>,
-    <div className="flex items-center">
-      <Briefcase className="w-4 h-4 text-gray-400 mr-2" />
-      <span className="text-gray-700">{getDesignationName(goal.designation)}</span>
-    </div>,
-    <div className="flex items-center">
-      <Building className="w-4 h-4 text-gray-400 mr-2" />
-      <span className="text-gray-700">{getDepartmentName(goal.department)}</span>
-    </div>,
-    <div className="max-w-xs">
-      <div className="flex flex-wrap gap-1">
-        {goal.role && goal.role.length > 0 && goal.role.slice(0, 2).map((roleId, idx) => {
-          const roles = rolesData?.data?.data?.list || [];
-          const role = roles.find(r => r._id === roleId);
+  const tableHeaders = [
+    "Branch",
+    "Goal",
+    "Designation",
+    "Roles",
+    "Salary",
+    "Duration",
+    "Created At",
+    ...(roleData === "superadmin" ? ["Actions"] : []),
+  ];
+
+  const tableData = goals.map((goal) => [
+    !goal?.adminId ? (
+      "N/A"
+    ) : (
+      <div>
+        <div className="font-medium text-gray-900 capitalize">
+          {goal.adminId.name || "Branch"}
+        </div>
+        <div className="text-sm text-gray-500">
+          {goal.adminId.role.toLowerCase() === "superadmin"
+            ? "Main Branch"
+            : "Sub Branch"}
+        </div>
+      </div>
+    ),
+    <span className="font-medium text-gray-900 capitalize">{goal.name}</span>,
+    <span className="text-gray-700 capitalize">
+      {goal.designation.name || "Unknown Designation"}
+    </span>,
+
+    <div className="flex flex-wrap gap-1">
+      {goal.role &&
+        goal.role.length > 0 &&
+        goal.role.slice(0, 2).map((roleId, idx) => {
           return (
-            <span key={idx} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">
-              {role ? role.name : 'Unknown'}
+            <span
+              key={idx}
+              className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded capitalize"
+            >
+              {roleId ? roleId.name : "Unknown"}
             </span>
           );
         })}
-        {goal.role && goal.role.length > 2 && (
-          <span className="text-gray-500 text-xs">
-            +{goal.role.length - 2} more
-          </span>
-        )}
-      </div>
+      {goal.role && goal.role.length > 2 && (
+        <span className="text-gray-500 text-xs">
+          +{goal.role.length - 2} more
+        </span>
+      )}
     </div>,
-    <div className="flex items-center">
-      <DollarSign className="w-4 h-4 text-green-500 mr-2" />
-      <span className="font-bold text-green-600">₹{goal.salary}</span>
-    </div>,
-    <div className="flex items-center">
-      <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-      <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
-        {goal.duration} Months
-      </span>
-    </div>,
-    <div className="flex items-center">
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(goal.status)}`}>
-        {goal.status ? 'Active' : 'Inactive'}
-      </span>
-      <div className="ml-3 relative inline-block w-10 align-middle select-none">
-        <input
-          type="checkbox"
-          checked={goal.status}
-          onChange={() => handleStatusToggle(goal)}
-          className="sr-only"
-          id={`toggle-goal-${goal._id}`}
-          disabled={loading}
-        />
-        <label
-          htmlFor={`toggle-goal-${goal._id}`}
-          className={`block overflow-hidden h-6 rounded-full cursor-pointer ${goal.status ? 'bg-green-500' : 'bg-gray-300'}`}
-        >
-          <span className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${goal.status ? 'translate-x-4' : 'translate-x-0'}`} />
-        </label>
-      </div>
-    </div>,
-    <div className="flex items-center gap-2">
-      <button
-        onClick={() => handleEditGoal(goal)}
-        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-        title="Edit"
-        disabled={loading}
-      >
-        <Edit2 className="w-4 h-4" />
-      </button>
-      {roleData==="superadmin" &&<button
-        onClick={() => handleDeleteClick(goal)}
-        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-        title="Delete"
-        disabled={loading}
-      >
-        <Trash2 className="w-4 h-4" />
-      </button>}
-    </div>
+    <span className="font-bold text-green-600">₹{goal.salary}</span>,
+    `${goal.duration} ${goal.duration > 1 ? "months" : "month"}`,
+    formatDateForTable(goal.createdAt),
+    ...(roleData === "superadmin"
+      ? [
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleDeleteClick(goal)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+              title="Delete"
+              disabled={loading}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>,
+        ]
+      : []),
   ]);
 
-  const totalSalary = goals.reduce((total, goal) => total + (Number(goal.salary) || 0), 0);
-  const uniqueDesignations = new Set(goals.map(goal => goal.designation)).size;
-  const totalDuration = goals.reduce((total, goal) => {
-    const months = parseInt(goal.duration) || 0;
-    return total + months;
-  }, 0);
-  const avgDuration = goals.length > 0 ? Math.round(totalDuration / goals.length) : 0;
-
   return (
-    <div className="">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Goal Management</h1>
-        <p className="text-gray-600 mt-2">Manage goals, designations, and roles for your team</p>
-      </div>
+    <>
+      <Loader loading={loading} />
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Goal Management</h1>
+          <p className="text-gray-600 mt-2">
+            Manage goals, designations, and roles for your team
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Total Goals</h3>
-          <p className="text-3xl font-bold text-black mt-2">{goals.length}</p>
-        </div>
-        
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Total Salary</h3>
-          <p className="text-3xl font-bold text-black mt-2">₹{totalSalary}</p>
-        </div>
-        
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Unique Designations</h3>
-          <p className="text-3xl font-bold text-black mt-2">{uniqueDesignations}</p>
-        </div>
-        
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-700">Avg Duration</h3>
-          <p className="text-3xl font-bold text-black mt-2">{avgDuration} Months</p>
+        <div className="flex justify-end items-center mb-6">
+          <button
+            onClick={handleAddGoalClick}
+            className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+            disabled={loading}
+          >
+            <span>Add Goal</span>
+            <Plus className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      <div className="flex justify-end items-center mb-6">
-        <button
-          onClick={handleAddGoalClick}
-          className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
-          disabled={loading}
-        >
-          <span>Add Goal</span>
-          <Plus className="w-5 h-5" />
-        </button>
-      </div>
-
-      {loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Loading goals...</span>
-          </div>
-        </div>
-      )}
-
-      {!loading && (
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <Table
-            headers={tableHeaders}
-            data={tableData}
-            currentPage={currentPage}
-            size={itemsPerPage}
-            handlePageChange={setCurrentPage}
-            total={totalGoals}
-            totalPages={totalPages}
-            renderRow={(row, index) => (
-              <tr 
-                key={index} 
-                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
-              >
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex} className="py-4 px-4">
-                    {cell}
-                  </td>
-                ))}
-              </tr>
-            )}
-          />
-        </div>
-      )}
+      <Table
+        headers={tableHeaders}
+        data={tableData}
+        currentPage={currentPage}
+        size={itemsPerPage}
+        handlePageChange={setCurrentPage}
+        total={totalGoals}
+        totalPages={totalPages}
+        renderRow={(row, index) => (
+          <tr
+            key={index}
+            className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+          >
+            {row.map((cell, cellIndex) => (
+              <td key={cellIndex} className="py-4 px-4">
+                {cell}
+              </td>
+            ))}
+          </tr>
+        )}
+      />
 
       {showModal && (
         <GoalModal
@@ -688,6 +625,6 @@ export default function GoalManagement({roleData}) {
           isVisibleConfirmButton={true}
         />
       )}
-    </div>
+    </>
   );
 }

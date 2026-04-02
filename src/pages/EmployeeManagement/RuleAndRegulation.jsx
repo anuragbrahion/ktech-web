@@ -1,32 +1,34 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Plus, Edit2, Trash2, Calendar } from "lucide-react";
+import { Plus, Edit2, Trash2, DollarSign } from "lucide-react";
 import { toast } from "react-toastify";
 import {
-  leaveTypesList,
-  enableDisableLeaveTypes,
-  deleteLeaveTypes,
-  createLeaveTypes,
-  updateLeaveTypes,
+  rulesList,
+  enableDisableRules,
+  deleteRules,
+  createRules,
+  updateRules,
 } from "../../redux/slices/employee";
 import AlertModal from "../../components/Modal/AlertModal";
 import Table from "../../components/Atoms/TableData/TableData";
-import { formatDateForTable, hasPermission } from "../../utils/globalFunction";
 import Loader from "../../components/Loader/Loader";
+import { formatDateForTable, hasPermission } from "../../utils/globalFunction";
 
-const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
+const RuleModal = ({ designation, onSave, onClose }) => {
   const [formData, setFormData] = useState({
-    name: "",
+    rule: "",
+    role: "",
   });
 
   useEffect(() => {
-    if (leaveType) {
+    if (designation) {
       setFormData({
-        name: leaveType.name || "",
+        rule: designation.rule || "",
+        role: designation.role || "",
       });
     }
-  }, [leaveType]);
+  }, [designation]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,17 +38,18 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!formData.name) {
-      toast.error("Please enter leave type name");
+    if (!formData.rule || !formData.role) {
+      toast.error("Please fill all required fields");
       return;
     }
 
     const payload = {
-      name: formData.name,
+      rule: formData.rule,
+      role: formData.role,
     };
 
-    if (leaveType) {
-      payload._id = leaveType._id;
+    if (designation) {
+      payload._id = designation._id;
     }
 
     onSave(payload);
@@ -58,7 +61,9 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">
-              {leaveType ? "Edit Leave Type" : "Add Leave Type"}
+              {designation
+                ? "Edit Rule And Regulation"
+                : "Add Rule And Regulation"}
             </h2>
             <button
               onClick={onClose}
@@ -72,17 +77,33 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Leave Type Name *
+                  Rule *
                 </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
+                <textarea
+                  name="rule"
+                  value={formData.rule}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  placeholder="Enter leave type name"
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                  placeholder="Enter rule"
                   required
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type *
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  required
+                >
+                  <option value="">Select Type</option>
+                  <option value="Student">Student</option>
+                  <option value="Teacher">Teacher</option>
+                </select>
               </div>
             </div>
 
@@ -97,9 +118,9 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
               <button
                 type="submit"
                 className="flex-1 px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!formData.name}
+                disabled={!formData.rule || !formData.role}
               >
-                {leaveType ? "Update Type" : "Create Type"}
+                {designation ? "Update" : "Create"}
               </button>
             </div>
           </form>
@@ -109,110 +130,99 @@ const LeaveTypeModal = ({ leaveType, onSave, onClose }) => {
   );
 };
 
-export default function LeaveTypeManagement({ roleData, adminId }) {
+export default function RuleAndRegulation({ roleData, adminId }) {
   const dispatch = useDispatch();
   const [showModal, setShowModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [editingLeaveType, setEditingLeaveType] = useState(null);
-  const [deletingLeaveType, setDeletingLeaveType] = useState(null);
+  const [editingDesignation, setEditingDesignation] = useState(null);
+  const [deletingDesignation, setDeletingDesignation] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
 
-  const leaveTypesListData = useSelector(
-    (state) => state.employee?.leaveTypesListData,
-  );
+  const rulesListData = useSelector((state) => state.employee?.rulesListData);
   const enableDisableData = useSelector(
-    (state) => state.employee?.enableDisableLeaveTypesData,
+    (state) => state.employee?.enableDisableRulesData,
   );
-  const deleteData = useSelector(
-    (state) => state.employee?.deleteLeaveTypesData,
-  );
-  const createData = useSelector(
-    (state) => state.employee?.createLeaveTypesData,
-  );
-  const updateData = useSelector(
-    (state) => state.employee?.updateLeaveTypesData,
-  );
+  const deleteData = useSelector((state) => state.employee?.deleteRulesData);
+  const createData = useSelector((state) => state.employee?.createRulesData);
+  const updateData = useSelector((state) => state.employee?.updateRulesData);
 
   useEffect(() => {
-    fetchLeaveTypes();
+    fetchRulesAndRegulations();
   }, []);
 
   useEffect(() => {
     if (!showModal) {
-      fetchLeaveTypes();
+      fetchRulesAndRegulations();
     }
   }, [currentPage, enableDisableData, deleteData, createData, updateData]);
 
-  const fetchLeaveTypes = () => {
+  const fetchRulesAndRegulations = () => {
     setLoading(true);
     const params = {
       page: currentPage,
       size: itemsPerPage,
-      populate: "adminId:name,role",
     };
 
-    dispatch(leaveTypesList(params)).then((action) => {
+    dispatch(rulesList(params)).then((action) => {
       if (action.error) {
-        toast.error(action.payload || "Failed to fetch leave types");
+        toast.error(action.payload || "Failed to fetch rules");
       }
       setLoading(false);
     });
   };
 
-  const handleAddLeaveTypeClick = () => {
-    setEditingLeaveType(null);
+  const handleAddDesignationClick = () => {
+    setEditingDesignation(null);
     setShowModal(true);
   };
 
-  const handleEditLeaveType = (leaveType) => {
-    setEditingLeaveType(leaveType);
+  const handleEditDesignation = (designation) => {
+    setEditingDesignation(designation);
     setShowModal(true);
   };
 
-  const handleDeleteClick = (leaveType) => {
-    setDeletingLeaveType(leaveType);
+  const handleDeleteClick = (designation) => {
+    setDeletingDesignation(designation);
     setShowDeleteModal(true);
   };
 
   const handleDeleteConfirm = () => {
-    if (deletingLeaveType) {
+    if (deletingDesignation) {
       setLoading(true);
-      dispatch(deleteLeaveTypes({ _id: deletingLeaveType._id })).then(
-        (action) => {
-          if (!action.error) {
-            toast.success("Leave type deleted successfully");
-            fetchLeaveTypes();
-          } else {
-            toast.error(action.payload || "Failed to delete leave type");
-          }
-          setLoading(false);
-          setShowDeleteModal(false);
-          setDeletingLeaveType(null);
-        },
-      );
+      dispatch(deleteRules({ _id: deletingDesignation._id })).then((action) => {
+        if (!action.error) {
+          toast.success("Rule deleted successfully");
+          fetchRulesAndRegulations();
+        } else {
+          toast.error(action.payload || "Failed to delete rule");
+        }
+        setLoading(false);
+        setShowDeleteModal(false);
+        setDeletingDesignation(null);
+      });
     }
   };
 
-  const handleStatusToggle = (leaveType) => {
-    const newStatus = !leaveType.status;
+  const handleStatusToggle = (designation) => {
+    const newStatus = !designation.status;
     if (
       window.confirm(
-        `Are you sure you want to ${newStatus ? "activate" : "deactivate"} this leave type?`,
+        `Are you sure you want to ${newStatus ? "activate" : "deactivate"} this rule?`,
       )
     ) {
       setLoading(true);
       const payload = {
-        _id: leaveType._id,
+        _id: designation._id,
         status: newStatus,
       };
-      dispatch(enableDisableLeaveTypes(payload)).then((action) => {
+      dispatch(enableDisableRules(payload)).then((action) => {
         if (!action.error) {
           toast.success(
-            `Leave type ${newStatus ? "activated" : "deactivated"} successfully`,
+            `Rule ${newStatus ? "activated" : "deactivated"} successfully`,
           );
-          fetchLeaveTypes();
+          fetchRulesAndRegulations();
         } else {
           toast.error(action.payload || "Failed to update status");
         }
@@ -221,32 +231,32 @@ export default function LeaveTypeManagement({ roleData, adminId }) {
     }
   };
 
-  const handleSaveLeaveType = (formData) => {
+  const handleSaveDesignation = (formData) => {
     setLoading(true);
-    if (editingLeaveType) {
+    if (editingDesignation) {
       const payload = {
         ...formData,
-        _id: editingLeaveType._id,
+        _id: editingDesignation._id,
       };
-      dispatch(updateLeaveTypes(payload)).then((action) => {
+      dispatch(updateRules(payload)).then((action) => {
         if (!action.error) {
-          toast.success("Leave type updated successfully");
+          toast.success("Rule updated successfully");
           setShowModal(false);
-          setEditingLeaveType(null);
-          fetchLeaveTypes();
+          setEditingDesignation(null);
+          fetchRulesAndRegulations();
         } else {
-          toast.error(action.payload || "Failed to update leave type");
+          toast.error(action.payload || "Failed to update rule");
         }
         setLoading(false);
       });
     } else {
-      dispatch(createLeaveTypes(formData)).then((action) => {
+      dispatch(createRules(formData)).then((action) => {
         if (!action.error) {
-          toast.success("Leave type created successfully");
+          toast.success("Rule created successfully");
           setShowModal(false);
-          fetchLeaveTypes();
+          fetchRulesAndRegulations();
         } else {
-          toast.error(action.payload || "Failed to create leave type");
+          toast.error(action.payload || "Failed to create rule");
         }
         setLoading(false);
       });
@@ -257,83 +267,62 @@ export default function LeaveTypeManagement({ roleData, adminId }) {
     return status ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
-  const leaveTypes = leaveTypesListData?.data?.data?.list || [];
-  const totalLeaveTypes = leaveTypesListData?.data?.data?.total || 0;
-  const totalPages = Math.ceil(totalLeaveTypes / itemsPerPage);
+  const designations = rulesListData?.data?.data?.list || [];
+  const totalDesignations = rulesListData?.data?.data?.total || 0;
+  const totalPages = Math.ceil(totalDesignations / itemsPerPage);
 
-  const tableHeaders = [
-    "Leave Type",
-    "Branch",
-    "Status",
-    "Created At",
-    "Actions",
-  ];
+  const tableHeaders = ["Rule", "Type", "Status", "Created At", "Actions"];
 
-  const tableData = leaveTypes.map((leaveType) => [
-    <div className="flex items-center">
-      <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-      <div className="font-medium text-gray-900 capitalize">
-        {leaveType.name}
-      </div>
+  const tableData = designations.map((designation) => [
+    <div className="font-medium text-gray-900 capitalize">
+      {designation.rule}
     </div>,
-    !leaveType?.adminId ? (
-      "N/A"
-    ) : (
-      <div>
-        <div className="font-medium text-gray-900 capitalize">
-          {leaveType.adminId.name || "Branch"}
-        </div>
-        <div className="text-sm text-gray-500">
-          {leaveType.adminId.role.toLowerCase() === "superadmin"
-            ? "Main Branch"
-            : "Sub Branch"}
-        </div>
-      </div>
-    ),
+
+    <div className="font-bold text-green-600">{designation.role}</div>,
     <div className="flex items-center">
       <span
-        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(leaveType.status)}`}
+        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(designation.status)}`}
       >
-        {leaveType.status ? "Active" : "Inactive"}
+        {designation.status ? "Active" : "Inactive"}
       </span>
       <div className="ml-3 relative inline-block w-10 align-middle select-none">
         <input
           type="checkbox"
-          checked={leaveType.status}
-          onChange={() => handleStatusToggle(leaveType)}
+          checked={designation.status}
+          onChange={() => handleStatusToggle(designation)}
           className="sr-only"
-          id={`toggle-leave-type-${leaveType._id}`}
+          id={`toggle-designation-${designation._id}`}
           disabled={
             loading ||
-            !hasPermission(roleData, adminId, leaveType?.adminId?._id || null)
+            !hasPermission(roleData, adminId, designation?.adminId?._id || null)
           }
         />
         <label
-          htmlFor={`toggle-leave-type-${leaveType._id}`}
-          className={`block overflow-hidden h-6 rounded-full ${!hasPermission(roleData, adminId, leaveType?.adminId?._id || null) ? "cursor-not-allowed" : "cursor-pointer"} ${leaveType.status ? "bg-green-500" : "bg-gray-300"}`}
+          htmlFor={`toggle-designation-${designation._id}`}
+          className={`block overflow-hidden h-6 rounded-full ${!hasPermission(roleData, adminId, designation?.adminId?._id || null) ? "cursor-not-allowed" : "cursor-pointer"} ${designation.status ? "bg-green-500" : "bg-gray-300"}`}
         >
           <span
-            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${leaveType.status ? "translate-x-4" : "translate-x-0"}`}
+            className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${designation.status ? "translate-x-4" : "translate-x-0"}`}
           />
         </label>
       </div>
     </div>,
-    formatDateForTable(leaveType.createdAt),
+    formatDateForTable(designation.createdAt),
     <div className="flex items-center gap-2">
       <button
-        onClick={() => handleEditLeaveType(leaveType)}
+        onClick={() => handleEditDesignation(designation)}
         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition disabled:cursor-not-allowed"
         title="Edit"
         disabled={
           loading ||
-          !hasPermission(roleData, adminId, leaveType?.adminId?._id || null)
+          !hasPermission(roleData, adminId, designation?.adminId?._id || null)
         }
       >
         <Edit2 className="w-4 h-4" />
       </button>
       {roleData === "superadmin" && (
         <button
-          onClick={() => handleDeleteClick(leaveType)}
+          onClick={() => handleDeleteClick(designation)}
           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
           title="Delete"
           disabled={loading}
@@ -347,20 +336,24 @@ export default function LeaveTypeManagement({ roleData, adminId }) {
   return (
     <>
       <Loader loading={loading} />
+
       <div className="mb-8 flex justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Leave Type</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Rule And Regulation
+          </h1>
           <p className="text-gray-600 mt-2">
-            Manage leave types and their status
+            Manage rules and regulations for employees
           </p>
         </div>
+
         <div className="flex justify-end items-center mb-6">
           <button
-            onClick={handleAddLeaveTypeClick}
+            onClick={handleAddDesignationClick}
             className="px-6 py-3 bg-black text-white font-medium rounded-xl hover:bg-gray-800 transition-all shadow-md hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
             disabled={loading}
           >
-            <span>Add Type</span>
+            <span>Add Rule</span>
             <Plus className="w-5 h-5" />
           </button>
         </div>
@@ -372,7 +365,7 @@ export default function LeaveTypeManagement({ roleData, adminId }) {
         currentPage={currentPage}
         size={itemsPerPage}
         handlePageChange={setCurrentPage}
-        total={totalLeaveTypes}
+        total={totalDesignations}
         totalPages={totalPages}
         renderRow={(row, index) => (
           <tr
@@ -389,12 +382,12 @@ export default function LeaveTypeManagement({ roleData, adminId }) {
       />
 
       {showModal && (
-        <LeaveTypeModal
-          leaveType={editingLeaveType}
-          onSave={handleSaveLeaveType}
+        <RuleModal
+          designation={editingDesignation}
+          onSave={handleSaveDesignation}
           onClose={() => {
             setShowModal(false);
-            setEditingLeaveType(null);
+            setEditingDesignation(null);
           }}
         />
       )}
@@ -404,11 +397,11 @@ export default function LeaveTypeManagement({ roleData, adminId }) {
           isOpen={showDeleteModal}
           onCancel={() => {
             setShowDeleteModal(false);
-            setDeletingLeaveType(null);
+            setDeletingDesignation(null);
           }}
           onConfirm={handleDeleteConfirm}
-          title="Delete Leave Type"
-          description="Are you sure you want to delete this leave type? This action cannot be undone."
+          title="Delete Rule"
+          description="Are you sure you want to delete this rule? This action cannot be undone."
           cancelLabel="Cancel"
           confirmLabel="Yes, Delete"
           confirmClassNameButton="!bg-red-600 hover:!bg-red-700"
