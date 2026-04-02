@@ -44,6 +44,40 @@ export const localStorageRemoveItem = () => {
   localStorage.removeItem(keyData);
 };
 
+ export const setAuthWithExpiry = (token, role) => {
+  const expiryTime = new Date().getTime() + 7 * 24 * 60 * 60 * 1000;
+  const authData = {
+    token,
+    role,
+    expiry: expiryTime,
+  };
+  localStorage.setItem("auth", JSON.stringify(authData));
+};
+
+ export const getAuthFromStorage = () => {
+  const data = JSON.parse(localStorage.getItem("auth"));
+  if (!data) return null;
+  const currentTime = new Date().getTime();
+  if (currentTime > data.expiry) {
+    localStorage.removeItem("auth");
+    return null;
+  }
+  return data;
+};
+
+  export  const getStoredAuth = () => {
+   const token = getAuthFromStorage()
+  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
+  const persistAuth = localStorage.getItem("persistAuth") === "true";
+  
+  return {
+    token,
+    role,
+    isAuthenticated: !!token,
+    persistAuth
+  };
+};
+
 export const getRandomHexColor = () => {
   return `#${Math.floor(Math.random() * 16777215)
     .toString(16)
@@ -232,18 +266,5 @@ export const getDaysLeft = (assignDate, value, unit = "days") => {
   return {
     daysLeft: totalDaysLeft,
     label,
-  };
-};
-
-  export const getStoredAuth = () => {
-   const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-  const role = localStorage.getItem("role") || sessionStorage.getItem("role");
-  const persistAuth = localStorage.getItem("persistAuth") === "true";
-  
-  return {
-    token,
-    role,
-    isAuthenticated: !!token,
-    persistAuth
   };
 };

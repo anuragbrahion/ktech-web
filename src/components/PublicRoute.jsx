@@ -1,17 +1,16 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { getAuthFromStorage } from "../utils/globalFunction";
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const auth = getAuthFromStorage();
 
-  const userData = JSON.parse(sessionStorage.getItem('data') || '{}');
- 
-  const token = userData?.token;
+  if (isAuthenticated || auth?.token) {
+    const role = auth?.role?.toLowerCase();
 
-  if (isAuthenticated || token) {
-    const role = userData?.role?.toLowerCase();
-     switch (role) {
+    switch (role) {
       case "student":
         return <Navigate to="/student-dashboard" replace />;
       case "teacher":

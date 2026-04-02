@@ -27,6 +27,19 @@ export const getStudentExamsList = createApiThunkPrivate(
   "GET",
 );
 
+export const studentExamsListDetails = createApiThunkPrivate(
+  "studentExamsListDetails",
+  "/examinations/student",
+  "GET",
+);
+
+export const studentExamsSubmit = createApiThunkPrivate(
+  "studentExamsSubmit",
+  "/examinations/submit",
+  "GET",
+);
+
+
 export const studentSlice = createSlice({
   name: "teacher",
   initialState,

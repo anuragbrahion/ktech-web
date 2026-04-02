@@ -1,17 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { formatDateForTable } from "../../utils/globalFunction";
+import LoadingSpinner from "../../components/Loader/Loader";
 import Table from "../../components/Atoms/TableData/TableData";
 import { getStudentExamsList } from "../../redux/slices/studentSlice";
-import ExamInterface from "../../components/ExamInterface";
-import Loader from "../../components/Loader/Loader";
- 
+
 const MyExams = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { examId } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
@@ -49,12 +48,12 @@ const MyExams = () => {
   ];
 
   const fetchMyExams = () => {
-    if (examId) return;
     setLoading(true);
     const params = {
       page: currentPage,
       size: itemsPerPage,
     };
+
     dispatch(getStudentExamsList(params)).then((action) => {
       if (action.error) {
         toast.error(action.payload || "Failed to fetch exams list");
@@ -65,7 +64,7 @@ const MyExams = () => {
 
   useEffect(() => {
     fetchMyExams();
-  }, [currentPage, examId]);
+  }, [currentPage]);
 
   const handleStartClick = (exam) => {
     setSelectedExam(exam);
@@ -74,14 +73,10 @@ const MyExams = () => {
 
   const handleAcceptInstructions = () => {
     if (selectedExam) {
-      const attempts = parseInt(sessionStorage.getItem(`exam_${selectedExam._id}_attempts`) || '0');
-      if (attempts >= 3) {
-        toast.error('You have reached the maximum number of attempts (3) for this exam');
-        setShowInstructions(false);
-        return;
-      }
+      // Store exam start time in sessionStorage
       sessionStorage.setItem(`exam_${selectedExam._id}_started`, Date.now().toString());
-      navigate(`/student/my-exams/${selectedExam._id}`, { 
+      // Navigate to exam page
+      navigate(`/exam/${selectedExam._id}`, { 
         state: { examData: selectedExam } 
       });
     }
@@ -93,10 +88,6 @@ const MyExams = () => {
     setShowInstructions(false);
   };
 
-  const handleBackToExams = () => {
-    navigate('/student/my-exams');
-  };
-
   const tableData = useMemo(() => {
     return resultList.map((item) => [
       <span className="capitalize font-medium">{item.course?.courseName || 'N/A'}</span>,
@@ -104,7 +95,7 @@ const MyExams = () => {
       <span className="capitalize font-semibold">{item.examtitle}</span>,
       formatDateForTable(item.time),
       <span className="text-sm">
-        {item.examduration?.hours || 0} hr {item.examduration?.minutes || 0} min
+        {item.examduration?.hours ? item.examduration.hours : 0} hr {item.examduration?.minutes ? item.examduration.minutes : 0} min
       </span>,
       <span className="font-medium">{item.passingPercentage}%</span>,
       <div className="flex items-center gap-2">
@@ -130,51 +121,46 @@ const MyExams = () => {
     ]);
   }, [resultList]);
 
-  if (examId) {
-    const examFromList = resultList.find(exam => exam._id === examId);
-    return (
-      <ExamInterface 
-        examId={examId} 
-        initialExamData={examFromList} 
-        onBack={handleBackToExams} 
-      />
-    );
-  }
-
   return (
     <>
-      <Loader loading={loading} />
+      <LoadingSpinner loading={loading} />
       
+      {/* Exam Instructions Modal */}
       {showInstructions && selectedExam && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
+            {/* Backdrop */}
             <div className="fixed inset-0 bg-black opacity-50" onClick={handleCloseInstructions}></div>
-            <div className="relative bg-white rounded-2xl max-w-3xl w-full p-8 shadow-xl">
+            
+            {/* Modal */}
+            <div className="relative bg-white rounded-2xl max-w-2xl w-full p-8 shadow-xl">
               <div className="bg-gradient-to-r from-blue-600 to-indigo-600 -mt-8 -mx-8 mb-6 px-8 py-6 rounded-t-2xl">
                 <h2 className="text-2xl font-bold text-white">Exam Instructions</h2>
                 <p className="text-blue-100 mt-1">{selectedExam.examtitle}</p>
               </div>
+
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-sm text-gray-600">Total Questions</p>
-                    <p className="text-2xl font-bold text-blue-600">{selectedExam.totalQuestions || 'N/A'}</p>
+                    <p className="text-xl font-bold text-blue-600">{selectedExam.totalQuestions || 'N/A'}</p>
                   </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-sm text-gray-600">Duration</p>
-                    <p className="text-2xl font-bold text-green-600">
+                    <p className="text-xl font-bold text-green-600">
                       {selectedExam.examduration?.hours || 0}h {selectedExam.examduration?.minutes || 0}m
                     </p>
                   </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="bg-purple-50 p-3 rounded-lg">
                     <p className="text-sm text-gray-600">Passing %</p>
-                    <p className="text-2xl font-bold text-purple-600">{selectedExam.passingPercentage}%</p>
+                    <p className="text-xl font-bold text-purple-600">{selectedExam.passingPercentage}%</p>
                   </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-600">Max Attempts</p>
-                    <p className="text-2xl font-bold text-orange-600">3</p>
+                  <div className="bg-orange-50 p-3 rounded-lg">
+                    <p className="text-sm text-gray-600">Total Marks</p>
+                    <p className="text-xl font-bold text-orange-600">{selectedExam.totalMarks || 'N/A'}</p>
                   </div>
                 </div>
+
                 <div className="border-t pt-4">
                   <h3 className="font-semibold text-gray-800 mb-3">Important Guidelines:</h3>
                   <ul className="list-disc pl-5 space-y-2 text-gray-600">
@@ -182,12 +168,12 @@ const MyExams = () => {
                     <li>You can navigate between questions using the question palette</li>
                     <li>The exam will be automatically submitted when the timer reaches zero</li>
                     <li>Do not refresh the page during the exam</li>
-                    <li>Do not switch tabs or windows</li>
-                    <li>Maximum 3 violations allowed</li>
+                    <li>Ensure you have a stable internet connection</li>
                     <li>Your answers are saved as you progress</li>
                     <li>Once submitted, you cannot retake the exam</li>
                   </ul>
                 </div>
+
                 <div className="border-t pt-4">
                   <label className="flex items-center space-x-3">
                     <input
@@ -199,6 +185,7 @@ const MyExams = () => {
                   </label>
                 </div>
               </div>
+
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={handleAcceptInstructions}
