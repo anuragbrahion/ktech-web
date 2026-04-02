@@ -255,18 +255,18 @@ const adminSections = {
         icon: ClipboardList,
         path: "/role-goal-assign",
       },
-      {
-        id: "coursePlans",
-        label: "Course Plans",
-        icon: Layers,
-        path: "/course-plans",
-      },
-      {
-        id: "courseBatches",
-        label: "Course Batches",
-        icon: Calendar,
-        path: "/course-batches",
-      },
+      // {
+      //   id: "coursePlans",
+      //   label: "Course Plans",
+      //   icon: Layers,
+      //   path: "/course-plans",
+      // },
+      // {
+      //   id: "courseBatches",
+      //   label: "Course Batches",
+      //   icon: Calendar,
+      //   path: "/course-batches",
+      // },
       {
         id: "inquirySource",
         label: "Inquiry Source",
@@ -511,18 +511,18 @@ const branchSections = {
         icon: ClipboardList,
         path: "/role-goal-assign",
       },
-      {
-        id: "coursePlans",
-        label: "Course Plans",
-        icon: Layers,
-        path: "/course-plans",
-      },
-      {
-        id: "courseBatches",
-        label: "Course Batches",
-        icon: Calendar,
-        path: "/course-batches",
-      },
+      // {
+      //   id: "coursePlans",
+      //   label: "Course Plans",
+      //   icon: Layers,
+      //   path: "/course-plans",
+      // },
+      // {
+      //   id: "courseBatches",
+      //   label: "Course Batches",
+      //   icon: Calendar,
+      //   path: "/course-batches",
+      // },
       {
         id: "inquirySource",
         label: "Inquiry Source",

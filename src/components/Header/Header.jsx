@@ -31,11 +31,13 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/rules-and-regulations": "Employee Management > Rules & Regulations",
       "/teacher-directory": "Employee Management > Teacher Directory",
       "/assign-task":"Employee Management > Assign Task",
+      "/all-assign-task":"Employee Management > All Assigned Task",
 
       "/referral-amount": "Branch Management > Referral Amount",
       "/inquiry-status": "Branch Management > Inquiry Status",
       "/inquiry-source": "Branch Management > Inquiry Source",
       "/visitors-book": "Branch Management > Visitors Book",
+      "/role-goal-assign": "Branch Management > Role/Goal-Assign",
 
       "/inquiry": "Student Management > Inquiry",
 

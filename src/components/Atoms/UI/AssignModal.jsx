@@ -56,22 +56,22 @@ const AssignModal = ({ isOpen, onClose, staffData, assignType, roles, goals, onS
                     <select
                       value={selectedValue}
                       onChange={(e) => setSelectedValue(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white capitalize"
                     >
                       <option value="">Select Role</option>
                       {roles.map((role, index) => (
-                        <option key={index} value={role}>{role}</option>
+                        <option key={index} value={role._id}>{role.name}</option>
                       ))}
                     </select>
                   ) : (
                     <select
                       value={selectedValue}
                       onChange={(e) => setSelectedValue(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black bg-white capitalize"
                     >
                       <option value="">Select Goal</option>
                       {goals.map((goal, index) => (
-                        <option key={index} value={goal}>{goal}</option>
+                        <option key={index} value={goal._id}>{goal.name}</option>
                       ))}
                     </select>
                   )}

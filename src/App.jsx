@@ -618,7 +618,11 @@ const App = () => {
         <Route
           path="/role-goal-assign"
           element={
-            <ProtectedRoute>{renderMainLayout(RoleGoalAssign)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <RoleGoalAssign roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 

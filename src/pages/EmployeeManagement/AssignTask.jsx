@@ -8,19 +8,28 @@ import {
   teachersList,
   designationsAllDocuments,
 } from "../../redux/slices/employee";
+import Loader from "../../components/Loader/Loader";
+import { assignEmployeeTeacherTask } from "../../redux/slices/examination";
 
 export default function AssignTask({ adminId }) {
   const dispatch = useDispatch();
-
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-
   const [filters, setFilters] = useState({
     search: "",
     designation: "",
   });
-
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [taskForm, setTaskForm] = useState({
+    title: "",
+    description: "",
+  });
+  const [errors, setErrors] = useState({
+    title: "",
+    description: "",
+  });
 
   const teachersListData = useSelector(
     (state) => state.employee?.teachersListData,
@@ -83,8 +92,58 @@ export default function AssignTask({ adminId }) {
   };
 
   const handleAssignTask = (teacher) => {
-    console.log("Assign task to:", teacher);
-    // 👉 Open modal / navigate here
+    setSelectedTeacher(teacher);
+    setTaskForm({ title: "", description: "" });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmitTask = async () => {
+    const newErrors = {
+      title: "",
+      description: "",
+    };
+
+    let isValid = true;
+
+    if (!taskForm.title.trim()) {
+      newErrors.title = "Title is required";
+      isValid = false;
+    }
+
+    if (!taskForm.description.trim()) {
+      newErrors.description = "Description is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+
+    if (!isValid) return;
+
+    const payload = {
+      teacherId: selectedTeacher?._id,
+      title: taskForm.title,
+      description: taskForm.description,
+    };
+
+    setLoading(true);
+
+    try {
+      const response = await dispatch(
+        assignEmployeeTeacherTask(payload),
+      ).unwrap();
+      if (!response.error) {
+        toast.success(response.message || "Task assigned successfully");
+        setIsModalOpen(false);
+      } else {
+        toast.error(response.message || "Failed to assign task");
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to assign task");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ✅ Table Headers
@@ -122,7 +181,8 @@ export default function AssignTask({ adminId }) {
   ]);
 
   return (
-    <div>
+    <>
+      <Loader loading={loading} />
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Assign Task</h1>
@@ -202,6 +262,80 @@ export default function AssignTask({ adminId }) {
           />
         )}
       </div>
-    </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6">
+            <h2 className="text-lg font-semibold mb-4">Assign Task</h2>
+
+            {/* Title */}
+            <div className="mb-4">
+              <label className="text-sm text-gray-600">
+                Title<em className="text-red-500">*</em>
+              </label>
+              <input
+                type="text"
+                value={taskForm.title}
+                onChange={(e) => {
+                  setTaskForm({ ...taskForm, title: e.target.value });
+                  setErrors({ ...errors, title: "" });
+                }}
+                className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 ${
+                  errors.title
+                    ? "border-red-500 focus:ring-red-500"
+                    : "focus:ring-indigo-500"
+                }`}
+                placeholder="Enter task title"
+              />
+              {errors.title && (
+                <p className="text-xs text-red-500 mt-1">{errors.title}</p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="mb-4">
+              <label className="text-sm text-gray-600">
+                Description<em className="text-red-500">*</em>
+              </label>
+              <textarea
+                value={taskForm.description}
+                onChange={(e) => {
+                  setTaskForm({ ...taskForm, description: e.target.value });
+                  setErrors({ ...errors, description: "" });
+                }}
+                rows={4}
+                className={`w-full mt-1 px-3 py-2 border rounded-lg focus:ring-2 ${
+                  errors.description
+                    ? "border-red-500 focus:ring-red-500"
+                    : "focus:ring-indigo-500"
+                }`}
+                placeholder="Enter task description"
+              />
+              {errors.description && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 text-sm border rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitTask}
+                className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
