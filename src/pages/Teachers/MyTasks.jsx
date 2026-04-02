@@ -66,15 +66,15 @@ const MyTasks = () => {
     return tasksList.map((item) => [
       item.title,
       item.description,
-      formatDateForTable(item.assignTo[0].assignDate),
-      item.assignTo[0].status,
+      formatDateForTable(item.assignTo.assignDate),
+      item.assignTo.status,
       <div className="flex items-center gap-2">
         <button
           onClick={() =>
             handleUpdateModal("open", {
               _id: item._id,
               status: statusOptions.find(
-                (status) => status.value === item.assignTo[0].status,
+                (status) => status.value === item.assignTo.status,
               ),
             })
           }

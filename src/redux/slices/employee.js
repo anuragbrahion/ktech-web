@@ -401,6 +401,18 @@ export const updateRules = createApiThunkPrivate(
   "/employee/rules/update",
 );
 
+export const assignRoleToTeacher = createApiThunkPrivate(
+  "assignRoleToTeacher",
+  "/employee/teachers/assign-role",
+  "POST",
+);
+
+export const assignGoalToTeacher = createApiThunkPrivate(
+  "assignRoleToTeacher",
+  "/employee/teachers/assign-goal",
+  "POST",
+);
+
 /* =========================
    Slice
 ========================= */
