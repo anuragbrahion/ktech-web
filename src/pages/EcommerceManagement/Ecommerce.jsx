@@ -13,6 +13,7 @@ import axios from "axios";
 import { apiUrl } from "../../utils/axiosProvider";
 import { toast } from "react-toastify";
 import { Trash2 } from "lucide-react";
+import { getAuthFromStorage } from "../../utils/globalFunction";
 
 const ProductModal = ({
   isOpen,
@@ -62,7 +63,7 @@ const ProductModal = ({
     uploadData.append("files", file);
 
     try {
-      const token = localStorage.getItem("token");
+      const token = getAuthFromStorage()
       const res = await axios.post(`${apiUrl}/files/upload`, uploadData, {
         headers: {
           "Content-Type": "multipart/form-data",
