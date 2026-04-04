@@ -309,12 +309,12 @@ const adminSections = {
         icon: Calendar,
         path: "/leave-request",
       },
-      {
-        id: "complaints",
-        label: "Complaints",
-        icon: AlertCircle,
-        path: "/complaints",
-      },
+      // {
+      //   id: "complaints",
+      //   label: "Complaints",
+      //   icon: AlertCircle,
+      //   path: "/complaints",
+      // },
     ],
   },
   attendance: {
@@ -565,12 +565,12 @@ const branchSections = {
         icon: Calendar,
         path: "/leave-request",
       },
-      {
-        id: "complaints",
-        label: "Complaints",
-        icon: AlertCircle,
-        path: "/complaints",
-      },
+      // {
+      //   id: "complaints",
+      //   label: "Complaints",
+      //   icon: AlertCircle,
+      //   path: "/complaints",
+      // },
     ],
   },
   attendance: {
