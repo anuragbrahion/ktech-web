@@ -25,8 +25,6 @@ const axiosPrivate = axios.create({
 axiosPrivate.interceptors.request.use(
   (config) => {
     const token = getAuthFromStorage();
-console.log("opppppppppppppppppppppppppppppppppp",token)
-
     if (token) {
       config.headers.Authorization = `Bearer ${token.token}`;
     }

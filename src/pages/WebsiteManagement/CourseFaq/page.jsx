@@ -65,7 +65,7 @@ export default function CourseFAQEditor() {
         // Refresh data after successful update
         fetchFaqData();
       } else {
-        toast.error(postFaqResponse.message || 'Failed to update FAQ');
+        toast.error(postFaqResponse.message);
       }
       setLoading(prev => ({ ...prev, submit: false }));
     }

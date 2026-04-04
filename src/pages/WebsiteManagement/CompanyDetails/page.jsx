@@ -10,6 +10,7 @@ import {
   postWebsiteConfigTemplates
 } from '../../../redux/slices/website';
 import { apiUrl } from '../../../utils/axiosProvider';
+import { getAuthFromStorage } from '../../../utils/globalFunction';
 
 const ConfigDetailsForm = () => {
   const dispatch = useDispatch();
@@ -29,7 +30,6 @@ const ConfigDetailsForm = () => {
     companyLogo: []
   });
 
-  console.log(companyData,"companyData")
 
   const [templatesData, setTemplatesData] = useState({
     certificate: [],
@@ -101,13 +101,13 @@ const ConfigDetailsForm = () => {
     setUploading(true);
     const formData = new FormData();
     formData.append('files', file);
+    const token = getAuthFromStorage();
 
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.post(`${apiUrl}/files/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token?.token}`
         }
       });
 

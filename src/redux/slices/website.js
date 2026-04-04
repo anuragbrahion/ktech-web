@@ -118,6 +118,12 @@ export const getHomeManagement = createApiThunkPublic(
   "GET",
 );
 
+export const getBlogManagement = createApiThunkPublic(
+  "getBlogManagement",
+  "/website/blogs",
+  "GET",
+);
+
 /* =========================
    Website Category
 ========================= */

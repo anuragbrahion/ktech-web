@@ -66,7 +66,7 @@ const adminSections = {
     icon: Globe,
     items: [
       { id: "homePage", label: "Home Page", icon: Home, path: "/home-page" },
-      { id: "blogs", label: "Blogs", icon: FileText, path: "/blogs" },
+      { id: "blogs", label: "Blogs", icon: FileText, path: "/admin-blogs" },
       { id: "branches", label: "Branches", icon: GitBranch, path: "/branches" },
       {
         id: "testimonials",
