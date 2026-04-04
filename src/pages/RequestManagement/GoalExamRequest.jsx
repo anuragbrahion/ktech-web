@@ -199,7 +199,7 @@ const GoalExamRequest = () => {
     "Teacher Name",
     "E-mail",
     "Goals",
-    "Total Days",
+    "Total Months",
     "Status",
     "Action",
   ];

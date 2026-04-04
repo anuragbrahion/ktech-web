@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAuthFromStorage } from "./globalFunction";
 
-const isLive = false;
+const isLive = true;
 
 export const apiUrl = isLive
   ? "http://147.93.19.238:4001/api/v1"
