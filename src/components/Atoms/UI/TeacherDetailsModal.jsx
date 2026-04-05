@@ -114,19 +114,22 @@ const TeacherDetailsModal = ({ isOpen, onClose, teacherData }) => {
             </div>
 
             <div>
-              <label className="block text-gray-600 text-sm mb-1 font-medium">
-                Status
-              </label>
-              <div className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-900">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  teacherData?.status === "Active" 
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}>
-                  {teacherData?.status || "Active"}
-                </span>
-              </div>
-            </div>
+  <label className="block text-gray-600 text-sm mb-1 font-medium">
+    Status
+  </label>
+
+  <div className="px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-900">
+    <span
+      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+        teacherData?.status
+          ? "bg-green-100 text-green-700"
+          : "bg-red-100 text-red-700"
+      }`}
+    >
+      {teacherData?.status ? "Active" : "Inactive"}
+    </span>
+  </div>
+</div>
           </div>
 
           <div className="flex justify-end mt-8 pt-6 border-t border-gray-200">

@@ -6,11 +6,11 @@ import {
   studentMarkAttendance,
   studentViewAttendance
 } from '../../redux/slices/examination';
-import { usersList } from '../../redux/slices/employee';
 import { toast } from 'react-toastify';
 import moment from 'moment-timezone';
 import LoadingSpinner from '../../components/Loader/Loader';
 import AttendanceCalendarModalStu from './AttendanceCalendarModalStu';
+import { studentAdmissionsList } from '../../redux/slices/course';
 
 const MarkStudentAttendance = () => {
   const dispatch = useDispatch();
@@ -48,11 +48,9 @@ const MarkStudentAttendance = () => {
     const payload = {
       page: currentPage,
       size: itemsPerPage,
-      query: JSON.stringify({ role: "Student" }),
-      ...(debouncedSearchTerm && { keyWord: debouncedSearchTerm })
     };
     try {
-      const result = await dispatch(usersList(payload)).unwrap();
+      const result = await dispatch(studentAdmissionsList(payload)).unwrap();
       if (result && result.data) {
         setStudents(result.data.list || []);
         setTotalCount(result.data.total || 0);
@@ -133,7 +131,7 @@ const MarkStudentAttendance = () => {
 
   const tableHeaders = [
     'Student Name',
-    'Course',
+    // 'Course',
     'Admission Date',
     'Mark Attendance',
     'View Attendance'
@@ -155,7 +153,7 @@ const MarkStudentAttendance = () => {
       </div>
 
       {/* Search Section */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+      {/* <div className="bg-white rounded-xl shadow-md p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -183,7 +181,7 @@ const MarkStudentAttendance = () => {
             Total Students: {totalCount}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Students Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -227,13 +225,13 @@ const MarkStudentAttendance = () => {
                     <p className="text-sm text-gray-500">{student.email}</p>
                   </div>
                 </td>
-                <td className="p-2">
+                {/* <td className="p-2">
                   <span className="p-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
                     {student.course?.courseName || 'Not Assigned'}
                   </span>
-                </td>
+                </td> */}
                 <td className="py-4 px-4 text-gray-600">
-                  {formatDate(student.dateOfJoining)}
+                  {formatDate(student.admissionDate)}
                 </td>
                 <td className="py-4 px-4">
                   <button

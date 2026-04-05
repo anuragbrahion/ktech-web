@@ -1,4 +1,3 @@
-// components/AttendanceDetailsModal/AttendanceDetailsModal.jsx
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 
@@ -34,7 +33,7 @@ const AttendanceDetailsModal = ({ isOpen, onClose, studentData, onSubmit }) => {
     setSubmitting(true);
     try {
       // Get student ID from studentData
-      const studentId = studentData._id || studentData.id;
+      const studentId = studentData?.user._id || studentData.id;
       // Get course ID if available
       const courseId = studentData.course?._id || studentData.courseId;
       
@@ -121,7 +120,6 @@ const AttendanceDetailsModal = ({ isOpen, onClose, studentData, onSubmit }) => {
               <option value="Present">Present</option>
               <option value="Absent">Absent</option>
               <option value="Leave">Leave</option>
-              <option value="Half-day">Half-day</option>
             </select>
           </div>
           

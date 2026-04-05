@@ -85,9 +85,9 @@ const StudentAttendanceList = () => {
 
   const tableData = useMemo(() => {
     return filteredAttendanceList.map((item) => [
-      item.user.name,
-      item.course.courseName,
-      `${item.batch.startTime} - ${item.batch.endTime}`,
+      item.user?.name,
+      item.course?.courseName,
+      `${item.batch?.startTime} - ${item.batch?.endTime}`,
       formatDateForTable(item.date),
       item.status,
     ]);
@@ -213,9 +213,8 @@ const StudentAttendanceList = () => {
       </div>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      {/* <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-          {/* Student Name Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Student Name
@@ -229,8 +228,7 @@ const StudentAttendanceList = () => {
             />
           </div>
 
-          {/* Start Date Filter */}
-          <div>
+           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Start Date
             </label>
@@ -242,8 +240,7 @@ const StudentAttendanceList = () => {
             />
           </div>
 
-          {/* End Date Filter */}
-          <div>
+           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               End Date
             </label>
@@ -255,8 +252,7 @@ const StudentAttendanceList = () => {
             />
           </div>
 
-          {/* Filter Button */}
-          <div>
+           <div>
             <button
               onClick={handleClearFilters}
               className="w-full px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
@@ -265,7 +261,7 @@ const StudentAttendanceList = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Table */}
       <Table

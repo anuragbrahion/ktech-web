@@ -10,6 +10,8 @@ import {
 } from "../../redux/slices/examination";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../components/Loader/Loader";
+import { usersList } from '../../redux/slices/employee';
+
 
 const MarkTeacherAttendance = () => {
   const dispatch = useDispatch();
@@ -42,26 +44,25 @@ const MarkTeacherAttendance = () => {
 
   const fetchTeachersList = useCallback(async () => {
     setLoading(true);
-    try {
-      const result = await dispatch(
-        attendanceList({
+        const payload = {
           page: currentPage,
           size: itemsPerPage,
-          type: "Teacher",
+          query: JSON.stringify({ role: "Teacher" }),
           ...(debouncedSearchTerm && { keyWord: debouncedSearchTerm })
-        })
-      ).unwrap();
-      if (result && result.data) {
-        setTeachers(result.data.list || []);
-        setTotalCount(result.data.total || 0);
-        setTotalPages(Math.ceil((result.data.total || 0) / itemsPerPage) || 1);
-      }
-    } catch (error) {
-      console.error("Error fetching teachers:", error);
-      toast.error(error?.message || "Failed to fetch teachers list");
-    } finally {
-      setLoading(false);
-    }
+        };
+        try {
+          const result = await dispatch(usersList(payload)).unwrap();
+          if (result && result.data) {
+            setTeachers(result.data.list || []);
+            setTotalCount(result.data.total || 0);
+            setTotalPages(Math.ceil((result.data.total || 0) / itemsPerPage) || 1);
+          }
+        } catch (error) {
+          console.error('Error fetching students:', error);
+          toast.error(error?.message || 'Failed to fetch students list');
+        } finally {
+          setLoading(false);
+        }
   }, [currentPage, itemsPerPage, debouncedSearchTerm, dispatch]);
 
   useEffect(() => {
@@ -128,7 +129,7 @@ const MarkTeacherAttendance = () => {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-2">
       <LoadingSpinner loading={loading} />
 
       <div className="mb-8">
@@ -215,16 +216,16 @@ const MarkTeacherAttendance = () => {
                   {teacher.user?.phoneNo || teacher.phoneNo || "N/A"}
                 </td>
                 <td className="py-4 px-4">
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                    teacher.status === "Active" 
-                      ? "bg-green-100 text-green-700"
-                      : teacher.status === "Inactive"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}>
-                    {teacher.status || "Active"}
-                  </span>
-                </td>
+  <span
+    className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
+      teacher.status === true
+        ? "bg-green-100 text-green-700"
+        : "bg-red-100 text-red-700"
+    }`}
+  >
+    {teacher.status ? "Active" : "Inactive"}
+  </span>
+</td>
                 <td className="py-4 px-4">
                   <button
                     onClick={() => handleViewDetails(teacher)}
@@ -251,34 +252,6 @@ const MarkTeacherAttendance = () => {
               </tr>
             )}
           />
-        )}
-
-        {teachers.length > 0 && (
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center text-sm text-gray-600">
-            <span>
-              Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-              {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} teachers
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
-              >
-                Previous
-              </button>
-              <span className="px-3 py-1">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
-              >
-                Next
-              </button>
-            </div>
-          </div>
         )}
       </div>
 

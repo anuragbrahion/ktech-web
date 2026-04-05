@@ -144,7 +144,6 @@ const AttendanceCalendarModal = ({
     }
   };
 
-  // Rest of your component remains the same...
   const handleDateClick = (day) => {
     if (day) {
       const dateObj = new Date(year, month, day);
@@ -153,14 +152,22 @@ const AttendanceCalendarModal = ({
     }
   };
 
-  const getAttendanceStatusForDate = (date) => {
-    const dateStr = formatDateForMarking(date);
-    const record = attendanceRecords.find(r => {
-      const recordDate = r.date?.split("T")[0] || r.date;
-      return recordDate === dateStr;
-    });
-    return record?.status || null;
-  };
+const getAttendanceStatusForDate = (dayValue) => {
+  const dateObj = new Date(year, month, dayValue);
+
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const monthStr = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const yearStr = dateObj.getFullYear();
+
+  const formattedDate1 = `${day}-${monthStr}-${yearStr}`;   // API format
+  const formattedDate2 = `${yearStr}-${monthStr}-${day}`;   // input format
+
+  const record = attendanceRecords.find((r) => {
+    return r.date === formattedDate1 || r.date === formattedDate2;
+  });
+
+  return record?.status || null;
+};
 
   const getAttendanceColor = (date) => {
     const status = getAttendanceStatusForDate(date);
@@ -171,8 +178,6 @@ const AttendanceCalendarModal = ({
         return "bg-red-500 text-white";
       case "Leave":
         return "bg-yellow-500 text-white";
-      case "Half-day":
-        return "bg-orange-500 text-white";
       default:
         return "bg-gray-100 hover:bg-gray-200 text-gray-900";
     }
@@ -223,7 +228,6 @@ const AttendanceCalendarModal = ({
   if (!isOpen || !teacherData) return null;
 
   return (
-    // Your existing JSX remains exactly the same
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-t-lg">
@@ -291,7 +295,6 @@ const AttendanceCalendarModal = ({
                   <option value="Present">Present</option>
                   <option value="Absent">Absent</option>
                   <option value="Leave">Leave</option>
-                  <option value="Half-day">Half-day</option>
                 </select>
               </div>
 
@@ -353,7 +356,7 @@ const AttendanceCalendarModal = ({
                   {dates.map((day, index) => {
                     const dateObj = day ? new Date(year, month, day) : null;
                     const isCurrentMonth = day !== null;
-                    const attendanceColor = dateObj ? getAttendanceColor(dateObj) : "";
+                    const attendanceColor = dateObj ? getAttendanceColor(day) : "";
                     const isSelected = dateObj ? isSelectedDate(day) : false;
                     const todayClass = dateObj && isToday(day) ? "ring-2 ring-blue-500" : "";
 
@@ -387,10 +390,6 @@ const AttendanceCalendarModal = ({
                     <div className="w-4 h-4 bg-yellow-500 rounded mr-2"></div>
                     <span className="text-gray-700 text-sm">Leave</span>
                   </div>
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-orange-500 rounded mr-2"></div>
-                    <span className="text-gray-700 text-sm">Half-day</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -415,8 +414,8 @@ const AttendanceCalendarModal = ({
                       {attendanceRecords.map((record, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="py-3 px-4 text-gray-900 border-b">
-                            {formatDateForDisplay(record.date?.split("T")[0] || record.date)}
-                           </td>
+                            {formatDateForDisplay(record.date)}
+                          </td>
                           <td className="py-3 px-4 border-b">
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                               record.status === "Present"
@@ -425,15 +424,15 @@ const AttendanceCalendarModal = ({
                                 ? "bg-red-100 text-red-800"
                                 : record.status === "Leave"
                                 ? "bg-yellow-100 text-yellow-800"
-                                : "bg-orange-100 text-orange-800"
+                                : "bg-gray-100 text-gray-800"
                             }`}>
                               {record.status}
                             </span>
-                           </td>
-                         </tr>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
-                   </table>
+                  </table>
                 </div>
               ) : (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
