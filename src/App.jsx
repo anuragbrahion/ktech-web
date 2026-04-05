@@ -96,6 +96,8 @@ import ExamPage from "./pages/Students/ExamPage";
 import ExamResults from "./components/ExamResults";
 import RuleAndRegulation from "./pages/EmployeeManagement/RuleAndRegulation";
 import EmployeeRulesAndRegulations from "./pages/EmployeeManagement/EmployeeRulesAndRegulations";
+import BlogList from "./components/BlogList";
+import BlogDetail from "./components/BlogDetail";
 
 const MainLayout = ({
   children,
@@ -146,7 +148,7 @@ const App = () => {
     <MainLayout
       websiteMode={websiteMode}
       onModeToggle={toggleWebsiteMode}
-      onLogout={() => {}}
+      onLogout={() => { }}
       onSidebarToggle={toggleSidebar}
       isSidebarOpen={isSidebarOpen}
     >
@@ -373,14 +375,22 @@ const App = () => {
           }
         />
 
+        {/* Blog Routes - Keep only these */}
         <Route
           path="/blogs"
           element={
             <ProtectedRoute>
-              {renderMainLayout(() => (
-                <Blogs roleData={roleData} adminId={role.id} />
-              ))}
+              {renderMainLayout(BlogList)}
             </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/blog/:id"
+          element={
+            <PublicRoute>
+              <BlogDetail />
+            </PublicRoute>
           }
         />
 
@@ -390,6 +400,17 @@ const App = () => {
             <ProtectedRoute>
               {renderMainLayout(() => (
                 <BlogCategoryManagement roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin-blogs"
+          element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Blogs roleData={roleData} adminId={role.id} />
               ))}
             </ProtectedRoute>
           }
@@ -736,14 +757,22 @@ const App = () => {
         <Route
           path="/role-exam-request"
           element={
-            <ProtectedRoute>{renderMainLayout(RoleExamRequest)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <RoleExamRequest roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/goal-exam-request"
           element={
-            <ProtectedRoute>{renderMainLayout(GoalExamRequest)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <GoalExamRequest roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 

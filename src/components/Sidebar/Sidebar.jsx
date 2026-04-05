@@ -66,7 +66,7 @@ const adminSections = {
     icon: Globe,
     items: [
       { id: "homePage", label: "Home Page", icon: Home, path: "/home-page" },
-      { id: "blogs", label: "Blogs", icon: FileText, path: "/blogs" },
+      { id: "blogs", label: "Blogs", icon: FileText, path: "/admin-blogs" },
       { id: "branches", label: "Branches", icon: GitBranch, path: "/branches" },
       {
         id: "testimonials",
@@ -309,12 +309,12 @@ const adminSections = {
         icon: Calendar,
         path: "/leave-request",
       },
-      {
-        id: "complaints",
-        label: "Complaints",
-        icon: AlertCircle,
-        path: "/complaints",
-      },
+      // {
+      //   id: "complaints",
+      //   label: "Complaints",
+      //   icon: AlertCircle,
+      //   path: "/complaints",
+      // },
     ],
   },
   attendance: {
@@ -565,12 +565,12 @@ const branchSections = {
         icon: Calendar,
         path: "/leave-request",
       },
-      {
-        id: "complaints",
-        label: "Complaints",
-        icon: AlertCircle,
-        path: "/complaints",
-      },
+      // {
+      //   id: "complaints",
+      //   label: "Complaints",
+      //   icon: AlertCircle,
+      //   path: "/complaints",
+      // },
     ],
   },
   attendance: {

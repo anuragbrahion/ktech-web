@@ -17,7 +17,9 @@ const BaseCMSEditor = ({
   const [loading, setLoading] = useState({ fetch: false, submit: false });
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState(defaultFormData);
-   const getData = useSelector(state => state.website?.[apiConfig.getDataKey]);
+  const [validationErrors, setValidationErrors] = useState({});
+  
+  const getData = useSelector(state => state.website?.[apiConfig.getDataKey]);
   const postData = useSelector(state => state.website?.[apiConfig.postDataKey]);
 
   useEffect(() => {
@@ -46,8 +48,14 @@ const BaseCMSEditor = ({
       if (postData.success) {
         toast.success('Content updated successfully!');
         fetchPageData();
+        setValidationErrors({});
       } else {
-        toast.error(postData.message || 'Failed to update content');
+        toast.error(postData.message);
+        if (postData.code === 1400 && postData.message) {
+          setValidationErrors({
+            bannerLogo: 'Banner logo is required'
+          });
+        }
       }
       setLoading(prev => ({ ...prev, submit: false }));
     }
@@ -63,6 +71,17 @@ const BaseCMSEditor = ({
     });
   };
 
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData[bannerFieldName].bannerLogo || formData[bannerFieldName].bannerLogo.length === 0) {
+      errors.bannerLogo = 'Banner logo is required';
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleBannerChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -71,6 +90,9 @@ const BaseCMSEditor = ({
         [field]: value
       }
     }));
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   const handleFileUpload = async (file) => {
@@ -88,7 +110,7 @@ const BaseCMSEditor = ({
       });
       
       if (response.data && response.data.data && response.data.data.length > 0) {
-         setFormData(prev => ({
+        setFormData(prev => ({
           ...prev,
           [bannerFieldName]: {
             ...prev[bannerFieldName],
@@ -96,9 +118,12 @@ const BaseCMSEditor = ({
           }
         }));
         toast.success('Image uploaded successfully');
+        if (validationErrors.bannerLogo) {
+          setValidationErrors(prev => ({ ...prev, bannerLogo: '' }));
+        }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to upload image');
+      toast.error(error.response?.data?.message);
     } finally {
       setUploading(false);
     }
@@ -112,9 +137,15 @@ const BaseCMSEditor = ({
         bannerLogo: []
       }
     }));
+    setValidationErrors(prev => ({ ...prev, bannerLogo: 'Banner logo is required' }));
   };
 
   const handleUpdate = () => {
+    if (!validateForm()) {
+      toast.error('Please fix validation errors before submitting');
+      return;
+    }
+
     const formDataToSend = new FormData();
     
     formDataToSend.append('text', formData.text);
@@ -132,6 +163,8 @@ const BaseCMSEditor = ({
           formDataToSend.append(`${bannerFieldName}[bannerLogo][${index}][mimetype]`, logo.mimetype || '');
         }
       });
+    } else {
+      formDataToSend.append(`${bannerFieldName}[bannerLogo]`, JSON.stringify([]));
     }
 
     setLoading(prev => ({ ...prev, submit: true }));
@@ -164,15 +197,22 @@ const BaseCMSEditor = ({
   const ImageUploader = () => {
     const bannerLogo = formData[bannerFieldName].bannerLogo;
     const hasImage = bannerLogo && bannerLogo.length > 0;
+    const hasError = validationErrors.bannerLogo;
 
     return (
       <div className="space-y-4">
         <label className="block text-sm font-semibold text-gray-800 mb-3">
-          Banner Logo
+          Banner Logo <span className="text-red-500">*</span>
         </label>
         
+        {hasError && (
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">
+            {validationErrors.bannerLogo}
+          </div>
+        )}
+        
         {hasImage ? (
-          <div className="relative">
+          <div className={`relative ${hasError ? 'border-2 border-red-500 rounded-lg' : ''}`}>
             <div className="border border-gray-200 rounded-lg p-4">
               <div className="flex items-center gap-4">
                 <img 
@@ -202,7 +242,7 @@ const BaseCMSEditor = ({
             </div>
           </div>
         ) : (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+          <div className={`border-2 border-dashed ${hasError ? 'border-red-500 bg-red-50' : 'border-gray-300'} rounded-lg p-8 text-center`}>
             <input 
               type="file" 
               accept="image/*" 
@@ -211,11 +251,14 @@ const BaseCMSEditor = ({
               id="banner-logo-upload" 
             />
             <label htmlFor="banner-logo-upload" className="cursor-pointer flex flex-col items-center gap-3">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                <Upload className="w-8 h-8 text-gray-400" />
+              <div className={`w-16 h-16 ${hasError ? 'bg-red-100' : 'bg-gray-100'} rounded-full flex items-center justify-center`}>
+                <Upload className={`w-8 h-8 ${hasError ? 'text-red-400' : 'text-gray-400'}`} />
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700">Click to upload banner logo</div>
+                <div className={`text-sm font-medium ${hasError ? 'text-red-700' : 'text-gray-700'}`}>
+                  {hasError ? 'Banner logo is required - ' : 'Click to upload banner logo'}
+                  {hasError && <span className="text-red-500">*</span>}
+                </div>
                 <div className="text-xs text-gray-500 mt-1">PNG, JPG, GIF up to 5MB</div>
               </div>
               <button

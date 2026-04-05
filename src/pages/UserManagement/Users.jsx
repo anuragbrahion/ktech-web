@@ -41,9 +41,9 @@ const Users = ({ roleData, adminId }) => {
 
     const query = {};
 
-    if (roleData === "admin") {
+    // if (roleData === "admin") {
       query.adminId = adminId;
-    }
+    // }
 
     if (filters.name !== "") query.name = filters.name;
     if (filters.role !== "") query.role = filters.role;

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAuthFromStorage } from "./globalFunction";
 
-const isLive = false;
+const isLive = true;
 
 export const apiUrl = isLive
   ? "http://147.93.19.238:4001/api/v1"
@@ -25,8 +25,6 @@ const axiosPrivate = axios.create({
 axiosPrivate.interceptors.request.use(
   (config) => {
     const token = getAuthFromStorage();
-console.log("opppppppppppppppppppppppppppppppppp",token)
-
     if (token) {
       config.headers.Authorization = `Bearer ${token.token}`;
     }

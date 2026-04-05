@@ -40,6 +40,7 @@ import {
 import Button from "../../components/Atoms/Button"; 
 import axios from "axios";
 import { apiUrl } from "../../utils/axiosProvider";
+import BlogList from "../../components/BlogList";
 
 const LandingPage = () => {
   const [data, setData] = useState(null);
@@ -819,6 +820,22 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+    {/* Blog Section */}
+<section className="py-16 bg-white">
+  <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="text-center mb-12">
+      <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        {extractTextFromHTML(data?.blogs?.heading) || "Latest from Our Blog"}
+      </h2>
+      <p className="text-gray-600 max-w-2xl mx-auto">
+        {extractTextFromHTML(data?.blogs?.subHeading) || "Insights, tips and industry news to help you grow"}
+      </p>
+    </div>
+    
+    {/* Blog List Component */}
+    <BlogList />
+  </div>
+</section>
 
       {/* CTA Section */}
       <section className="py-20 bg-gray-100">
