@@ -6,8 +6,7 @@ import {
   createExaminationStudent,
   examinationsList,
   updateExaminationStudent,
-  examinationsSingleDocument,
-  clearExaminationSingleData,
+  examinationsSingleDocument
 } from '../../redux/slices/examination';
 import {
   courseBatchesAllDocuments,
@@ -153,7 +152,6 @@ const StudentExaminations = () => {
     setShowModal(false);
     setSelectedExam(null);
     setIsEditing(false);
-    dispatch(clearExaminationSingleData());
   };
 
   const tableHeaders = [
