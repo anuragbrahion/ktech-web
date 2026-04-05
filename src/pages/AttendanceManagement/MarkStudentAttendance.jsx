@@ -1,25 +1,26 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Table from '../../components/Atoms/TableData/TableData';
-import AttendanceDetailsModal from '../../components/Atoms/UI/AttendanceDetailsModal';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Table from "../../components/Atoms/TableData/TableData";
+import AttendanceDetailsModal from "../../components/Atoms/UI/AttendanceDetailsModal";
 import {
   studentMarkAttendance,
-  studentViewAttendance
-} from '../../redux/slices/examination';
-import { toast } from 'react-toastify';
-import moment from 'moment-timezone';
-import LoadingSpinner from '../../components/Loader/Loader';
-import AttendanceCalendarModalStu from './AttendanceCalendarModalStu';
-import { studentAdmissionsList } from '../../redux/slices/course';
+  studentViewAttendance,
+} from "../../redux/slices/examination";
+import { toast } from "react-toastify";
+import moment from "moment-timezone";
+import LoadingSpinner from "../../components/Loader/Loader";
+import AttendanceCalendarModalStu from "./AttendanceCalendarModalStu";
+import { studentAdmissionsList } from "../../redux/slices/course";
 
-const MarkStudentAttendance = () => {
+const MarkStudentAttendance = ({ adminId }) => {
   const dispatch = useDispatch();
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -27,7 +28,7 @@ const MarkStudentAttendance = () => {
   const [itemsPerPage] = useState(10);
 
   const studentAttendanceViewData = useSelector(
-    (state) => state?.examination?.studentViewAttendanceData
+    (state) => state?.examination?.studentViewAttendanceData,
   );
 
   // Debounce search term
@@ -48,6 +49,7 @@ const MarkStudentAttendance = () => {
     const payload = {
       page: currentPage,
       size: itemsPerPage,
+      query: JSON.stringify({ adminId }),
     };
     try {
       const result = await dispatch(studentAdmissionsList(payload)).unwrap();
@@ -57,8 +59,8 @@ const MarkStudentAttendance = () => {
         setTotalPages(Math.ceil((result.data.total || 0) / itemsPerPage) || 1);
       }
     } catch (error) {
-      console.error('Error fetching students:', error);
-      toast.error(error?.message || 'Failed to fetch students list');
+      console.error("Error fetching students:", error);
+      toast.error(error?.message || "Failed to fetch students list");
     } finally {
       setLoading(false);
     }
@@ -80,15 +82,17 @@ const MarkStudentAttendance = () => {
 
   const handleMarkAttendance = async (studentId, status, date, courseId) => {
     try {
-      const result = await dispatch(studentMarkAttendance({
-        studentId,
-        status,
-        date,
-        courseId: courseId || selectedStudent?.course?._id
-      })).unwrap();
+      const result = await dispatch(
+        studentMarkAttendance({
+          studentId,
+          status,
+          date,
+          courseId: courseId || selectedStudent?.course?._id,
+        }),
+      ).unwrap();
 
       if (result) {
-        toast.success('Attendance marked successfully');
+        toast.success("Attendance marked successfully");
         setShowAttendanceModal(false);
         setSelectedStudent(null);
         // Refresh the attendance view if calendar modal is open
@@ -101,46 +105,53 @@ const MarkStudentAttendance = () => {
         }
       }
     } catch (error) {
-      console.error('Error marking attendance:', error);
-      toast.error(error?.message || 'Failed to mark attendance');
+      console.error("Error marking attendance:", error);
+      toast.error(error?.message || "Failed to mark attendance");
     }
   };
 
-  const handleViewAttendance = async (studentId, startDate, endDate, courseId) => {
+  const handleViewAttendance = async (
+    studentId,
+    startDate,
+    endDate,
+    courseId,
+  ) => {
     try {
-      const result = await dispatch(studentViewAttendance({
-        startDate,
-        endDate,
-        studentId,
-        courseId: courseId || selectedStudent?.course?._id
-      })).unwrap();
+      const result = await dispatch(
+        studentViewAttendance({
+          startDate,
+          endDate,
+          studentId,
+          courseId: courseId || selectedStudent?.course?._id,
+        }),
+      ).unwrap();
 
       return result?.data || [];
     } catch (error) {
-      console.error('Error fetching attendance:', error);
-      toast.error(error?.message || 'Failed to fetch attendance records');
+      console.error("Error fetching attendance:", error);
+      toast.error(error?.message || "Failed to fetch attendance records");
       return [];
     }
   };
 
   const handleClearSearch = () => {
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
+    setSearchTerm("");
+    setDebouncedSearchTerm("");
     setCurrentPage(1);
   };
 
   const tableHeaders = [
-    'Student Name',
+    "Student Name",
     // 'Course',
-    'Admission Date',
-    'Mark Attendance',
-    'View Attendance'
+    "Admission Date",
+    "Mark Attendance",
+    "View Attendance",
   ];
 
   // Format date for display
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return moment(dateString).format('DD/MM/YYYY');
+    if (!dateString) return "N/A";
+    return moment(dateString).format("DD/MM/YYYY");
   };
 
   return (
@@ -148,8 +159,12 @@ const MarkStudentAttendance = () => {
       <LoadingSpinner loading={loading} />
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Mark Student Attendance</h1>
-        <p className="text-gray-600 mt-2">Manage student attendance and details</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Mark Student Attendance
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Manage student attendance and details
+        </p>
       </div>
 
       {/* Search Section */}
@@ -202,7 +217,9 @@ const MarkStudentAttendance = () => {
             </svg>
             <p className="text-gray-500 text-lg">No students found</p>
             <p className="text-gray-400 text-sm mt-1">
-              {searchTerm ? 'Try a different search term' : 'No students available'}
+              {searchTerm
+                ? "Try a different search term"
+                : "No students available"}
             </p>
           </div>
         ) : (
@@ -216,7 +233,7 @@ const MarkStudentAttendance = () => {
               <tr
                 key={student._id || index}
                 className={`hover:bg-blue-50 transition-colors duration-150 ${
-                  index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
                 }`}
               >
                 <td className="py-4 px-4">
@@ -285,12 +302,13 @@ const MarkStudentAttendance = () => {
         {students.length > 0 && (
           <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center text-sm text-gray-600">
             <span>
-              Showing {(currentPage - 1) * itemsPerPage + 1} to{' '}
-              {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount} students
+              Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+              {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}{" "}
+              students
             </span>
             <div className="flex gap-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
               >
@@ -300,7 +318,9 @@ const MarkStudentAttendance = () => {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
               >

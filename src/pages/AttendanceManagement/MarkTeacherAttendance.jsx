@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Table from "../../components/Atoms/TableData/TableData";
@@ -6,14 +7,13 @@ import AttendanceCalendarModal from "../../components/Atoms/UI/AttendanceCalenda
 import {
   teacherAttendanceView,
   teacherMarkAttendance,
-  attendanceList
 } from "../../redux/slices/examination";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../components/Loader/Loader";
 import { usersList } from '../../redux/slices/employee';
 
 
-const MarkTeacherAttendance = () => {
+const MarkTeacherAttendance = ({adminId}) => {
   const dispatch = useDispatch();
   const [teachers, setTeachers] = useState([]);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
@@ -47,7 +47,7 @@ const MarkTeacherAttendance = () => {
         const payload = {
           page: currentPage,
           size: itemsPerPage,
-          query: JSON.stringify({ role: "Teacher" }),
+          query: JSON.stringify({ role: "Teacher", adminId }),
           ...(debouncedSearchTerm && { keyWord: debouncedSearchTerm })
         };
         try {

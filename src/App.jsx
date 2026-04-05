@@ -148,7 +148,7 @@ const App = () => {
     <MainLayout
       websiteMode={websiteMode}
       onModeToggle={toggleWebsiteMode}
-      onLogout={() => { }}
+      onLogout={() => {}}
       onSidebarToggle={toggleSidebar}
       isSidebarOpen={isSidebarOpen}
     >
@@ -379,9 +379,7 @@ const App = () => {
         <Route
           path="/blogs"
           element={
-            <ProtectedRoute>
-              {renderMainLayout(BlogList)}
-            </ProtectedRoute>
+            <ProtectedRoute>{renderMainLayout(BlogList)}</ProtectedRoute>
           }
         />
 
@@ -803,7 +801,9 @@ const App = () => {
           path="/mark-teacher-attendance"
           element={
             <ProtectedRoute>
-              {renderMainLayout(MarkTeacherAttendance)}
+              {renderMainLayout(() => (
+                <MarkTeacherAttendance roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />
@@ -812,7 +812,9 @@ const App = () => {
           path="/mark-student-attendance"
           element={
             <ProtectedRoute>
-              {renderMainLayout(MarkStudentAttendance)}
+              {renderMainLayout(() => (
+                <MarkStudentAttendance roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />

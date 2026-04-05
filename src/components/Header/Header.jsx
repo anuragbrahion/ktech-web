@@ -51,6 +51,10 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/role-exam-request":"All Request > Role Exam Request",
       "/goal-exam-request":"All Request > Goal Exam Request",
 
+      "/mark-teacher-attendance": "Mark Attendance > Mark Teacher Attendance",
+      "/teacher/attendance": "Teacher Attendance Report",
+      "/mark-student-attendance": "Mark Attendance > Mark Student Attendance",
+
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
       "/languages": "Languages",
@@ -61,7 +65,6 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/user-management": "User Management",
       "/website-settings": "Website Settings",
       "/teacher/incentive": "My Incentives",
-      "/teacher/attendance": "My Attendance Report",
       "/teacher/leave-request": "My Leave Request",
       "/teacher/student-attendance": "Student Attendance Report",
       "/teacher/my-tasks": "My Tasks",
