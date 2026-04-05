@@ -1,27 +1,44 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-import Table from '../../components/Atoms/TableData/TableData';
-import AlertModal from '../../components/Modal/AlertModal'; 
-import { requestRolesAssigned, requestRolesList, requestRolesUpdateStatus } from '../../redux/slices/examination';
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import Table from "../../components/Atoms/TableData/TableData";
+import AlertModal from "../../components/Modal/AlertModal";
+import {
+  requestRolesAssigned,
+  requestRolesList,
+  requestRolesUpdateStatus,
+} from "../../redux/slices/examination";
+import { rolesAllDocuments } from "../../redux/slices/employee";
+import Loader from "../../components/Loader/Loader";
 
 const RoleExamRequest = () => {
   const dispatch = useDispatch();
-  
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [actionData, setActionData] = useState({ type: '', id: '', teacherId: '' });
-
-  const requestRolesListData = useSelector(state => state.examination?.requestRolesListData); 
+  const [actionData, setActionData] = useState({
+    type: "",
+    id: "",
+    teacherId: "",
+  });
+  const [selectedRole, setSelectedRole] = useState(null);
+  const requestRolesListData = useSelector(
+    (state) => state.examination?.requestRolesListData,
+  );
+  const rolesAllDocumentsData = useSelector(
+    (state) => state.employee?.rolesAllDocumentsData,
+  );
+  const allRoles = rolesAllDocumentsData?.data?.data?.list || [];
+  const totalRequests = requestRolesListData?.data?.data?.total || 0;
+  const totalPages = Math.ceil(totalRequests / itemsPerPage);
 
   useEffect(() => {
-    fetchRequests();
-  }, [currentPage]);
+    if (selectedRole) fetchRequests();
+  }, [currentPage, filter, selectedRole]);
 
   useEffect(() => {
     if (requestRolesListData?.data?.data?.list) {
@@ -34,12 +51,16 @@ const RoleExamRequest = () => {
     const params = {
       page: currentPage,
       size: itemsPerPage,
-      roleId:"690dd5426fa7f65963c2b8cb"
+      roleId: selectedRole,
     };
-    
+
+    if (filter && filter !== "all") {
+      params.status = filter;
+    }
+
     dispatch(requestRolesList(params)).then((action) => {
       if (action.error) {
-        toast.error(action.payload || 'Failed to fetch role requests');
+        toast.error(action.payload || "Failed to fetch role requests");
       }
       setLoading(false);
     });
@@ -47,33 +68,33 @@ const RoleExamRequest = () => {
 
   const handleApprove = (request) => {
     setActionData({
-      type: 'approve',
+      type: "approve",
       id: request._id,
-      teacherId: request.teacherId || request.teacher?._id
+      teacherId: request.teacherId || request.teacher?._id,
     });
     setShowConfirmModal(true);
   };
 
   const handleReject = (request) => {
     setActionData({
-      type: 'reject',
+      type: "reject",
       id: request._id,
-      teacherId: request.teacherId || request.teacher?._id
+      teacherId: request.teacherId || request.teacher?._id,
     });
     setShowConfirmModal(true);
   };
 
   const handleConfirmAction = () => {
     const { type, id, teacherId } = actionData;
-    const status = type === 'approve' ? 'Approved' : 'Rejected';
-    
+    const status = type === "approve" ? "Approved" : "Rejected";
+
     setLoading(true);
     const payload = {
       _id: id,
       teacherId: teacherId,
-      status: status
+      status: status,
     };
-    
+
     dispatch(requestRolesUpdateStatus(payload)).then((action) => {
       if (!action.error) {
         toast.success(`Request ${status.toLowerCase()} successfully`);
@@ -84,43 +105,35 @@ const RoleExamRequest = () => {
       }
       setLoading(false);
       setShowConfirmModal(false);
-      setActionData({ type: '', id: '', teacherId: '' });
+      setActionData({ type: "", id: "", teacherId: "" });
     });
   };
 
   const fetchAssignedRoles = () => {
-    dispatch(requestRolesAssigned({page: 1, size: 100}));
+    dispatch(requestRolesAssigned({ page: 1, size: 100 }));
   };
 
-  const filteredRequests = requests.filter(request => {
-    if (filter === 'all') return true;
-    return request.status === filter;
-  });
-
-  const totalRequests = requestRolesListData?.data?.data?.total || 0;
-  const totalPages = Math.ceil(totalRequests / itemsPerPage);
-
-  const tableData = filteredRequests.map((request, index) => [
+  const tableData = requests.map((request, index) => [
     (currentPage - 1) * itemsPerPage + index + 1,
-    request?.teacherName || 'N/A',
-    request?.teacherEmail || 'N/A',
-    request?.name || 'N/A',
-    request?.days || 'N/A',
-    request?.status || 'Pending',
+    request?.teacherName || "N/A",
+    request?.teacherEmail || "N/A",
+    request?.name || "N/A",
+    request?.days || "N/A",
+    request?.status || "Pending",
     request?._id,
-    request?.teacherId || request.teacher?._id
+    request?.teacherId || request.teacher?._id,
   ]);
 
   const renderRow = (row, index) => {
     const [sNo, teacherName, email, role, totalDays, status, requestId] = row;
-    const request = filteredRequests[index];
-    
-    const isActionTaken = status === 'Approved' || status === 'Rejected';
+    const request = requests[index];
+
+    const isActionTaken = status === "Approved" || status === "Rejected";
 
     return (
-      <tr 
-        key={requestId} 
-        className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
+      <tr
+        key={requestId}
+        className={`hover:bg-blue-50 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
       >
         <td className="py-4 px-4 text-center">
           <div className="font-medium text-gray-800">{sNo}</div>
@@ -132,102 +145,119 @@ const RoleExamRequest = () => {
           <div className="text-gray-700 truncate max-w-xs">{email}</div>
         </td>
         <td className="py-4 px-4">
-          <span className="text-blue-800 rounded-full text-sm">
-            {role}
-          </span>
+          <span className="text-blue-800 rounded-full text-sm">{role}</span>
         </td>
         <td className="py-4 px-4 text-gray-700">{totalDays}</td>
         <td className="py-4 px-4">
-          <span className={`px-3 py-1 rounded-full text-sm font-bold border ${
-            status === 'Approved' ? 'bg-green-100 text-green-800 border-green-200' :
-            status === 'Rejected' ? 'bg-red-100 text-red-800 border-red-200' :
-            'bg-yellow-100 text-yellow-800 border-yellow-200'
-          }`}>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-bold border ${
+              status === "Approved"
+                ? "bg-green-100 text-green-800 border-green-200"
+                : status === "Rejected"
+                  ? "bg-red-100 text-red-800 border-red-200"
+                  : "bg-yellow-100 text-yellow-800 border-yellow-200"
+            }`}
+          >
             {status}
           </span>
         </td>
         <td className="py-4 px-4">
-          <button
-            onClick={() => handleApprove(request)}
-            disabled={isActionTaken || loading}
-            className={`px-4 py-2 rounded-md font-medium text-sm ${
-              isActionTaken || loading
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'
-            }`}
-          >
-            {status === 'Approved' ? 'Approved' : 'Approve'}
-          </button>
-        </td>
-        <td className="py-4 px-4">
-          <button
-            onClick={() => handleReject(request)}
-            disabled={isActionTaken || loading}
-            className={`px-4 py-2 rounded-md font-medium text-sm ${
-              isActionTaken || loading
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-200'
-            }`}
-          >
-            {status === 'Rejected' ? 'Rejected' : 'Reject'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleApprove(request)}
+              disabled={isActionTaken || loading}
+              className={`px-4 py-2 rounded-md font-medium text-sm ${
+                isActionTaken || loading
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-green-100 text-green-700 hover:bg-green-200 border border-green-200"
+              }`}
+            >
+              {status === "Approved" ? "Approved" : "Approve"}
+            </button>
+            <button
+              onClick={() => handleReject(request)}
+              disabled={isActionTaken || loading}
+              className={`px-4 py-2 rounded-md font-medium text-sm ${
+                isActionTaken || loading
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-red-100 text-red-700 hover:bg-red-200 border border-red-200"
+              }`}
+            >
+              {status === "Rejected" ? "Rejected" : "Reject"}
+            </button>
+          </div>
         </td>
       </tr>
     );
   };
 
-  const tableHeaders = ['S.No', 'Teacher Name', 'E-mail', 'Roles', 'Total Days', 'Status', 'Approve', 'Reject'];
+  const tableHeaders = [
+    "S.No",
+    "Teacher Name",
+    "E-mail",
+    "Roles",
+    "Total Days",
+    "Status",
+    "Action",
+  ];
+
+  useEffect(() => {
+    dispatch(rolesAllDocuments({ select: "name" }));
+  }, []);
+
+  useEffect(() => {
+    if (allRoles.length > 0) {
+      setSelectedRole(allRoles[0]._id);
+    }
+  }, [allRoles]);
 
   return (
-    <div className="">
+    <>
+    <Loader loading={loading} />
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Role Exam Requests</h1>
-        <p className="text-gray-600 mt-2">Manage teacher role examination requests</p>
+        <p className="text-gray-600 mt-2">
+          Manage teacher role examination requests
+        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div className="mb-6">
-          <div className="flex flex-wrap gap-4">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                filter === 'all' 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          {/* Filter Tabs */}
+          <div className="flex flex-wrap gap-2 bg-gray-100 p-1 rounded-xl w-fit">
+            {[
+              { label: "All", value: "all" },
+              { label: "Pending", value: "Pending" },
+              { label: "Approved", value: "Approved" },
+              { label: "Rejected", value: "Rejected" },
+            ].map((item) => (
+              <button
+                key={item.value}
+                onClick={() => setFilter(item.value)}
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition ${
+                  filter === item.value
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Role Select */}
+          <div className="w-full md:w-64">
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 capitalize"
             >
-              All Requests
-            </button>
-            <button
-              onClick={() => setFilter('Pending')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                filter === 'Pending' 
-                  ? 'bg-yellow-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Pending
-            </button>
-            <button
-              onClick={() => setFilter('Approved')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                filter === 'Approved' 
-                  ? 'bg-green-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Approved
-            </button>
-            <button
-              onClick={() => setFilter('Rejected')}
-              className={`px-4 py-2 rounded-md font-medium ${
-                filter === 'Rejected' 
-                  ? 'bg-red-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Rejected
-            </button>
+              {allRoles.map((role, index) => (
+                <option key={index} value={role._id}>
+                  {role.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
@@ -243,43 +273,24 @@ const RoleExamRequest = () => {
             totalPages={totalPages}
           />
         </div>
-
-        {filteredRequests.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <div className="text-4xl mb-4">📋</div>
-            <h3 className="text-xl font-semibold text-gray-600 mb-2">No role exam requests found</h3>
-            <p className="text-gray-500">
-              {filter !== 'all' 
-                ? `No ${filter.toLowerCase()} requests available` 
-                : "No role examination requests available."}
-            </p>
-          </div>
-        )}
-
-        {loading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading role requests...</p>
-          </div>
-        )}
       </div>
 
       <AlertModal
         isOpen={showConfirmModal}
         onCancel={() => {
           setShowConfirmModal(false);
-          setActionData({ type: '', id: '', teacherId: '' });
+          setActionData({ type: "", id: "", teacherId: "" });
         }}
         onConfirm={handleConfirmAction}
-        title={`${actionData.type === 'approve' ? 'Approve' : 'Reject'} Request`}
-        description={`Are you sure you want to ${actionData.type === 'approve' ? 'approve' : 'reject'} this role request?`}
+        title={`${actionData.type === "approve" ? "Approve" : "Reject"} Request`}
+        description={`Are you sure you want to ${actionData.type === "approve" ? "approve" : "reject"} this role request?`}
         cancelLabel="Cancel"
-        confirmLabel={`Yes, ${actionData.type === 'approve' ? 'Approve' : 'Reject'}`}
-        confirmClassNameButton={`${actionData.type === 'approve' ? '!bg-green-600 hover:!bg-green-700' : '!bg-red-600 hover:!bg-red-700'}`}
+        confirmLabel={`Yes, ${actionData.type === "approve" ? "Approve" : "Reject"}`}
+        confirmClassNameButton={`${actionData.type === "approve" ? "!bg-green-600 hover:!bg-green-700" : "!bg-red-600 hover:!bg-red-700"}`}
         isVisibleCancelButton={true}
         isVisibleConfirmButton={true}
       />
-    </div>
+    </>
   );
 };
 

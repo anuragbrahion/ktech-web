@@ -757,14 +757,22 @@ const App = () => {
         <Route
           path="/role-exam-request"
           element={
-            <ProtectedRoute>{renderMainLayout(RoleExamRequest)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <RoleExamRequest roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/goal-exam-request"
           element={
-            <ProtectedRoute>{renderMainLayout(GoalExamRequest)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <GoalExamRequest roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 

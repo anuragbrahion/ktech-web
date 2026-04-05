@@ -48,6 +48,8 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/users": "Users Management > Users",
 
       "/leave-request":"All Request > Leave Request",
+      "/role-exam-request":"All Request > Role Exam Request",
+      "/goal-exam-request":"All Request > Goal Exam Request",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
