@@ -148,7 +148,7 @@ const App = () => {
     <MainLayout
       websiteMode={websiteMode}
       onModeToggle={toggleWebsiteMode}
-      onLogout={() => { }}
+      onLogout={() => {}}
       onSidebarToggle={toggleSidebar}
       isSidebarOpen={isSidebarOpen}
     >
@@ -379,9 +379,7 @@ const App = () => {
         <Route
           path="/blogs"
           element={
-            <ProtectedRoute>
-              {renderMainLayout(BlogList)}
-            </ProtectedRoute>
+            <ProtectedRoute>{renderMainLayout(BlogList)}</ProtectedRoute>
           }
         />
 

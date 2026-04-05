@@ -51,6 +51,8 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/role-exam-request":"All Request > Role Exam Request",
       "/goal-exam-request":"All Request > Goal Exam Request",
 
+      "/profile":"Profile",
+
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
       "/languages": "Languages",
