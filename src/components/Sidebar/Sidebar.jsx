@@ -333,6 +333,18 @@ const adminSections = {
         icon: GraduationCap,
         path: "/mark-student-attendance",
       },
+       {
+        id: "studentAttendance",
+        label: "Student Attendance List",
+        icon: Eye,
+        path: "/teacher/student-attendance",
+      },
+      {
+        id: "myAttendance",
+        label: "Teacher Attendance List",
+        icon: CalendarCheck,
+        path: "/teacher/attendance",
+      },
     ],
   },
   certificate: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import ExamModalStudent from '../../components/Atoms/UI/ExamModalStudent';
 import Table from '../../components/Atoms/TableData/TableData';
@@ -6,11 +6,15 @@ import {
   createExaminationStudent,
   examinationsList,
   updateExaminationStudent,
+  examinationsSingleDocument,
+  clearExaminationSingleData,
 } from '../../redux/slices/examination';
 import {
   courseBatchesAllDocuments,
   coursesAllDocuments,
 } from '../../redux/slices/course';
+import LoadingSpinner from '../../components/Loader/Loader';
+import { toast } from 'react-toastify';
 
 const StudentExaminations = () => {
   const dispatch = useDispatch();
@@ -19,10 +23,10 @@ const StudentExaminations = () => {
   const [selectedExam, setSelectedExam] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const itemsPerPage = 10;
 
-  // Redux selectors
   const examinationsData = useSelector(
     (state) => state.examination.examinationsListData
   );
@@ -35,16 +39,19 @@ const StudentExaminations = () => {
     (state) => state.examination.updateExaminationStudentData
   );
 
+  const examinationsSingleDocumentData = useSelector(
+    (state) => state.examination.examinationsSingleDocumentData
+  );
+
   const coursesData = useSelector(
     (state) => state.course.coursesAllDocumentsData?.data?.data?.list
   );
- 
+
   const batchesData = useSelector(
     (state) => state.course.courseBatchesAllDocumentsData?.data?.data?.list
   );
 
-  // Fetch exams
-  const fetchExams = (page = 1) => {
+  const fetchExams = useCallback((page = 1) => {
     dispatch(
       examinationsList({
         page,
@@ -52,16 +59,42 @@ const StudentExaminations = () => {
         query: JSON.stringify({ type: 'Student' }),
       })
     );
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     fetchExams(currentPage);
-    dispatch(coursesAllDocuments({populate: 'courses'}));
+    dispatch(coursesAllDocuments());
     dispatch(courseBatchesAllDocuments());
-  }, [dispatch, currentPage]);
+  }, [dispatch, currentPage, fetchExams]);
+
+  useEffect(() => {
+    if (createExaminationStudentData?.data) {
+      toast.success('Exam created successfully');
+      fetchExams(currentPage);
+      setShowModal(false);
+      setSelectedExam(null);
+    }
+  }, [createExaminationStudentData, fetchExams, currentPage]);
+
+  useEffect(() => {
+    if (updateExaminationStudentData?.data) {
+      toast.success('Exam updated successfully');
+      fetchExams(currentPage);
+      setShowModal(false);
+      setSelectedExam(null);
+    }
+  }, [updateExaminationStudentData, fetchExams, currentPage]);
+
+  useEffect(() => {
+    if (examinationsSingleDocumentData?.data) {
+      setSelectedExam(examinationsSingleDocumentData.data);
+      setLoading(false);
+    }
+  }, [examinationsSingleDocumentData]);
 
   const exams = examinationsData?.data?.data?.list || [];
-  const totalPages = examinationsData?.totalPages || 1;
+  const totalPages = examinationsData?.data?.data?.totalPages || 
+                     Math.ceil((examinationsData?.data?.data?.total || 0) / itemsPerPage) || 1;
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
@@ -75,15 +108,15 @@ const StudentExaminations = () => {
     setShowModal(true);
   };
 
-  const handleEditExam = (exam) => {
-    setSelectedExam(exam);
+  const handleEditExam = async (exam) => {
+    setLoading(true);
     setIsEditing(true);
     setShowModal(true);
+    await dispatch(examinationsSingleDocument(exam._id));
   };
 
   const handleSaveExam = (examData) => {
-    console.log("object111111111",examData)
-    const formattedQuestions = examData.questions.map((q) => ({
+    const formattedQuestions = examData.questions.map((q, idx) => ({
       question: q.text,
       option_1: q.options.A,
       option_2: q.options.B,
@@ -95,27 +128,32 @@ const StudentExaminations = () => {
     const payload = {
       examtitle: examData.examTitle,
       examduration: {
-        hours: parseInt(examData.durationHours),
-        minutes: parseInt(examData.durationMinutes),
+        hours: parseInt(examData.durationHours) || 0,
+        minutes: parseInt(examData.durationMinutes) || 0,
       },
       passingPercentage: parseInt(examData.passingPercentage),
       questions: formattedQuestions,
-      course: examData.course?._id,
-      batch: examData.batch?._id,
+      course: examData.courseId || examData.course?._id,
+      batch: examData.batchId || examData.batch?._id,
       isDraft: false,
       type: 'Student',
     };
 
     if (isEditing && selectedExam) {
-      dispatch(
-        updateExaminationStudent({
-          id: selectedExam._id,
-          ...payload,
-        })
-      );
+      dispatch(updateExaminationStudent({
+        id: selectedExam._id,
+        ...payload,
+      }));
     } else {
       dispatch(createExaminationStudent(payload));
     }
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedExam(null);
+    setIsEditing(false);
+    dispatch(clearExaminationSingleData());
   };
 
   const tableHeaders = [
@@ -124,23 +162,25 @@ const StudentExaminations = () => {
     'Exam Title',
     'Exam Duration',
     'Passing Percentage',
-    'Created At',
     'Actions',
   ];
 
   return (
-    <div>
+    <div className="p-6">
+      <LoadingSpinner loading={loading} />
+
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1 className="text-3xl font-bold text-gray-900">
           Student Examination Lists
         </h1>
+        <p className="text-gray-600 mt-2">Manage student examinations and questions</p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="mb-6 flex justify-end">
           <button
             onClick={handleAddExam}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
           >
             + Add Examination
           </button>
@@ -156,8 +196,7 @@ const StudentExaminations = () => {
             renderRow={(exam, index) => (
               <tr
                 key={exam._id}
-                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
-                  }`}
+                className={`hover:bg-blue-50 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}
               >
                 <td className="py-4 px-4">
                   {exam.batch
@@ -174,18 +213,20 @@ const StudentExaminations = () => {
                   {exam.examduration?.hours || 0} hr :{' '}
                   {exam.examduration?.minutes || 0} min
                 </td>
-                <td className="py-4 px-4 font-bold">
-                  {exam.passingPercentage ?? 0}%
-                </td>
                 <td className="py-4 px-4">
-                  {exam.type || 'N/A'}
+                  <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                    {exam.passingPercentage ?? 0}%
+                  </span>
                 </td>
                 <td className="py-4 px-4">
                   <button
                     onClick={() => handleEditExam(exam)}
-                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded"
+                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-full transition-colors"
+                    title="Edit Exam"
                   >
-                    👁️
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
                   </button>
                 </td>
               </tr>
@@ -199,16 +240,14 @@ const StudentExaminations = () => {
             <h3 className="text-xl font-semibold text-gray-600 mb-2">
               No examinations found
             </h3>
+            <p className="text-gray-500">Click "Add Examination" to create your first exam</p>
           </div>
         )}
       </div>
 
       <ExamModalStudent
         isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setSelectedExam(null);
-        }}
+        onClose={handleCloseModal}
         onSave={handleSaveExam}
         examData={selectedExam}
         isEditing={isEditing}
