@@ -1,37 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import Table from '../../components/Atoms/TableData/TableData';
-import ExamDetailsModalStudent from '../../components/Atoms/UI/ExamDetailsModalStudent';
-import { useDispatch, useSelector } from 'react-redux';
-import { examinationsResultList, examinationsResultView } from '../../redux/slices/examination';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
+import Table from "../../components/Atoms/TableData/TableData";
+import ExamDetailsModalStudent from "../../components/Atoms/UI/ExamDetailsModalStudent";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  examinationsResultList,
+  examinationsResultView,
+} from "../../redux/slices/examination";
 
 const AllPastExaminationsList = () => {
   const dispatch = useDispatch();
 
   const resData = useSelector(
-    (state) => state?.examination?.examinationsResultListData
+    (state) => state?.examination?.examinationsResultListData,
   );
 
   const viewData = useSelector(
-    (state) => state?.examination?.examinationsResultViewData
+    (state) => state?.examination?.examinationsResultViewData,
   );
 
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    result: 'all',
-    type: 'all',
+    result: "all",
+    type: "all",
   });
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const getData = (page = 1) => {
-    dispatch(examinationsResultList({ page, size: itemsPerPage }));
+  const getData = (page = 1, filters) => {
+    const query = {};
+
+    if (filters.type && filters.type !== "all") {
+      query.type = filters.type;
+    }
+
+    if (filters.result && filters.result !== "all") {
+      query.result = filters.result;
+    }
+    dispatch(
+      examinationsResultList({
+        page,
+        size: itemsPerPage,
+        query: JSON.stringify(query),
+      }),
+    );
   };
 
   useEffect(() => {
-    getData(currentPage);
-  }, [currentPage]);
+    getData(currentPage, filters);
+  }, [currentPage, filters]);
 
   const handleViewDetails = (exam) => {
     dispatch(examinationsResultView({ _id: exam._id })).then(() => {
@@ -49,26 +68,22 @@ const AllPastExaminationsList = () => {
   };
 
   const tableHeaders = [
-    'Start Name',
-    'Start e-mail',
-    'Type',
-    'Exam Title',
-    'Marks',
-    'Result',
-    'Details of Order',
+    "Start Name",
+    "Start e-mail",
+    "Type",
+    "Exam Title",
+    "Marks",
+    "Result",
+    "Details of Order",
   ];
 
   const getScoreColor = (marks, totalMarks, passingPercentage) => {
     const percentage = (marks / totalMarks) * 100;
-    return percentage >= passingPercentage
-      ? 'text-green-600'
-      : 'text-red-600';
+    return percentage >= passingPercentage ? "text-green-600" : "text-red-600";
   };
 
   const getResultColor = (result) => {
-    return result === 'PASS'
-      ? 'text-green-600'
-      : 'text-red-600';
+    return result === "PASS" ? "text-green-600" : "text-red-600";
   };
 
   return (
@@ -85,9 +100,7 @@ const AllPastExaminationsList = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <select
             value={filters.result}
-            onChange={(e) =>
-              setFilters({ ...filters, result: e.target.value })
-            }
+            onChange={(e) => setFilters({ ...filters, result: e.target.value })}
             className="px-4 py-2 border rounded-md"
           >
             <option value="all">All Results</option>
@@ -97,24 +110,22 @@ const AllPastExaminationsList = () => {
 
           <select
             value={filters.type}
-            onChange={(e) =>
-              setFilters({ ...filters, type: e.target.value })
-            }
+            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
             className="px-4 py-2 border rounded-md"
           >
             <option value="all">All Types</option>
             <option value="Role">Role</option>
-            <option value="Theory">Theory</option>
-            <option value="Practical">Practical</option>
+            <option value="Goal">Goal</option>
+            <option value="Student">Student</option>
           </select>
 
-          <input
+          {/* <input
             type="text"
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="px-4 py-2 border rounded-md"
-          />
+          /> */}
         </div>
 
         {/* Table */}
@@ -124,7 +135,7 @@ const AllPastExaminationsList = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           handlePageChange={handlePageChange}
-          renderRow={(exam, index) => (
+          renderRow={(exam) => (
             <tr key={exam.id}>
               <td className="py-4 px-4">{exam?.userId?.name}</td>
               <td className="py-4 px-4">{exam?.userId?.email}</td>
@@ -135,18 +146,14 @@ const AllPastExaminationsList = () => {
                   className={`font-bold ${getScoreColor(
                     exam.marks,
                     exam.totalMarks,
-                    exam.passingPercentage
+                    exam.passingPercentage,
                   )}`}
                 >
                   {exam.marks}/{exam.totalMarks}
                 </span>
               </td>
               <td className="py-4 px-4">
-                <span
-                  className={`font-bold ${getResultColor(
-                    exam.result
-                  )}`}
-                >
+                <span className={`font-bold ${getResultColor(exam.result)}`}>
                   {exam.result}
                 </span>
               </td>

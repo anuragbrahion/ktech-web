@@ -30,8 +30,8 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/role": "Employee Management > Role",
       "/rules-and-regulations": "Employee Management > Rules & Regulations",
       "/teacher-directory": "Employee Management > Teacher Directory",
-      "/assign-task":"Employee Management > Assign Task",
-      "/all-assign-task":"Employee Management > All Assigned Task",
+      "/assign-task": "Employee Management > Assign Task",
+      "/all-assign-task": "Employee Management > All Assigned Task",
 
       "/referral-amount": "Branch Management > Referral Amount",
       "/inquiry-status": "Branch Management > Inquiry Status",
@@ -50,13 +50,15 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
 
       "/users": "Users Management > Users",
 
-      "/leave-request":"All Request > Leave Request",
-      "/role-exam-request":"All Request > Role Exam Request",
-      "/goal-exam-request":"All Request > Goal Exam Request",
+      "/leave-request": "All Request > Leave Request",
+      "/role-exam-request": "All Request > Role Exam Request",
+      "/goal-exam-request": "All Request > Goal Exam Request",
 
       "/mark-teacher-attendance": "Mark Attendance > Mark Teacher Attendance",
       "/teacher/attendance": "Teacher Attendance Report",
       "/mark-student-attendance": "Mark Attendance > Mark Student Attendance",
+
+      "/all-past-exams": "Examinations > All Past Examinations List",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",
