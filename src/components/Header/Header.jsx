@@ -59,6 +59,10 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/mark-student-attendance": "Mark Attendance > Mark Student Attendance",
 
       "/all-past-exams": "Examinations > All Past Examinations List",
+      "/hall-tickets": "Examinations > Hall Tickets",
+      "/role-exams": "Examinations > Role Examinations",
+      "/student-exams": "Examinations > Student Examinations",
+      "/goal-exams": "Examinations > Goal Examinations",
 
       "/exam-grade-system": "Exam Grade System",
       "/subjects": "Subjects",

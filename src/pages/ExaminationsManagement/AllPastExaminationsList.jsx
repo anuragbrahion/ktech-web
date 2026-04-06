@@ -69,17 +69,16 @@ const AllPastExaminationsList = () => {
 
   const tableHeaders = [
     "Start Name",
-    "Start e-mail",
+    "Email",
     "Type",
     "Exam Title",
     "Marks",
     "Result",
-    "Details of Order",
+    "Action",
   ];
 
-  const getScoreColor = (marks, totalMarks, passingPercentage) => {
-    const percentage = (marks / totalMarks) * 100;
-    return percentage >= passingPercentage ? "text-green-600" : "text-red-600";
+  const getScoreColor = (marks, passingPercentage) => {
+    return marks >= passingPercentage ? "text-green-600" : "text-red-600";
   };
 
   const getResultColor = (result) => {
@@ -145,11 +144,10 @@ const AllPastExaminationsList = () => {
                 <span
                   className={`font-bold ${getScoreColor(
                     exam.marks,
-                    exam.totalMarks,
-                    exam.passingPercentage,
+                    exam?.examination?.passingPercentage,
                   )}`}
                 >
-                  {exam.marks}/{exam.totalMarks}
+                  {exam.marks}
                 </span>
               </td>
               <td className="py-4 px-4">

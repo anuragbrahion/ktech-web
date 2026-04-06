@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Table from "../../components/Atoms/TableData/TableData";
@@ -14,12 +15,12 @@ const Modal = ({
   onClose,
   title,
   children,
-  size = "lg", 
+  size = "lg",
   showCloseButton = true,
   closeOnOutsideClick = true,
   footer = null,
 }) => {
-   useEffect(() => {
+  useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen) {
         onClose();
@@ -28,7 +29,7 @@ const Modal = ({
 
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
-       document.body.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
@@ -37,7 +38,7 @@ const Modal = ({
     };
   }, [isOpen, onClose]);
 
-   const handleOutsideClick = (e) => {
+  const handleOutsideClick = (e) => {
     if (closeOnOutsideClick && e.target === e.currentTarget) {
       onClose();
     }
@@ -45,7 +46,7 @@ const Modal = ({
 
   if (!isOpen) return null;
 
-   const sizeClasses = {
+  const sizeClasses = {
     sm: "max-w-md",
     md: "max-w-lg",
     lg: "max-w-2xl",
@@ -63,7 +64,7 @@ const Modal = ({
         className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} transform transition-all`}
         style={{ animation: "slideIn 0.3s ease-out" }}
       >
-         <div className="flex items-center justify-between px-6 py-4 border-b">
+        <div className="flex items-center justify-between px-6 py-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
           {showCloseButton && (
             <button
@@ -86,18 +87,18 @@ const Modal = ({
           )}
         </div>
 
-         <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           {children}
         </div>
 
-         {footer && (
+        {footer && (
           <div className="px-6 py-4 border-t bg-gray-50 rounded-b-lg">
             {footer}
           </div>
         )}
       </div>
 
-       <style jsx>{`
+      <style jsx>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -130,7 +131,7 @@ export const ConfirmModal = ({
   message = "Are you sure you want to proceed?",
   confirmText = "Confirm",
   cancelText = "Cancel",
-  type = "info",  
+  type = "info",
 }) => {
   const getTypeStyles = () => {
     switch (type) {
@@ -330,7 +331,7 @@ export const DrawerModal = ({
   title,
   children,
   size = "md",
-  position = "right",  
+  position = "right",
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -371,7 +372,7 @@ export const DrawerModal = ({
         }}
       >
         <div className="flex flex-col h-full">
-           <div className="flex items-center justify-between px-6 py-4 border-b">
+          <div className="flex items-center justify-between px-6 py-4 border-b">
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
@@ -393,7 +394,7 @@ export const DrawerModal = ({
             </button>
           </div>
 
-           <div className="flex-1 px-6 py-4 overflow-y-auto">{children}</div>
+          <div className="flex-1 px-6 py-4 overflow-y-auto">{children}</div>
         </div>
       </div>
 
@@ -433,7 +434,7 @@ export const DrawerModal = ({
   );
 };
 
-const HallTickets = () => {
+const HallTickets = ({ adminId }) => {
   const dispatch = useDispatch();
 
   const hallTicketData = useSelector(
@@ -442,7 +443,7 @@ const HallTickets = () => {
   const examListData = useSelector(
     (state) => state?.examination?.getALlExamListData.data?.data?.list,
   );
-  console.log(examListData)
+  console.log(examListData);
 
   const studentListData = useSelector(
     (state) => state?.course?.getAllStudFeeNameData,
@@ -460,17 +461,23 @@ const HallTickets = () => {
   const [filteredAdmissions, setFilteredAdmissions] = useState([]);
 
   const getData = (page = 1) => {
-    dispatch(getHallTicketList({ page, size: itemsPerPage }));
+    dispatch(
+      getHallTicketList({
+        page,
+        size: itemsPerPage,
+        query: JSON.stringify({ adminId }),
+      }),
+    );
   };
 
   useEffect(() => {
     getData(currentPage);
     dispatch(
       getALlExamList({
-        query: JSON.stringify({ type: "Student" }),
-      })
-    )
-    dispatch(getAllStudFeeName());
+        query: JSON.stringify({ type: "Student", adminId: adminId }),
+      }),
+    );
+    dispatch(getAllStudFeeName({ query: JSON.stringify({ adminId }) }));
   }, [currentPage, dispatch]);
 
   useEffect(() => {
@@ -478,53 +485,55 @@ const HallTickets = () => {
       dispatch(
         getAllAdmissionList({
           query: JSON.stringify({ user: formData.user_id }),
-        })
+        }),
       ).then((res) => {
         setFilteredAdmissions(res?.payload?.data?.list || []);
       });
     }
   }, [formData.user_id, dispatch]);
 
-const handleAddTicket = () => { 
+  const handleAddTicket = () => {
     if (!formData.user_id) {
-    alert("Please select a user");
-    return;
-  }
-  
-  if (!formData.admission_id) {
-    alert("Please select an admission");
-    return;
-  }
-  
-  if (!formData.examination_id) {
-    alert("Please select an examination");
-    return;
-  }
-  
-   const payload = {
-    user_id: formData.user_id,
-    examination_id: formData.examination_id,
-    admission_id: formData.admission_id
-  };
-  
-  console.log("Dispatching payload:", payload);
-  
-  dispatch(addHallTicketList(payload)).then((result) => {
-    console.log("Dispatch result:", result);
-    if (result.payload) {
-      setShowAddModal(false);
-      setFormData({
-        user_id: "",
-        examination_id: "",
-        admission_id: "",
-      });
-      getData(currentPage);
+      alert("Please select a user");
+      return;
     }
-  }).catch((error) => {
-    console.error("Error adding hall ticket:", error);
-    alert("Failed to add hall ticket. Please try again.");
-  });
-};
+
+    if (!formData.admission_id) {
+      alert("Please select an admission");
+      return;
+    }
+
+    if (!formData.examination_id) {
+      alert("Please select an examination");
+      return;
+    }
+
+    const payload = {
+      user_id: formData.user_id,
+      examination_id: formData.examination_id,
+      admission_id: formData.admission_id,
+    };
+
+    console.log("Dispatching payload:", payload);
+
+    dispatch(addHallTicketList(payload))
+      .then((result) => {
+        console.log("Dispatch result:", result);
+        if (result.payload) {
+          setShowAddModal(false);
+          setFormData({
+            user_id: "",
+            examination_id: "",
+            admission_id: "",
+          });
+          getData(currentPage);
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding hall ticket:", error);
+        alert("Failed to add hall ticket. Please try again.");
+      });
+  };
 
   const handleGeneratePDF = (ticket) => {
     console.log("Generate PDF for:", ticket);
@@ -565,7 +574,6 @@ const handleAddTicket = () => {
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-
         <Table
           headers={tableHeaders}
           data={hallTickets}
@@ -600,115 +608,118 @@ const handleAddTicket = () => {
         />
       </div>
 
-    <Modal
-  isOpen={showAddModal}
-  onClose={() => {
-    setShowAddModal(false);
-    setFormData({
-      user_id: "",
-      examination_id: "",
-      admission_id: "",
-    });
-  }}
-  title="Add Hall Ticket"
->
-  <form onSubmit={(e) => {
-    e.preventDefault();
-    handleAddTicket();
-  }}>
-    <div className="space-y-4 p-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          User <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={formData.user_id}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              user_id: e.target.value,
-              admission_id: "",  
-            })
-          }
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-          required
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          setFormData({
+            user_id: "",
+            examination_id: "",
+            admission_id: "",
+          });
+        }}
+        title="Add Hall Ticket"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAddTicket();
+          }}
         >
-          <option value="">Select...</option>
-          {students.map((student) => (
-            <option key={student._id} value={student._id}>
-              {student.name || student.user?.name || "Unknown"}
-            </option>
-          ))}
-        </select>
-      </div>
+          <div className="space-y-4 p-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                User <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.user_id}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    user_id: e.target.value,
+                    admission_id: "",
+                  })
+                }
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                required
+              >
+                <option value="">Select...</option>
+                {students.map((student) => (
+                  <option key={student._id} value={student._id}>
+                    {student.name || student.user?.name || "Unknown"}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Admission <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={formData.admission_id}
-          onChange={(e) =>
-            setFormData({ ...formData, admission_id: e.target.value })
-          }
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-          disabled={!formData.user_id || filteredAdmissions.length === 0}
-          required
-        >
-          <option value="">Select...</option>
-          {filteredAdmissions.map((admission) => (
-            <option key={admission._id} value={admission._id}>
-              {admission.name || "N/A"} ({admission?.course?.courseName})
-            </option>
-          ))}
-        </select>
-        {!formData.user_id && (
-          <p className="text-sm text-gray-500 mt-1">
-            Please select a user first
-          </p>
-        )}
-        {formData.user_id && filteredAdmissions.length === 0 && (
-          <p className="text-sm text-yellow-600 mt-1">
-            No admissions found for this user
-          </p>
-        )}
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Examination <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={formData.examination_id}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              examination_id: e.target.value,
-             })
-          }
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-          required
-        >
-          <option value="">Select...</option>
-          {Array.isArray(examListData) && examListData.map((exam) => (
-            <option key={exam._id} value={exam._id}>
-              {exam.examtitle || "Unknown"}
-            </option>
-          ))}
-        </select>
-      </div>
-      
-      <div className="flex justify-end pt-4">
-        <button
-          type="submit"
-          className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
-        >
-          Submit
-        </button>
-      </div>
-    </div>
-  </form>
-</Modal>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Admission <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.admission_id}
+                onChange={(e) =>
+                  setFormData({ ...formData, admission_id: e.target.value })
+                }
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                disabled={!formData.user_id || filteredAdmissions.length === 0}
+                required
+              >
+                <option value="">Select...</option>
+                {filteredAdmissions.map((admission) => (
+                  <option key={admission._id} value={admission._id}>
+                    {admission.name || "N/A"} ({admission?.course?.courseName})
+                  </option>
+                ))}
+              </select>
+              {!formData.user_id && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Please select a user first
+                </p>
+              )}
+              {formData.user_id && filteredAdmissions.length === 0 && (
+                <p className="text-sm text-yellow-600 mt-1">
+                  No admissions found for this user
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Examination <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.examination_id}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    examination_id: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+                required
+              >
+                <option value="">Select...</option>
+                {Array.isArray(examListData) &&
+                  examListData.map((exam) => (
+                    <option key={exam._id} value={exam._id}>
+                      {exam.examtitle || "Unknown"}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 transition-colors"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

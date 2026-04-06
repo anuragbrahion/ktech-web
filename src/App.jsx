@@ -942,7 +942,11 @@ const App = () => {
         <Route
           path="/hall-tickets"
           element={
-            <ProtectedRoute>{renderMainLayout(HallTickets)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <HallTickets roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
