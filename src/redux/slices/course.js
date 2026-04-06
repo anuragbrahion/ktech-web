@@ -179,8 +179,8 @@ export const getAllStudFeeName = createApiThunkPrivate(
   "GET",
 );
 
-export const getAllStuCouseName = createApiThunkPrivate(
-  "getAllStuCouseName",
+export const getAllStuCourseName = createApiThunkPrivate(
+  "getAllStuCourseName",
   "/students/course-installments",
   "GET",
 );
@@ -326,7 +326,7 @@ export const courseSlice = createSlice({
     );
 
     createExtraReducersForThunk(builder, getAllStudFeeName, "getAllStudFeeNameData");
-    createExtraReducersForThunk(builder, getAllStuCouseName, "getAllStuCouseNameData");
+    createExtraReducersForThunk(builder, getAllStuCourseName, "getAllStuCouseNameData");
 
         // Student Admissions
     createExtraReducersForThunk(

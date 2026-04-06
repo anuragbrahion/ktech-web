@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import Table from '../../components/Atoms/TableData/TableData';
-import StudentAdmissionModal from '../../components/Atoms/UI/StudentAdmissionModal';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-  studentAdmissionsList, 
-  createNewAdmission, 
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from "react";
+import Table from "../../components/Atoms/TableData/TableData";
+import StudentAdmissionModal from "../../components/Atoms/UI/StudentAdmissionModal";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  studentAdmissionsList,
+  createNewAdmission,
   updateAdmission,
-  studentAdmissionsView, 
+  studentAdmissionsView,
   coursesAllDocuments,
   courseBatchesAllDocuments,
-  coursePlansAllDocuments
-} from '../../redux/slices/course';
-import { teachersAllDocuments } from '../../redux/slices/employee';
+  coursePlansAllDocuments,
+} from "../../redux/slices/course";
+import { teachersAllDocuments } from "../../redux/slices/employee";
 
-const Admission = () => {
+const Admission = ({ adminId }) => {
   const dispatch = useDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -22,17 +23,29 @@ const Admission = () => {
   const itemsPerPage = 10;
 
   const admissionList = useSelector(
-    (state) => state?.course?.studentAdmissionsListData?.data?.data
+    (state) => state?.course?.studentAdmissionsListData?.data?.data,
   );
 
-  const createData = useSelector((state) => state?.course?.createNewAdmissionData?.data?.data?.list);
-  const updateData = useSelector((state) => state?.course?.updateAdmissionData?.data?.data?.list);
-  const viewData = useSelector((state) => state?.course?.studentAdmissionsViewData?.data?.data?.list);
-  const coursesData = useSelector((state) => state?.course?.coursesAllDocumentsData?.data?.data?.list);
-  const batchesData = useSelector((state) => state?.batch?.courseBatchesAllDocumentsData?.data?.data?.list);
-  const plansData = useSelector((state) => state?.plan?.coursePlansAllDocumentsData?.data?.data?.list);
-  const teachersData = useSelector((state) => state?.employee?.teachersAllDocumentsData?.data?.data?.list);
-   useEffect(() => {
+  const createData = useSelector(
+    (state) => state?.course?.createNewAdmissionData?.data?.data?.list,
+  );
+  const updateData = useSelector(
+    (state) => state?.course?.updateAdmissionData?.data?.data?.list,
+  );
+  // const viewData = useSelector((state) => state?.course?.studentAdmissionsViewData?.data?.data?.list);
+  const coursesData = useSelector(
+    (state) => state?.course?.coursesAllDocumentsData?.data?.data?.list,
+  );
+  const batchesData = useSelector(
+    (state) => state?.batch?.courseBatchesAllDocumentsData?.data?.data?.list,
+  );
+  const plansData = useSelector(
+    (state) => state?.plan?.coursePlansAllDocumentsData?.data?.data?.list,
+  );
+  const teachersData = useSelector(
+    (state) => state?.employee?.teachersAllDocumentsData?.data?.data?.list,
+  );
+  useEffect(() => {
     fetchData();
     loadMasterData();
   }, [currentPage]);
@@ -47,14 +60,20 @@ const Admission = () => {
   }, [createData, updateData]);
 
   const fetchData = () => {
-    dispatch(studentAdmissionsList({ page: currentPage, size: itemsPerPage }));
+    dispatch(
+      studentAdmissionsList({
+        page: currentPage,
+        size: itemsPerPage,
+        query: JSON.stringify({ adminId }),
+      }),
+    );
   };
 
   const loadMasterData = () => {
     dispatch(coursesAllDocuments());
-    dispatch(courseBatchesAllDocuments());
-    dispatch(coursePlansAllDocuments());
-    dispatch(teachersAllDocuments());
+    dispatch(courseBatchesAllDocuments({ query: JSON.stringify({ adminId }) }));
+    dispatch(coursePlansAllDocuments({ query: JSON.stringify({ adminId }) }));
+    dispatch(teachersAllDocuments({ query: JSON.stringify({ adminId }) }));
   };
 
   const handleAddStudent = () => {
@@ -73,28 +92,28 @@ const Admission = () => {
   const handleViewStudent = async (student) => {
     const result = await dispatch(studentAdmissionsView({ _id: student._id }));
     setEditingStudent(result?.payload?.data || student);
-    setViewMode('view');
+    setViewMode("view");
     setIsModalOpen(true);
   };
 
   const handleShowAdmissionForm = async (student) => {
     const result = await dispatch(studentAdmissionsView({ _id: student._id }));
     setEditingStudent(result?.payload?.data || student);
-    setViewMode('admissionForm');
+    setViewMode("admissionForm");
     setIsModalOpen(true);
   };
 
   const handleShowFees = async (student) => {
     const result = await dispatch(studentAdmissionsView({ _id: student._id }));
     setEditingStudent(result?.payload?.data || student);
-    setViewMode('fees');
+    setViewMode("fees");
     setIsModalOpen(true);
   };
 
   const handleShowCertificate = async (student) => {
     const result = await dispatch(studentAdmissionsView({ _id: student._id }));
     setEditingStudent(result?.payload?.data || student);
-    setViewMode('certificate');
+    setViewMode("certificate");
     setIsModalOpen(true);
   };
 
@@ -126,7 +145,8 @@ const Admission = () => {
       motherPhoneNo: parseInt(studentData.mothersMobileNo) || 0,
       dateOfBirth: studentData.dob,
       gender: studentData.gender,
-      discountRate: studentData.discountRate === "Percent" ? "Percent" : "Fixed",
+      discountRate:
+        studentData.discountRate === "Percent" ? "Percent" : "Fixed",
       discountAmount: parseInt(studentData.discountAmount) || 0,
       remarks: studentData.remarks,
       examType: "Online",
@@ -134,19 +154,22 @@ const Admission = () => {
       admissionDate: studentData.admissionDate,
       incentive: parseInt(studentData.incentive) || 0,
       teacherid: studentData.staffName,
-      installments: studentData.installments?.map(inst => ({
-        name: inst.name || `Installment ${inst.id}`,
-        amount: parseInt(inst.amount) || 0,
-        date: inst.date,
-        paymentStatus: inst.paymentStatus || "Pending",
-        receiptNumber: inst.receiptNumber || null,
-        paymentmode: inst.mode || null,
-        transctionId: inst.transactionId || null
-      })) || []
+      installments:
+        studentData.installments?.map((inst) => ({
+          name: inst.name || `Installment ${inst.id}`,
+          amount: parseInt(inst.amount) || 0,
+          date: inst.date,
+          paymentStatus: inst.paymentStatus || "Pending",
+          receiptNumber: inst.receiptNumber || null,
+          paymentmode: inst.mode || null,
+          transctionId: inst.transactionId || null,
+        })) || [],
     };
 
     if (editingStudent) {
-      await dispatch(updateAdmission({ id: editingStudent._id, data: payload }));
+      await dispatch(
+        updateAdmission({ id: editingStudent._id, data: payload }),
+      );
     } else {
       await dispatch(createNewAdmission(payload));
     }
@@ -157,24 +180,24 @@ const Admission = () => {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB');
+    return date.toLocaleDateString("en-GB");
   };
 
   const tableHeaders = [
-    'Student Name',
-    'Referral Code',
-    'Type',
-    'Roll No.',
-    'Course',
-    'Admission Date',
-    'Created At',
-    'Actions'
+    "Student Name",
+    "Referral Code",
+    "Type",
+    "Roll No.",
+    "Course",
+    "Admission Date",
+    "Created At",
+    "Actions",
   ];
 
   const printAdmissionForm = (student) => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <html>
         <head>
@@ -234,7 +257,7 @@ const Admission = () => {
   };
 
   const printCertificate = (student) => {
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(`
       <html>
         <head>
@@ -284,13 +307,14 @@ const Admission = () => {
   const totalPages = admissionList?.page || 1;
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Student Admission List</h1>
-        <p className="text-black mt-2">Manage student admissions and enrollment</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <>
+      <div className="mb-8 flex justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Student Admission List</h1>
+          <p className="text-black mt-2">
+            Manage student admissions and enrollment
+          </p>
+        </div>
         <div className="flex justify-end items-center mb-6">
           <button
             onClick={handleAddStudent}
@@ -299,7 +323,9 @@ const Admission = () => {
             <span>+</span> Add Student Admission
           </button>
         </div>
+      </div>
 
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
         <Table
           headers={tableHeaders}
           data={admissionList?.list || []}
@@ -308,24 +334,68 @@ const Admission = () => {
           handlePageChange={handlePageChange}
           renderRow={(student) => (
             <tr key={student._id} className="hover:bg-sky-50">
-              <td className="py-4 px-4 text-black capitalize">{student.name || "-"}</td>
-              <td className="py-4 px-4 text-black font-mono text-sm uppercase">{student.referralCode || "-"}</td>
+              <td className="py-4 px-4 text-black capitalize">
+                {student.name || "-"}
+              </td>
+              <td className="py-4 px-4 text-black font-mono text-sm uppercase">
+                {student?.user?.referralCode || "-"}
+              </td>
               <td className="py-4 px-4">
-                <span className={`text-sm font-medium ${student.type === "New-Admission" ? "text-green-700" : "text-blue-700"}`}>
+                <span
+                  className={`text-sm font-medium ${student.type === "New-Admission" ? "text-green-700" : "text-blue-700"}`}
+                >
                   {student.type || "-"}
                 </span>
               </td>
               <td className="py-4 px-4 text-black">{student.rollNo || "-"}</td>
-              <td className="py-4 px-4 text-black">{student.course?.courseName || student.course || "-"}</td>
-              <td className="py-4 px-4 text-black">{student.admissionDate ? formatDate(student.admissionDate) : "-"}</td>
-              <td className="py-4 px-4 text-black">{student.createdAt ? formatDate(student.createdAt) : "-"}</td>
+              <td className="py-4 px-4 text-black">
+                {student.course?.courseName || student.course || "-"}
+              </td>
+              <td className="py-4 px-4 text-black">
+                {student.admissionDate
+                  ? formatDate(student.admissionDate)
+                  : "-"}
+              </td>
+              <td className="py-4 px-4 text-black">
+                {student.createdAt ? formatDate(student.createdAt) : "-"}
+              </td>
               <td className="py-4 px-4">
                 <div className="flex space-x-3">
-                  <button onClick={() => handleViewStudent(student)} className="text-sky-500 hover:text-sky-700 p-1 hover:bg-sky-50 rounded" title="View Details">👁️</button>
-                  <button onClick={() => handleEditStudent(student)} className="text-yellow-500 hover:text-yellow-700 p-1 hover:bg-yellow-50 rounded" title="Edit">✏️</button>
-                  <button onClick={() => handleShowAdmissionForm(student)} className="text-purple-500 hover:text-purple-700 p-1 hover:bg-purple-50 rounded" title="Admission Form">📄</button>
-                  <button onClick={() => handleShowFees(student)} className="text-green-500 hover:text-green-700 p-1 hover:bg-green-50 rounded" title="Admission Fees">💰</button>
-                  <button onClick={() => handleShowCertificate(student)} className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded" title="Certificate">🏆</button>
+                  <button
+                    onClick={() => handleViewStudent(student)}
+                    className="text-sky-500 hover:text-sky-700 p-1 hover:bg-sky-50 rounded"
+                    title="View Details"
+                  >
+                    👁️
+                  </button>
+                  <button
+                    onClick={() => handleEditStudent(student)}
+                    className="text-yellow-500 hover:text-yellow-700 p-1 hover:bg-yellow-50 rounded"
+                    title="Edit"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => handleShowAdmissionForm(student)}
+                    className="text-purple-500 hover:text-purple-700 p-1 hover:bg-purple-50 rounded"
+                    title="Admission Form"
+                  >
+                    📄
+                  </button>
+                  <button
+                    onClick={() => handleShowFees(student)}
+                    className="text-green-500 hover:text-green-700 p-1 hover:bg-green-50 rounded"
+                    title="Admission Fees"
+                  >
+                    💰
+                  </button>
+                  <button
+                    onClick={() => handleShowCertificate(student)}
+                    className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded"
+                    title="Certificate"
+                  >
+                    🏆
+                  </button>
                 </div>
               </td>
             </tr>
@@ -351,7 +421,7 @@ const Admission = () => {
         teachersData={teachersData?.data || []}
         loading={createData?.loading || updateData?.loading}
       />
-    </div>
+    </>
   );
 };
 

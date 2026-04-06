@@ -721,14 +721,22 @@ const App = () => {
         <Route
           path="/admission"
           element={
-            <ProtectedRoute>{renderMainLayout(Admission)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <Admission roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
         <Route
           path="/re-admission"
           element={
-            <ProtectedRoute>{renderMainLayout(ReAdmission)}</ProtectedRoute>
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <ReAdmission roleData={roleData} adminId={role.id} />
+              ))}
+            </ProtectedRoute>
           }
         />
 
@@ -747,7 +755,9 @@ const App = () => {
           path="/student-fee-summary"
           element={
             <ProtectedRoute>
-              {renderMainLayout(StudentFeeSummary)}
+              {renderMainLayout(() => (
+                <StudentFeeSummary roleData={roleData} adminId={role.id} />
+              ))}
             </ProtectedRoute>
           }
         />

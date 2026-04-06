@@ -1,51 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { courseBatchesAllDocuments, coursePlansAllDocuments, getAllStudFeeName, reAdmission } from '../../redux/slices/course';
- import { coursesAllDocuments } from '../../redux/slices/course';
- import { teachersAllDocuments } from '../../redux/slices/employee';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  courseBatchesAllDocuments,
+  coursePlansAllDocuments,
+  getAllStudFeeName,
+  reAdmission,
+} from "../../redux/slices/course";
+import { coursesAllDocuments } from "../../redux/slices/course";
+import { teachersAllDocuments } from "../../redux/slices/employee";
 
-const ReAdmission = () => {
+const ReAdmission = ({ adminId }) => {
   const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    userId: '',
-    batch: '',
-    course: '',
-    plan: '',
-    discountRate: 'Percent',
+    userId: "",
+    batch: "",
+    course: "",
+    plan: "",
+    discountRate: "Percent",
     discountAmount: 0,
-    remarks: '',
-    examType: 'Online',
-    admissionDate: '',
+    remarks: "",
+    examType: "Online",
+    admissionDate: "",
     incentive: 0,
-    teacherid: '',
+    teacherid: "",
     installments: [
       {
-        name: 'First Installment',
-        amount: '',
-        date: '',
-        paymentStatus: 'Pending',
+        name: "First Installment",
+        amount: "",
+        date: "",
+        paymentStatus: "Pending",
         receiptNumber: null,
         paymentmode: null,
-        transctionId: null
-      }
-    ]
+        transctionId: null,
+      },
+    ],
   });
 
   const [calculationFields, setCalculationFields] = useState({
-    courseFees: '',
-    feesReceived: '',
-    totalFees: '',
-    balance: ''
+    courseFees: "",
+    feesReceived: "",
+    totalFees: "",
+    balance: "",
   });
 
-  const studentsData = useSelector((state) => state?.course?.getAllStudFeeNameData?.data?.data?.list || []);
-  const coursesData = useSelector((state) => state?.course?.coursesAllDocumentsData?.data?.data?.list || []);
-  const batchesData = useSelector((state) => state?.course?.courseBatchesAllDocumentsData?.data?.data?.list || []);
-  const plansData = useSelector((state) => state?.course?.coursePlansAllDocumentsData?.data?.data?.list || []);
-  const teachersData = useSelector((state) => state?.employee?.teachersAllDocumentsData?.data?.data?.list || []);
-  const reAdmissionData = useSelector((state) => state?.course?.reAdmissionData);
+  const studentsData = useSelector(
+    (state) => state?.course?.getAllStudFeeNameData?.data?.data?.list || [],
+  );
+  const coursesData = useSelector(
+    (state) => state?.course?.coursesAllDocumentsData?.data?.data?.list || [],
+  );
+  const batchesData = useSelector(
+    (state) =>
+      state?.course?.courseBatchesAllDocumentsData?.data?.data?.list || [],
+  );
+  const plansData = useSelector(
+    (state) =>
+      state?.course?.coursePlansAllDocumentsData?.data?.data?.list || [],
+  );
+  const teachersData = useSelector(
+    (state) =>
+      state?.employee?.teachersAllDocumentsData?.data?.data?.list || [],
+  );
+  const reAdmissionData = useSelector(
+    (state) => state?.course?.reAdmissionData,
+  );
 
-console.log("studentsData",batchesData)
+  console.log("studentsData", batchesData);
 
   useEffect(() => {
     loadMasterData();
@@ -53,80 +74,88 @@ console.log("studentsData",batchesData)
 
   useEffect(() => {
     if (reAdmissionData?.success) {
-      alert('Re-Admission submitted successfully!');
+      alert("Re-Admission submitted successfully!");
       resetForm();
     }
   }, [reAdmissionData]);
 
   const loadMasterData = () => {
-    dispatch(getAllStudFeeName());
+    dispatch(getAllStudFeeName({ query: JSON.stringify({ adminId }) }));
     dispatch(coursesAllDocuments());
-    dispatch(courseBatchesAllDocuments());
-    dispatch(coursePlansAllDocuments());
-    dispatch(teachersAllDocuments());
+    dispatch(courseBatchesAllDocuments({ query: JSON.stringify({ adminId }) }));
+    dispatch(coursePlansAllDocuments({ query: JSON.stringify({ adminId }) }));
+    dispatch(teachersAllDocuments({ query: JSON.stringify({ adminId }) }));
   };
 
   const resetForm = () => {
     setFormData({
-      userId: '',
-      batch: '',
-      course: '',
-      plan: '',
-      discountRate: 'Percent',
+      userId: "",
+      batch: "",
+      course: "",
+      plan: "",
+      discountRate: "Percent",
       discountAmount: 0,
-      remarks: '',
-      examType: 'Online',
-      admissionDate: '',
+      remarks: "",
+      examType: "Online",
+      admissionDate: "",
       incentive: 0,
-      teacherid: '',
+      teacherid: "",
       installments: [
         {
-          name: 'First Installment',
-          amount: '',
-          date: '',
-          paymentStatus: 'Pending',
+          name: "First Installment",
+          amount: "",
+          date: "",
+          paymentStatus: "Pending",
           receiptNumber: null,
           paymentmode: null,
-          transctionId: null
-        }
-      ]
+          transctionId: null,
+        },
+      ],
     });
     setCalculationFields({
-      courseFees: '',
-      feesReceived: '',
-      totalFees: '',
-      balance: ''
+      courseFees: "",
+      feesReceived: "",
+      totalFees: "",
+      balance: "",
     });
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'incentive' || name === 'discountAmount' ? parseFloat(value) || 0 : value
+      [name]:
+        name === "incentive" || name === "discountAmount"
+          ? parseFloat(value) || 0
+          : value,
     }));
   };
 
   const handleCalculationChange = (e) => {
     const { name, value } = e.target;
-    setCalculationFields(prev => {
+    setCalculationFields((prev) => {
       const updated = { ...prev, [name]: value };
-      
-      if (name === 'courseFees' || name === 'discountAmount' || name === 'feesReceived') {
+
+      if (
+        name === "courseFees" ||
+        name === "discountAmount" ||
+        name === "feesReceived"
+      ) {
         const fees = parseFloat(updated.courseFees) || 0;
         const discountAmount = parseFloat(formData.discountAmount) || 0;
-        const discountValue = formData.discountRate === 'Percent' 
-          ? (fees * discountAmount) / 100 
-          : discountAmount;
-        
+        const discountValue =
+          formData.discountRate === "Percent"
+            ? (fees * discountAmount) / 100
+            : discountAmount;
+
         const totalFees = fees - discountValue;
         const feesReceived = parseFloat(updated.feesReceived) || 0;
         const balance = totalFees - feesReceived;
-        
+
         updated.totalFees = totalFees.toFixed(2);
         updated.balance = balance.toFixed(2);
       }
-      
+
       return updated;
     });
   };
@@ -135,43 +164,45 @@ console.log("studentsData",batchesData)
     const updatedInstallments = [...formData.installments];
     updatedInstallments[index] = {
       ...updatedInstallments[index],
-      [field]: field === 'amount' ? parseFloat(value) || 0 : value
+      [field]: field === "amount" ? parseFloat(value) || 0 : value,
     };
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      installments: updatedInstallments
+      installments: updatedInstallments,
     }));
   };
 
   const addInstallment = () => {
     const newInstallment = {
       name: `Installment ${formData.installments.length + 1}`,
-      amount: '',
-      date: '',
-      paymentStatus: 'Pending',
+      amount: "",
+      date: "",
+      paymentStatus: "Pending",
       receiptNumber: null,
       paymentmode: null,
-      transctionId: null
+      transctionId: null,
     };
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      installments: [...prev.installments, newInstallment]
+      installments: [...prev.installments, newInstallment],
     }));
   };
 
   const removeInstallment = (index) => {
     if (formData.installments.length > 1) {
-      const updatedInstallments = formData.installments.filter((_, i) => i !== index);
-      setFormData(prev => ({
+      const updatedInstallments = formData.installments.filter(
+        (_, i) => i !== index,
+      );
+      setFormData((prev) => ({
         ...prev,
-        installments: updatedInstallments
+        installments: updatedInstallments,
       }));
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const payload = {
       userId: formData.userId,
       batch: formData.batch,
@@ -184,15 +215,15 @@ console.log("studentsData",batchesData)
       admissionDate: formData.admissionDate,
       incentive: parseFloat(formData.incentive) || 0,
       teacherid: formData.teacherid,
-      installments: formData.installments.map(inst => ({
+      installments: formData.installments.map((inst) => ({
         name: inst.name,
         amount: parseFloat(inst.amount) || 0,
         date: inst.date,
         paymentStatus: inst.paymentStatus,
         receiptNumber: inst.receiptNumber || null,
         paymentmode: inst.paymentmode || null,
-        transctionId: inst.transctionId || null
-      }))
+        transctionId: inst.transctionId || null,
+      })),
     };
 
     dispatch(reAdmission(payload));
@@ -204,14 +235,16 @@ console.log("studentsData",batchesData)
     }, 0);
   };
 
-  const examTypes = ['Online', 'Offline', 'Mixed'];
-  const paymentStatuses = ['Pending', 'Paid', 'Partial', 'Overdue'];
+  const examTypes = ["Online", "Offline", "Mixed"];
+  const paymentStatuses = ["Pending", "Paid", "Partial", "Overdue"];
 
   return (
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Re-Admission</h1>
-        <p className="text-black mt-2">Process student re-admission with fee details</p>
+        <p className="text-black mt-2">
+          Process student re-admission with fee details
+        </p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6">
@@ -245,7 +278,9 @@ console.log("studentsData",batchesData)
                 required
               >
                 {examTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -261,7 +296,9 @@ console.log("studentsData",batchesData)
               >
                 <option value="">Select Batch</option>
                 {batchesData.map((batch) => (
-                  <option key={batch._id} value={batch._id}>{batch.name}</option>
+                  <option key={batch._id} value={batch._id}>
+                    {batch.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -277,7 +314,9 @@ console.log("studentsData",batchesData)
               >
                 <option value="">Select Course</option>
                 {coursesData.map((course) => (
-                  <option key={course._id} value={course._id}>{course.courseName}</option>
+                  <option key={course._id} value={course._id}>
+                    {course.courseName}
+                  </option>
                 ))}
               </select>
             </div>
@@ -293,7 +332,9 @@ console.log("studentsData",batchesData)
               >
                 <option value="">Select Plan</option>
                 {plansData.map((plan) => (
-                  <option key={plan._id} value={plan._id}>{plan.name}</option>
+                  <option key={plan._id} value={plan._id}>
+                    {plan.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -308,7 +349,9 @@ console.log("studentsData",batchesData)
               >
                 <option value="">Select Staff</option>
                 {teachersData.map((teacher) => (
-                  <option key={teacher._id} value={teacher._id}>{teacher.name}</option>
+                  <option key={teacher._id} value={teacher._id}>
+                    {teacher.name}
+                  </option>
                 ))}
               </select>
             </div>
@@ -340,7 +383,9 @@ console.log("studentsData",batchesData)
           </div>
 
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-sky-700 mb-4">Course Fees</h3>
+            <h3 className="text-lg font-semibold text-sky-700 mb-4">
+              Course Fees
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
                 <label className="block text-black mb-2">Course Fees</label>
@@ -369,7 +414,10 @@ console.log("studentsData",batchesData)
               </div>
 
               <div>
-                <label className="block text-black mb-2">Discount {formData.discountRate === 'Percent' ? '(%)' : 'Amount'}</label>
+                <label className="block text-black mb-2">
+                  Discount{" "}
+                  {formData.discountRate === "Percent" ? "(%)" : "Amount"}
+                </label>
                 <input
                   type="number"
                   name="discountAmount"
@@ -378,7 +426,7 @@ console.log("studentsData",batchesData)
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-black"
                   placeholder="0"
                   min="0"
-                  max={formData.discountRate === 'Percent' ? 100 : undefined}
+                  max={formData.discountRate === "Percent" ? 100 : undefined}
                 />
               </div>
 
@@ -412,7 +460,9 @@ console.log("studentsData",batchesData)
                   value={calculationFields.balance}
                   readOnly
                   className={`w-full px-3 py-2 border rounded-md bg-gray-50 text-black font-bold ${
-                    parseFloat(calculationFields.balance) > 0 ? 'text-red-600' : 'text-green-600'
+                    parseFloat(calculationFields.balance) > 0
+                      ? "text-red-600"
+                      : "text-green-600"
                   }`}
                 />
               </div>
@@ -433,7 +483,9 @@ console.log("studentsData",batchesData)
 
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-sky-700">Installments</h3>
+              <h3 className="text-lg font-semibold text-sky-700">
+                Installments
+              </h3>
               <button
                 type="button"
                 onClick={addInstallment}
@@ -447,12 +499,24 @@ console.log("studentsData",batchesData)
               <table className="min-w-full bg-white border border-gray-200 rounded-lg">
                 <thead className="bg-sky-100">
                   <tr>
-                    <th className="py-3 px-4 text-left text-black font-semibold">Name</th>
-                    <th className="py-3 px-4 text-left text-black font-semibold">Amount</th>
-                    <th className="py-3 px-4 text-left text-black font-semibold">Date</th>
-                    <th className="py-3 px-4 text-left text-black font-semibold">Payment Status</th>
-                    <th className="py-3 px-4 text-left text-black font-semibold">Payment Mode</th>
-                    <th className="py-3 px-4 text-left text-black font-semibold">Actions</th>
+                    <th className="py-3 px-4 text-left text-black font-semibold">
+                      Name
+                    </th>
+                    <th className="py-3 px-4 text-left text-black font-semibold">
+                      Amount
+                    </th>
+                    <th className="py-3 px-4 text-left text-black font-semibold">
+                      Date
+                    </th>
+                    <th className="py-3 px-4 text-left text-black font-semibold">
+                      Payment Status
+                    </th>
+                    <th className="py-3 px-4 text-left text-black font-semibold">
+                      Payment Mode
+                    </th>
+                    <th className="py-3 px-4 text-left text-black font-semibold">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -462,7 +526,13 @@ console.log("studentsData",batchesData)
                         <input
                           type="text"
                           value={installment.name}
-                          onChange={(e) => handleInstallmentChange(index, 'name', e.target.value)}
+                          onChange={(e) =>
+                            handleInstallmentChange(
+                              index,
+                              "name",
+                              e.target.value,
+                            )
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-black text-sm"
                           placeholder="Installment name"
                           required
@@ -472,7 +542,13 @@ console.log("studentsData",batchesData)
                         <input
                           type="number"
                           value={installment.amount}
-                          onChange={(e) => handleInstallmentChange(index, 'amount', e.target.value)}
+                          onChange={(e) =>
+                            handleInstallmentChange(
+                              index,
+                              "amount",
+                              e.target.value,
+                            )
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-black text-sm"
                           placeholder="0.00"
                           required
@@ -483,7 +559,13 @@ console.log("studentsData",batchesData)
                         <input
                           type="date"
                           value={installment.date}
-                          onChange={(e) => handleInstallmentChange(index, 'date', e.target.value)}
+                          onChange={(e) =>
+                            handleInstallmentChange(
+                              index,
+                              "date",
+                              e.target.value,
+                            )
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-black text-sm"
                           required
                         />
@@ -491,18 +573,32 @@ console.log("studentsData",batchesData)
                       <td className="py-3 px-4">
                         <select
                           value={installment.paymentStatus}
-                          onChange={(e) => handleInstallmentChange(index, 'paymentStatus', e.target.value)}
+                          onChange={(e) =>
+                            handleInstallmentChange(
+                              index,
+                              "paymentStatus",
+                              e.target.value,
+                            )
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-black text-sm"
                         >
                           {paymentStatuses.map((status) => (
-                            <option key={status} value={status}>{status}</option>
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
                           ))}
                         </select>
                       </td>
                       <td className="py-3 px-4">
                         <select
-                          value={installment.paymentmode || ''}
-                          onChange={(e) => handleInstallmentChange(index, 'paymentmode', e.target.value)}
+                          value={installment.paymentmode || ""}
+                          onChange={(e) =>
+                            handleInstallmentChange(
+                              index,
+                              "paymentmode",
+                              e.target.value,
+                            )
+                          }
                           className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-black text-sm"
                         >
                           <option value="">Select Mode</option>
@@ -518,7 +614,9 @@ console.log("studentsData",batchesData)
                           onClick={() => removeInstallment(index)}
                           disabled={formData.installments.length <= 1}
                           className={`text-red-500 hover:text-red-700 text-sm ${
-                            formData.installments.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''
+                            formData.installments.length <= 1
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
                           }`}
                         >
                           Remove
@@ -529,13 +627,15 @@ console.log("studentsData",batchesData)
                 </tbody>
               </table>
             </div>
-            
+
             <div className="mt-4 p-3 bg-gray-50 rounded flex justify-between items-center">
               <p className="text-sm text-black">
-                <span className="font-medium">Total Installments Amount:</span> ₹{calculateTotalInstallments().toFixed(2)}
+                <span className="font-medium">Total Installments Amount:</span>{" "}
+                ₹{calculateTotalInstallments().toFixed(2)}
               </p>
               <p className="text-sm text-black">
-                <span className="font-medium">Total Fees:</span> ₹{calculationFields.totalFees || '0.00'}
+                <span className="font-medium">Total Fees:</span> ₹
+                {calculationFields.totalFees || "0.00"}
               </p>
             </div>
           </div>
@@ -553,11 +653,13 @@ console.log("studentsData",batchesData)
               disabled={reAdmissionData?.loading}
               className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {reAdmissionData?.loading ? 'Processing...' : 'Submit Re-Admission'}
+              {reAdmissionData?.loading
+                ? "Processing..."
+                : "Submit Re-Admission"}
             </button>
           </div>
         </form>
-      </div> 
+      </div>
     </div>
   );
 };

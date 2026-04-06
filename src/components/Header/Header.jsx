@@ -40,6 +40,9 @@ const Header = ({ onSidebarToggle, websiteMode }) => {
       "/role-goal-assign": "Branch Management > Role/Goal-Assign",
 
       "/inquiry": "Student Management > Inquiry",
+      "/student-fee-summary": "Student Management > Fee Summary",
+      "/admission": "Student Management > Admissions",
+      "/re-admission": "Student Management > Re-Admissions",
 
       "/course-list": "Course Management > Courses",
       "/course-plans": "Course Management > Plans",
