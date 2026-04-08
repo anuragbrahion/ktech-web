@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Table from '../../components/Atoms/TableData/TableData';
 import GoalExamModal from '../../components/Atoms/UI/GoalExamModal';
 import { examinationsList, createExaminationGoal, updateExaminationGoal } from '../../redux/slices/examination';
 import { goalsAllDocuments } from '../../redux/slices/employee';
+import { toast } from 'react-toastify';
 
 const GoalExamination = () => {
   const dispatch = useDispatch();
@@ -11,6 +12,7 @@ const GoalExamination = () => {
   const [selectedExam, setSelectedExam] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 5;
 
   const examinationsListData = useSelector(state => state.examination.examinationsListData);
@@ -19,28 +21,48 @@ const GoalExamination = () => {
   const goalsData = useSelector(state => state.employee.goalsAllDocumentsData);
 
   const exams = examinationsListData?.data?.data?.list || [];
-  const totalPages = examinationsListData?.data?.data?.page || 1;
+  const total = examinationsListData?.data?.data?.total || 0;
+  const totalPages = examinationsListData?.data?.data?.totalPages || Math.ceil(total / itemsPerPage) || 1;
 
-  useEffect(() => {
-    fetchData();
-  }, [currentPage, dispatch]);
-
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
+    setLoading(true);
     dispatch(examinationsList({
       page: currentPage,
       size: itemsPerPage,
       query: JSON.stringify({ type: "Goal" })
-    }));
+    })).finally(() => {
+      setLoading(false);
+    });
     dispatch(goalsAllDocuments());
-  };
+  }, [currentPage, dispatch]);
 
   useEffect(() => {
-    if (createExaminationGoalData?.success || updateExaminationGoalData?.success) {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    if (createExaminationGoalData?.data && !createExaminationGoalData?.loading) {
+      toast.success(createExaminationGoalData.data.isDraft ? 'Goal exam draft saved successfully' : 'Goal exam created successfully');
       fetchData();
       setShowModal(false);
       setSelectedExam(null);
     }
-  }, [createExaminationGoalData, updateExaminationGoalData]);
+    if (createExaminationGoalData?.error) {
+      toast.error(createExaminationGoalData.error.message || 'Failed to create exam');
+    }
+  }, [createExaminationGoalData, fetchData]);
+
+  useEffect(() => {
+    if (updateExaminationGoalData?.data && !updateExaminationGoalData?.loading) {
+      toast.success(updateExaminationGoalData.data.isDraft ? 'Goal exam draft updated successfully' : 'Goal exam updated successfully');
+      fetchData();
+      setShowModal(false);
+      setSelectedExam(null);
+    }
+    if (updateExaminationGoalData?.error) {
+      toast.error(updateExaminationGoalData.error.message || 'Failed to update exam');
+    }
+  }, [updateExaminationGoalData, fetchData]);
 
   const handleAddExam = () => {
     setSelectedExam(null);
@@ -73,7 +95,8 @@ const GoalExamination = () => {
       passingPercentage: parseInt(examData.passingPercentage),
       questions: formattedQuestions,
       goal: examData.goalName,
-      type: 'Goal'
+      type: 'Goal',
+      isDraft: examData.isDraft || false
     };
 
     if (isEditing && selectedExam) {
@@ -86,25 +109,44 @@ const GoalExamination = () => {
     }
   };
 
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedExam(null);
+    setIsEditing(false);
+  };
+
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  const tableHeaders = ['Goal Name', 'Exam Title', 'Exam Duration', 'Passing Percentage', 'Actions'];
+  const formatDuration = (duration) => {
+    const hours = duration?.hours || 0;
+    const minutes = duration?.minutes || 0;
+    if (hours === 0 && minutes === 0) return 'Not set';
+    if (hours === 0) return `${minutes} min`;
+    if (minutes === 0) return `${hours} hr`;
+    return `${hours} hr ${minutes} min`;
+  };
+
+  const tableHeaders = ['Goal Name', 'Exam Title', 'Exam Duration', 'Passing Percentage', 'Status', 'Actions'];
+
+  const isLoading = loading || createExaminationGoalData?.loading || updateExaminationGoalData?.loading;
 
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Goal Examinations List</h1>
+        <p className="text-gray-600 mt-2">Manage goal-based examinations and questions</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-lg p-6">
         <div className="mb-6 flex justify-end">
           <button
             onClick={handleAddExam}
-            className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 font-medium flex items-center gap-2"
+            disabled={isLoading}
+            className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
           >
             <span>+</span> Add Goal Examination
           </button>
@@ -116,7 +158,7 @@ const GoalExamination = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           handlePageChange={handlePageChange}
-          loading={examinationsListData?.loading}
+          loading={isLoading}
           emptyMessage="No goal examinations available. Click 'Add Goal Examination' to create one."
           renderRow={(exam) => (
             <tr key={exam._id} className="hover:bg-gray-50">
@@ -125,30 +167,41 @@ const GoalExamination = () => {
               </td>
               <td className="py-4 px-4 text-gray-800 font-medium">{exam.examtitle}</td>
               <td className="py-4 px-4 text-gray-700">
-                {exam.examduration?.hours || 0} hr : {exam.examduration?.minutes || 0} min
+                {formatDuration(exam.examduration)}
               </td>
               <td className="py-4 px-4">
-                <span className="font-semibold text-gray-800">{exam.passingPercentage}%</span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+                  {exam.passingPercentage}%
+                </span>
+              </td>
+              <td className="py-4 px-4">
+                {exam.isDraft ? (
+                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                    Draft
+                  </span>
+                ) : (
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                    Published
+                  </span>
+                )}
               </td>
               <td className="py-4 px-4">
                 <button
                   onClick={() => handleEditExam(exam)}
-                  className="px-3 py-1 bg-sky-500 text-white rounded hover:bg-sky-600 text-sm"
+                  disabled={isLoading}
+                  className="px-3 py-1 bg-sky-500 text-white rounded hover:bg-sky-600 text-sm transition-colors disabled:opacity-50"
                 >
                   Edit
                 </button>
               </td>
-            </tr>
+             </tr>
           )}
         />
       </div>
 
       <GoalExamModal
         isOpen={showModal}
-        onClose={() => {
-          setShowModal(false);
-          setSelectedExam(null);
-        }}
+        onClose={handleCloseModal}
         onSave={handleSaveExam}
         examData={selectedExam}
         isEditing={isEditing}

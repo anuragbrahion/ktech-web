@@ -23,7 +23,6 @@ const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
     totalSeat: "",
     courses: [],
   });
-
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [courseSearch, setCourseSearch] = useState("");
@@ -35,6 +34,7 @@ const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
 
   useEffect(() => {
     if (batch) {
+console.log("object",batch.courses)
       setFormData({
         startTime: batch.startTime || "",
         endTime: batch.endTime || "",
@@ -306,16 +306,16 @@ const BatchModal = ({ batch, onSave, onClose, mode = "add" }) => {
                       </div>
                     ) : (
                       <div className="border border-gray-300 rounded-xl p-2 bg-gray-50">
-                        {formData.courses?.length > 0 && (
+                        {batch.courses?.length > 0 && (
                           <div className="">
                             <p className="text-sm text-gray-600 mb-2">
                               Selected courses:
                             </p>
                             <div className="space-y-1 max-h-40 overflow-y-auto">
-                              {formData.courses.map((courseId, index) => {
+                              {batch.courses.map((courseId, index) => {
                                 return (
                                   <div
-                                    key={courseId || index}
+                                    key={index}
                                     className="text-sm text-gray-700 bg-white p-2 rounded border capitalize"
                                   >
                                     {courseId?.courseName}

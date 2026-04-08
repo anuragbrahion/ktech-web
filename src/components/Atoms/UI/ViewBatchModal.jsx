@@ -1,6 +1,7 @@
 import React from 'react';
 
 const ViewBatchModal = ({ isOpen, onClose, batchData }) => {
+  console.log("object",batchData)
   if (!isOpen || !batchData) return null;
 
   const coursesList = batchData.courses.split(',').map(course => course.trim());

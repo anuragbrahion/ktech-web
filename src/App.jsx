@@ -723,7 +723,7 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Admission roleData={roleData} adminId={role.id} />
+                <Admission roleData={roleData} adminId={role?.id} />
               ))}
             </ProtectedRoute>
           }

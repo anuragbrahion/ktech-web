@@ -167,7 +167,7 @@ const StudentAdmissionModal = ({
   };
 
   const renderFeesView = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 p-2">
       <div className="bg-gray-50 p-4 rounded-lg">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Fee Summary</h3>
         <div className="grid grid-cols-2 gap-4">

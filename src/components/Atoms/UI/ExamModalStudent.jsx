@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const ExamModalStudent = ({ 
   isOpen, 
@@ -12,94 +13,141 @@ const ExamModalStudent = ({
 }) => {
   const [formData, setFormData] = useState({
     batchId: '',
-    batch: '',
+    batch: null,
     courseId: '',
-    course: '',
+    course: null,
     examTitle: '',
     date: '',
     durationHours: 0,
     durationMinutes: 0,
     passingPercentage: '',
+    isDraft: false,
     questions: []
   });
 
+  // Reset form when modal closes
   useEffect(() => {
-    if (examData && isEditing && examData._id) {
-      const exam = examData;
-      
-      const hours = exam.examduration?.hours || 0;
-      const minutes = exam.examduration?.minutes || 0;
-      
-      const formattedQuestions = (exam.questions || []).map((q, idx) => ({
-        id: idx + 1,
-        text: q.question || '',
-        options: {
-          A: q.option_1 || '',
-          B: q.option_2 || '',
-          C: q.option_3 || '',
-          D: q.option_4 || ''
-        },
-        correctAnswer: q.answer || 'A'
-      }));
+    if (!isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
 
-      if (formattedQuestions.length === 0) {
-        formattedQuestions.push({
+  useEffect(() => {
+    if (isOpen && examData && isEditing) {
+      console.log("Loading exam data for edit:", examData);
+      console.log("Courses data available:", coursesData);
+      console.log("Batches data available:", batchesData);
+      
+      // Extract duration
+      const hours = examData.examduration?.hours || 0;
+      const minutes = examData.examduration?.minutes || 0;
+      
+      // Handle questions - if not present, create empty question
+      let formattedQuestions = [];
+      
+      if (examData.questions && Array.isArray(examData.questions) && examData.questions.length > 0) {
+        formattedQuestions = examData.questions.map((q, idx) => ({
+          id: idx + 1,
+          text: q.question || q.text || '',
+          options: {
+            A: q.option_1 || q.options?.A || '',
+            B: q.option_2 || q.options?.B || '',
+            C: q.option_3 || q.options?.C || '',
+            D: q.option_4 || q.options?.D || ''
+          },
+          correctAnswer: q.answer || q.correctAnswer || 'A'
+        }));
+      } else {
+        // If no questions in the data, add one empty question
+        formattedQuestions = [{
           id: 1,
           text: '',
           options: { A: '', B: '', C: '', D: '' },
           correctAnswer: 'A'
-        });
+        }];
       }
-
+      
+      // Get course and batch IDs from the exam data
+      const courseId = examData.course?._id || examData.courseId || '';
+      const batchId = examData.batch?._id || examData.batchId || '';
+      
+      // Find the actual course and batch objects from the dropdown data
+      const selectedCourse = coursesData?.find(c => c._id === courseId) || examData.course || null;
+      const selectedBatch = batchesData?.find(b => b._id === batchId) || examData.batch || null;
+      
+      console.log("Selected Course:", selectedCourse);
+      console.log("Selected Batch:", selectedBatch);
+      console.log("Course ID:", courseId);
+      console.log("Batch ID:", batchId);
+      
       setFormData({
-        batchId: exam.batch?._id || exam.batchId || '',
-        batch: exam.batch || '',
-        courseId: exam.course?._id || exam.courseId || '',
-        course: exam.course || '',
-        examTitle: exam.examtitle || '',
-        date: exam.date || '',
+        batchId: batchId,
+        batch: selectedBatch,
+        courseId: courseId,
+        course: selectedCourse,
+        examTitle: examData.examtitle || examData.examTitle || '',
+        date: examData.date || new Date().toISOString().split('T')[0],
         durationHours: hours,
         durationMinutes: minutes,
-        passingPercentage: exam.passingPercentage || '',
+        passingPercentage: examData.passingPercentage || '',
+        isDraft: examData.isDraft || false,
         questions: formattedQuestions
       });
-    } else if (!isEditing) {
-      setFormData({
-        batchId: '',
-        batch: '',
-        courseId: '',
-        course: '',
-        examTitle: '',
-        date: '',
-        durationHours: 0,
-        durationMinutes: 0,
-        passingPercentage: '',
-        questions: [
-          {
-            id: 1,
-            text: '',
-            options: { A: '', B: '', C: '', D: '' },
-            correctAnswer: 'A'
-          }
-        ]
-      });
+    } else if (isOpen && !isEditing) {
+      resetForm();
     }
-  }, [examData, isEditing]);
+  }, [examData, isEditing, isOpen, coursesData, batchesData]);
+
+  const resetForm = () => {
+    setFormData({
+      batchId: '',
+      batch: null,
+      courseId: '',
+      course: null,
+      examTitle: '',
+      date: new Date().toISOString().split('T')[0],
+      durationHours: 0,
+      durationMinutes: 0,
+      passingPercentage: '',
+      isDraft: false,
+      questions: [
+        {
+          id: 1,
+          text: '',
+          options: { A: '', B: '', C: '', D: '' },
+          correctAnswer: 'A'
+        }
+      ]
+    });
+  };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    // If not draft and editing existing exam, prevent changes
+    if (isEditing && !formData.isDraft) {
+      toast.warning('Published exams cannot be edited. Please save as draft first.');
+      return;
+    }
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
   const handleSelectChange = (name, value, selectedItem) => {
+    // If not draft and editing existing exam, prevent changes
+    if (isEditing && !formData.isDraft) {
+      toast.warning('Published exams cannot be edited. Please save as draft first.');
+      return;
+    }
+    
     if (name === 'courseId') {
       setFormData(prev => ({
         ...prev,
         courseId: value,
-        course: selectedItem
+        course: selectedItem,
+        batchId: '', // Reset batch when course changes
+        batch: null
       }));
     } else if (name === 'batchId') {
       setFormData(prev => ({
@@ -111,6 +159,12 @@ const ExamModalStudent = ({
   };
 
   const handleQuestionChange = (index, field, value) => {
+    // If not draft and editing existing exam, prevent changes
+    if (isEditing && !formData.isDraft) {
+      toast.warning('Published exams cannot be edited. Please save as draft first.');
+      return;
+    }
+    
     const updatedQuestions = [...formData.questions];
     
     if (field.startsWith('option_')) {
@@ -141,6 +195,12 @@ const ExamModalStudent = ({
   };
 
   const addQuestion = () => {
+    // If not draft and editing existing exam, prevent changes
+    if (isEditing && !formData.isDraft) {
+      toast.warning('Published exams cannot be edited. Please save as draft first.');
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       questions: [
@@ -156,7 +216,16 @@ const ExamModalStudent = ({
   };
 
   const removeQuestion = (index) => {
-    if (formData.questions.length === 1) return;
+    // If not draft and editing existing exam, prevent changes
+    if (isEditing && !formData.isDraft) {
+      toast.warning('Published exams cannot be edited. Please save as draft first.');
+      return;
+    }
+    
+    if (formData.questions.length === 1) {
+      toast.warning('At least one question is required');
+      return;
+    }
     const updatedQuestions = formData.questions.filter((_, i) => i !== index);
     setFormData(prev => ({
       ...prev,
@@ -164,11 +233,55 @@ const ExamModalStudent = ({
     }));
   };
 
+  const validateForm = () => {
+    if (!formData.courseId) {
+      toast.error('Please select a course');
+      return false;
+    }
+    if (!formData.batchId) {
+      toast.error('Please select a batch');
+      return false;
+    }
+    if (!formData.examTitle.trim()) {
+      toast.error('Please enter exam title');
+      return false;
+    }
+    if (formData.durationHours === 0 && formData.durationMinutes === 0) {
+      toast.error('Please set exam duration');
+      return false;
+    }
+    if (!formData.passingPercentage) {
+      toast.error('Please enter passing percentage');
+      return false;
+    }
+    
+    // Validate questions only if not draft
+    if (!formData.isDraft) {
+      for (let i = 0; i < formData.questions.length; i++) {
+        const q = formData.questions[i];
+        if (!q.text.trim()) {
+          toast.error(`Question ${i + 1} text is required`);
+          return false;
+        }
+        if (!q.options.A.trim() || !q.options.B.trim() || !q.options.C.trim() || !q.options.D.trim()) {
+          toast.error(`All options for Question ${i + 1} are required`);
+          return false;
+        }
+      }
+    }
+    
+    return true;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    if (!validateForm()) {
+      return;
+    }
+    
     const examToSave = {
-      examTitle: formData.examTitle,
+      examTitle: formData.examTitle.trim(),
       durationHours: parseInt(formData.durationHours) || 0,
       durationMinutes: parseInt(formData.durationMinutes) || 0,
       passingPercentage: parseInt(formData.passingPercentage),
@@ -177,18 +290,35 @@ const ExamModalStudent = ({
       batchId: formData.batchId,
       course: formData.course,
       batch: formData.batch,
-      date: formData.date
+      date: formData.date || new Date().toISOString().split('T')[0],
+      isDraft: formData.isDraft
     };
     
     onSave(examToSave);
   };
 
+  // Filter batches based on selected course
+  const filteredBatches = formData.courseId 
+    ? batchesData?.filter(batch => {
+        // Check if batch has courses array and includes the selected course
+        if (batch.courses && Array.isArray(batch.courses)) {
+          return batch.courses.includes(formData.courseId);
+        }
+        // Alternative: check batch.courseId
+        const batchCourseId = batch.courseId || batch.course?._id;
+        return batchCourseId === formData.courseId;
+      })
+    : [];
+
+  // Determine if fields should be disabled
+  const isDisabled = isEditing && !formData.isDraft;
+  
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">
               {isEditing ? 'Edit Examination' : 'Add New Examination'}
@@ -201,6 +331,11 @@ const ExamModalStudent = ({
               &times;
             </button>
           </div>
+          {isDisabled && (
+            <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
+              ⚠️ This exam is published. To edit, please save it as a draft first.
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="p-6">
@@ -210,11 +345,12 @@ const ExamModalStudent = ({
               <select
                 value={formData.courseId}
                 onChange={(e) => {
-                  const selected = coursesData.find(c => c._id === e.target.value);
+                  const selected = coursesData?.find(c => c._id === e.target.value);
                   handleSelectChange('courseId', e.target.value, selected);
                 }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                disabled={isDisabled}
               >
                 <option value="">Select Course</option>
                 {coursesData?.map((course) => (
@@ -230,20 +366,26 @@ const ExamModalStudent = ({
               <select
                 value={formData.batchId}
                 onChange={(e) => {
-                  const selected = batchesData?.find(b => b._id === e.target.value);
+                  const selected = filteredBatches?.find(b => b._id === e.target.value);
                   handleSelectChange('batchId', e.target.value, selected);
                 }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-                disabled={!formData.courseId}
+                disabled={isDisabled || !formData.courseId}
               >
                 <option value="">Select Batch</option>
-                {batchesData?.map((batch) => (
+                {filteredBatches?.map((batch) => (
                   <option key={batch._id} value={batch._id}>
-                    {batch.startTime} - {batch.endTime}
+                    {batch.batchName || `${batch.startTime} - ${batch.endTime}`}
                   </option>
                 ))}
               </select>
+              {!formData.courseId && (
+                <p className="text-sm text-gray-500 mt-1">Please select a course first</p>
+              )}
+              {filteredBatches?.length === 0 && formData.courseId && (
+                <p className="text-sm text-yellow-500 mt-1">No batches available for this course</p>
+              )}
             </div>
 
             <div className="md:col-span-2">
@@ -256,6 +398,7 @@ const ExamModalStudent = ({
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter exam title"
                 required
+                disabled={isDisabled}
               />
             </div>
 
@@ -272,6 +415,7 @@ const ExamModalStudent = ({
                       min="0"
                       className="w-full px-4 py-2 focus:outline-none rounded-l-md"
                       placeholder="Hours"
+                      disabled={isDisabled}
                     />
                     <span className="px-3 text-gray-500">hr</span>
                   </div>
@@ -287,6 +431,7 @@ const ExamModalStudent = ({
                       max="59"
                       className="w-full px-4 py-2 focus:outline-none rounded-l-md"
                       placeholder="Minutes"
+                      disabled={isDisabled}
                     />
                     <span className="px-3 text-gray-500">min</span>
                   </div>
@@ -306,9 +451,25 @@ const ExamModalStudent = ({
                   max="100"
                   className="w-full px-4 py-2 focus:outline-none rounded-l-md"
                   required
+                  disabled={isDisabled}
                 />
                 <span className="px-3 text-gray-500">%</span>
               </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  name="isDraft"
+                  checked={formData.isDraft}
+                  onChange={handleInputChange}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  disabled={!isEditing} // Only allow draft toggle when editing
+                />
+                <span className="text-gray-700 font-medium">Save as Draft</span>
+                <span className="text-sm text-gray-500">(Draft exams won't be visible to students)</span>
+              </label>
             </div>
           </div>
 
@@ -319,6 +480,7 @@ const ExamModalStudent = ({
                 type="button"
                 onClick={addQuestion}
                 className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium transition-colors"
+                disabled={isDisabled}
               >
                 + Add Question
               </button>
@@ -332,7 +494,8 @@ const ExamModalStudent = ({
                     <button
                       type="button"
                       onClick={() => removeQuestion(index)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 transition-colors"
+                      disabled={isDisabled}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -349,7 +512,8 @@ const ExamModalStudent = ({
                     onChange={(e) => handleQuestionChange(index, 'text', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                     placeholder="Enter question text"
-                    required
+                    required={!formData.isDraft}
+                    disabled={isDisabled}
                   />
                 </div>
 
@@ -363,7 +527,8 @@ const ExamModalStudent = ({
                         onChange={(e) => handleQuestionChange(index, `option_${option}`, e.target.value)}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                         placeholder={`Enter option ${option}`}
-                        required
+                        required={!formData.isDraft}
+                        disabled={isDisabled}
                       />
                     </div>
                   ))}
@@ -375,7 +540,8 @@ const ExamModalStudent = ({
                     value={question.correctAnswer}
                     onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    required
+                    required={!formData.isDraft}
+                    disabled={isDisabled}
                   >
                     <option value="A">Option A</option>
                     <option value="B">Option B</option>
@@ -385,6 +551,12 @@ const ExamModalStudent = ({
                 </div>
               </div>
             ))}
+            
+            {formData.questions.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No questions added. Click "Add Question" to create questions.
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-4 sticky bottom-0 bg-white py-4 border-t border-gray-200">
@@ -397,10 +569,10 @@ const ExamModalStudent = ({
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isDisabled}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50"
             >
-              {loading ? 'Saving...' : (isEditing ? 'Update Exam' : 'Submit Exam')}
+              {loading ? 'Saving...' : (isEditing ? 'Update Exam' : (formData.isDraft ? 'Save Draft' : 'Submit Exam'))}
             </button>
           </div>
         </form>
