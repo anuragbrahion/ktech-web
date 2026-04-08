@@ -143,7 +143,7 @@ const handleSavePassword = () => {
   };
 
   const getProfileImageUrl = () => {
-     if (profile?.profilephoto[0].url) {
+     if (profile?.profilephoto?.[0]?.url) {
       return profile.profilephoto[0].url;
     }
     return null;
