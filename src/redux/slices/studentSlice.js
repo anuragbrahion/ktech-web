@@ -7,6 +7,7 @@ const initialState = {
   getStudentOverviewData: {},
   getStudentCoursesListData: {},
   getStudentExamsListData: {},
+  getMyDashboardData : {}
 };
 
 export const getStudentOverview = createApiThunkPrivate(
@@ -39,6 +40,12 @@ export const studentExamsSubmit = createApiThunkPrivate(
   "GET",
 );
 
+export const getMyDashboard = createApiThunkPrivate(
+  "getMyDashboard",
+  "/users/my-dashboard",
+  "GET",
+);
+
 
 export const studentSlice = createSlice({
   name: "teacher",
@@ -58,6 +65,12 @@ export const studentSlice = createSlice({
       builder,
       getStudentExamsList,
       "getStudentExamsListData",
+    );
+
+    createExtraReducersForThunk(
+      builder,
+      getMyDashboard,
+      "getMyDashboardData",
     );
   },
 });

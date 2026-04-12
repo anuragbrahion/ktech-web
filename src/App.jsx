@@ -75,7 +75,6 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 import BlogCategoryManagement from "./pages/WebsiteManagement/Blogs/BlogCategoryManagement";
 import Sidebar from "./components/Sidebar/Sidebar";
-import TeacherDashboard from "./pages/Dashboard/TeacherDashboard";
 import HallTickets from "./pages/ExaminationsManagement/HallTickets";
 import TeacherIncentive from "./pages/Teachers/TeacherIncentive";
 import TeacherAttendance from "./pages/Teachers/TeacherAttendance";
@@ -98,6 +97,8 @@ import RuleAndRegulation from "./pages/EmployeeManagement/RuleAndRegulation";
 import EmployeeRulesAndRegulations from "./pages/EmployeeManagement/EmployeeRulesAndRegulations";
 import BlogList from "./components/BlogList";
 import BlogDetail from "./components/BlogDetail";
+import TeacherDashboard from "./pages/Teachers/Dashboard";
+
 
 const MainLayout = ({
   children,
