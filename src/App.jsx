@@ -89,7 +89,6 @@ import StudentMyAttendance from "./pages/Students/AttendanceList";
 import StudentLeaveRequest from "./pages/Students/LeaveRequest";
 import StudentPastExams from "./pages/Students/PastExams";
 import StudentMyCourses from "./pages/Students/MyCourses";
-import StudentMyExams from "./pages/Students/MyExams";
 import StudentReferralAmount from "./pages/Students/ReferralAmount";
 import ExamPage from "./pages/Students/ExamPage";
 import ExamResults from "./components/ExamResults";
@@ -98,6 +97,7 @@ import EmployeeRulesAndRegulations from "./pages/EmployeeManagement/EmployeeRule
 import BlogList from "./components/BlogList";
 import BlogDetail from "./components/BlogDetail";
 import TeacherDashboard from "./pages/Teachers/Dashboard";
+import MyExams from "./pages/Students/MyExams";
 
 
 const MainLayout = ({
@@ -338,14 +338,7 @@ const App = () => {
         <Route
           path="/student/my-exams"
           element={
-            <ProtectedRoute>{renderMainLayout(StudentMyExams)}</ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/student/my-exams/:examId"
-          element={
-            <ProtectedRoute>{renderMainLayout(StudentMyExams)}</ProtectedRoute>
+            <ProtectedRoute>{renderMainLayout(MyExams)}</ProtectedRoute>
           }
         />
 
@@ -886,11 +879,19 @@ const App = () => {
           element={
             <ProtectedRoute>
               {renderMainLayout(() => (
-                <Users roleData={roleData} adminId={role.id} />
+                <Users roleData={roleData} adminId={role?.id} />
               ))}
             </ProtectedRoute>
           }
         />
+
+        <Route path="/student/exam/:examId"  element={
+            <ProtectedRoute>
+              {renderMainLayout(() => (
+                <ExamPage roleData={roleData} adminId={role?.id} />
+              ))}
+            </ProtectedRoute>
+          } />
 
         <Route
           path="/profile"

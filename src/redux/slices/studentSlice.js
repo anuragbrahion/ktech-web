@@ -7,6 +7,7 @@ const initialState = {
   getStudentOverviewData: {},
   getStudentCoursesListData: {},
   getStudentExamsListData: {},
+  getStudentExamsQueData:{},
   getMyDashboardData : {}
 };
 
@@ -25,6 +26,12 @@ export const getStudentCoursesList = createApiThunkPrivate(
 export const getStudentExamsList = createApiThunkPrivate(
   "getStudentExamsList",
   "/examinations/student/my-exams",
+  "GET",
+);
+
+export const getStudentExamsQue = createApiThunkPrivate(
+  "getStudentExamsQue",
+  "/examinations/student/",
   "GET",
 );
 
@@ -65,6 +72,11 @@ export const studentSlice = createSlice({
       builder,
       getStudentExamsList,
       "getStudentExamsListData",
+    );
+    createExtraReducersForThunk(
+      builder,
+      getStudentExamsQue,
+      "getStudentExamsQueData",
     );
 
     createExtraReducersForThunk(

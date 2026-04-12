@@ -81,7 +81,7 @@ const MyExams = () => {
         return;
       }
       sessionStorage.setItem(`exam_${selectedExam._id}_started`, Date.now().toString());
-      navigate(`/student/my-exams/${selectedExam._id}`, { 
+      navigate(`/student/exam/${selectedExam._id}`, { 
         state: { examData: selectedExam } 
       });
     }
@@ -112,11 +112,11 @@ const MyExams = () => {
           onClick={() => handleStartClick(item)}
           className={`
             px-4 py-2 rounded-lg font-medium transition transform hover:scale-105
-            ${item.hallticketdata && !item.ispassed 
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md' 
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
+            ${item.ispassed 
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md' }
           `}
-          disabled={!item.hallticketdata || item.ispassed}
+          disabled={item.ispassed}
           title={!item.hallticketdata ? "Hall ticket not available" : item.ispassed ? "Exam already passed" : "Start Exam"}
         >
           {item.ispassed ? 'Completed' : 'Start Exam'}
