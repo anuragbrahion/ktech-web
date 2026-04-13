@@ -2,7 +2,6 @@ import React from "react";
 import { IoClose } from "react-icons/io5";
 import Button from "../Atoms/Button";
 
-
 /**
  * DefaultPreviewModal - A global, reusable modal component
  *
@@ -33,6 +32,8 @@ const DefaultPreviewModal = ({
   isEditMode = false,
   showCancelButton = true,
   showSubmitButton = true,
+  submitButtonLabel = "Submit",
+  cancelButtonLabel = "Cancel",
 }) => {
   if (!isOpen) return null;
 
@@ -73,7 +74,7 @@ const DefaultPreviewModal = ({
                 onClick={closeModal}
                 disabled={isLoading}
               >
-                Cancel
+                {cancelButtonLabel}
               </Button>
             )}
 
@@ -86,8 +87,8 @@ const DefaultPreviewModal = ({
                 {isLoading
                   ? "Processing..."
                   : isEditMode
-                  ? "Update"
-                  : "Submit"}
+                    ? "Update"
+                    : submitButtonLabel}
               </Button>
             )}
           </div>
