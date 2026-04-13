@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   getAssignedRoleList,
   requestApprovalForRole,
@@ -9,20 +10,13 @@ import { toast } from "react-toastify";
 import { formatDateForTable, getDaysLeft } from "../../utils/globalFunction";
 import LoadingSpinner from "../../components/Loader/Loader";
 import Table from "../../components/Atoms/TableData/TableData";
-import { Edit2 } from "lucide-react";
-import DefaultPreviewModal from "../../components/Modal/DefaultModal";
 
 const RoleAssign = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
-  const [instructionsModalData, setInstructionsModalData] = useState({
-    isOpen: false,
-    data: null,
-    accepted: false,
-    error: null,
-  });
 
   const getAssignedRoleListData = useSelector(
     (state) => state.teacher?.getAssignedRoleListData,
@@ -60,6 +54,17 @@ const RoleAssign = () => {
     fetchAssignedRoles();
   }, [currentPage, itemsPerPage]);
 
+  const handleStartExam = (item) => {
+    // Navigate to role exam page with role ID
+    navigate(`/teacher/role-exam/${item._id}`, {
+      state: {
+        roleId: item._id,
+        roleName: item.name,
+        courseName: item.courseName
+      }
+    });
+  };
+
   const tableData = useMemo(() => {
     return assignedRoleList.map((item) => [
       item.name,
@@ -92,18 +97,13 @@ const RoleAssign = () => {
               ? "Not approved yet"
               : getDaysLeft(item.assignDate, item.days) < 0
                 ? "Edit time expired"
-                : "Edit"
+                : "Start Exam"
           }
           disabled={
             item.status !== "Approved" ||
             getDaysLeft(item.assignDate, item.days) < 0
           }
-          onClick={() =>
-            item.status !== "Approved" ||
-            getDaysLeft(item.assignDate, item.days) < 0
-              ? null
-              : handleInstructionsModal("open", item)
-          }
+          onClick={() => handleStartExam(item)}
         >
           Start Exam
         </button>
@@ -126,32 +126,6 @@ const RoleAssign = () => {
     } catch (error) {
       console.error("Error: ", error);
       toast.error("Failed to send request");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInstructionsModal = (type, data) => {
-    setInstructionsModalData({
-      isOpen: type === "open",
-      data: data || null,
-      accepted: false,
-      error: null,
-    });
-  };
-
-  const handleSubmitInstructions = async () => {
-    try {
-      if (!instructionsModalData.accepted) {
-        setInstructionsModalData((prev) => ({
-          ...prev,
-          error: "Please accept the terms and conditions",
-        }));
-        return;
-      }
-    } catch (error) {
-      console.error("Error in submitting instructions:", error);
-      toast.error("Failed to submit instructions");
     } finally {
       setLoading(false);
     }
@@ -186,58 +160,6 @@ const RoleAssign = () => {
           </tr>
         )}
       />
-      <DefaultPreviewModal
-        isOpen={instructionsModalData.isOpen}
-        closeModal={() => handleInstructionsModal("close", null)}
-        heading="Exam Instructions"
-        submitButtonLabel="Start Exam"
-        handleSubmit={handleSubmitInstructions}
-      >
-        <>
-          <div>
-            <h3 className="font-semibold text-gray-800 mb-3">
-              Important Guidelines:
-            </h3>
-            <ul className="list-disc pl-5 space-y-2 text-gray-600">
-              <li>Read each question carefully before answering</li>
-              <li>
-                You can navigate between questions using the question palette
-              </li>
-              <li>
-                The exam will be automatically submitted when the timer reaches
-                zero
-              </li>
-              <li>Do not refresh the page during the exam</li>
-              <li>Do not switch tabs or windows</li>
-              <li>Maximum 3 violations allowed</li>
-              <li>Your answers are saved as you progress</li>
-              <li>Once submitted, you cannot retake the exam</li>
-            </ul>
-          </div>
-          <div className="border-t pt-4">
-            <label className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                id="acceptInstructions"
-                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                checked={instructionsModalData.accepted}
-                onChange={(e) => {
-                  setInstructionsModalData((prev) => ({
-                    ...prev,
-                    accepted: e.target.checked,
-                  }));
-                }}
-              />
-              <span className="text-gray-700">
-                I have read and understood all the instructions
-              </span>
-            </label>
-            {instructionsModalData.error && (
-              <p className="text-red-500 mt-2">{instructionsModalData.error}</p>
-            )}
-          </div>
-        </>
-      </DefaultPreviewModal>
     </>
   );
 };

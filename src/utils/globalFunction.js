@@ -60,7 +60,11 @@ export const getAuthFromStorage = () => {
     return null;
   }
 
-  return data;
+return {
+  token: data.token,
+  role: data.role,
+  expiry: data.expiry,
+};
 };
 
 // ✅ SINGLE SOURCE OF TRUTH

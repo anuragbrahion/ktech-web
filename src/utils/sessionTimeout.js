@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout } from '../redux/slices/AuthSlice';
 import { toast } from 'react-toastify';
+import { getAuthFromStorage } from './globalFunction';
 
 export const useSessionTimeout = () => {
   const dispatch = useDispatch();
@@ -14,8 +15,8 @@ export const useSessionTimeout = () => {
     const resetTimer = () => {
       clearTimeout(inactivityTimer);
       inactivityTimer = setTimeout(() => {
-         const persistAuth = localStorage.getItem('persistAuth') === 'true';
-        if (!persistAuth) {
+         const auth = getAuthFromStorage();
+       if (!auth || new Date().getTime() > auth.expiry) {
            toast.warning('Session expired due to inactivity');
           dispatch(logout());
           navigate('/login');

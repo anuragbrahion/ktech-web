@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
+ import { axiosPrivate } from '../../../utils/axiosProvider';
+import Loader from '../../Loader/Loader';
 
 const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }) => {
   const [formData, setFormData] = useState({
+    _id: '',
+    roleId: '',
     role: '',
     examTitle: '',
     durationHours: 0,
@@ -23,6 +27,75 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
       }
     ]
   });
+  
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [originalData, setOriginalData] = useState(null);
+
+  // Fetch single document when editing
+  useEffect(() => {
+    const fetchSingleDocument = async () => {
+      if (isOpen && isEditing && examData?._id) {
+        setFetchLoading(true);
+        try {
+          const response = await axiosPrivate.get('/examinations/single-document', {
+            params: { _id: examData._id }
+          });
+          
+          const result = response?.data;
+          if (result && result.data) {
+            const fetchedData = result.data;
+            setOriginalData(fetchedData);
+            
+            // Extract duration
+            let hours = 0;
+            let minutes = 0;
+            
+            if (fetchedData.examduration) {
+              hours = fetchedData.examduration.hours || 0;
+              minutes = fetchedData.examduration.minutes || 0;
+            }
+            
+            // Handle questions
+            let formattedQuestions = [];
+            
+            if (fetchedData.questions && Array.isArray(fetchedData.questions) && fetchedData.questions.length > 0) {
+              formattedQuestions = fetchedData.questions.map((q, idx) => ({
+                id: idx + 1,
+                text: q.question || q.text || '',
+                options: {
+                  A: q.option_1 || q.options?.A || '',
+                  B: q.option_2 || q.options?.B || '',
+                  C: q.option_3 || q.options?.C || '',
+                  D: q.option_4 || q.options?.D || ''
+                },
+                correctAnswer: q.answer || q.correctAnswer || 'A',
+                _id: q._id // Store original question ID for updates
+              }));
+            }
+            
+            setFormData({
+              _id: fetchedData._id,
+              roleId: fetchedData.role || '',
+              role: fetchedData.role || '',
+              examTitle: fetchedData.examtitle || '',
+              durationHours: hours,
+              durationMinutes: minutes,
+              passingPercentage: fetchedData.passingPercentage || '',
+              isDraft: fetchedData.isDraft || false,
+              questions: formattedQuestions
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching exam data:", error);
+          toast.error(error.response?.data?.message || "Failed to fetch exam data");
+        } finally {
+          setFetchLoading(false);
+        }
+      }
+    };
+    
+    fetchSingleDocument();
+  }, [isOpen, isEditing, examData]);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -31,66 +104,10 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (isOpen && examData && isEditing) {
-      console.log("Loading exam data for edit:", examData);
-      
-      // Extract duration from examDuration string or from hours/minutes
-      let hours = 0;
-      let minutes = 0;
-      
-      if (examData.examduration) {
-        hours = examData.examduration.hours || 0;
-        minutes = examData.examduration.minutes || 0;
-      } else if (examData.examDuration) {
-        // Handle string format like "2hr 30Min" or "2:30"
-        const durationStr = examData.examDuration;
-        const hoursMatch = durationStr.match(/(\d+)hr/);
-        const minutesMatch = durationStr.match(/(\d+)Min/);
-        hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
-        minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
-      }
-      
-      // Handle questions
-      let formattedQuestions = [];
-      
-      if (examData.questions && Array.isArray(examData.questions) && examData.questions.length > 0) {
-        formattedQuestions = examData.questions.map((q, idx) => ({
-          id: idx + 1,
-          text: q.question || q.text || '',
-          options: {
-            A: q.option_1 || q.options?.A || '',
-            B: q.option_2 || q.options?.B || '',
-            C: q.option_3 || q.options?.C || '',
-            D: q.option_4 || q.options?.D || ''
-          },
-          correctAnswer: q.answer || q.correctAnswer || 'A'
-        }));
-      } else {
-        formattedQuestions = [{
-          id: 1,
-          text: '',
-          options: { A: '', B: '', C: '', D: '' },
-          correctAnswer: 'A'
-        }];
-      }
-      
-      setFormData({
-        role: examData.role || '',
-        examTitle: examData.examtitle || examData.examTitle || '',
-        durationHours: hours,
-        durationMinutes: minutes,
-        passingPercentage: examData.passingPercentage || '',
-        isDraft: examData.isDraft || false,
-        questions: formattedQuestions
-      });
-    } else if (isOpen && !isEditing) {
-      resetForm();
-    }
-  }, [examData, isEditing, isOpen]);
-
   const resetForm = () => {
     setFormData({
+      _id: '',
+      roleId: '',
       role: '',
       examTitle: '',
       durationHours: 0,
@@ -111,16 +128,11 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
         }
       ]
     });
+    setOriginalData(null);
   };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    // If not draft and editing existing exam, prevent changes
-    if (isEditing && !formData.isDraft) {
-      toast.warning('Published exams cannot be edited. Please save as draft first.');
-      return;
-    }
     
     setFormData(prev => ({
       ...prev,
@@ -128,13 +140,17 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
     }));
   };
 
-  const handleQuestionChange = (index, field, value) => {
-    // If not draft and editing existing exam, prevent changes
-    if (isEditing && !formData.isDraft) {
-      toast.warning('Published exams cannot be edited. Please save as draft first.');
-      return;
-    }
+  const handleRoleSelect = (e) => {
+    const selectedRoleId = e.target.value;
     
+    setFormData(prev => ({
+      ...prev,
+      roleId: selectedRoleId,
+      role: selectedRoleId
+    }));
+  };
+
+  const handleQuestionChange = (index, field, value) => {
     const updatedQuestions = [...formData.questions];
     
     if (field.startsWith('option_')) {
@@ -165,12 +181,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
   };
 
   const addQuestion = () => {
-    // If not draft and editing existing exam, prevent changes
-    if (isEditing && !formData.isDraft) {
-      toast.warning('Published exams cannot be edited. Please save as draft first.');
-      return;
-    }
-    
     setFormData(prev => ({
       ...prev,
       questions: [
@@ -191,12 +201,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
   };
 
   const removeQuestion = (index) => {
-    // If not draft and editing existing exam, prevent changes
-    if (isEditing && !formData.isDraft) {
-      toast.warning('Published exams cannot be edited. Please save as draft first.');
-      return;
-    }
-    
     if (formData.questions.length === 1) {
       toast.warning('At least one question is required');
       return;
@@ -209,7 +213,7 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
   };
 
   const validateForm = () => {
-    if (!formData.role) {
+    if (!formData.roleId && !formData.role) {
       toast.error('Please select a role');
       return false;
     }
@@ -223,6 +227,10 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
     }
     if (!formData.passingPercentage) {
       toast.error('Please enter passing percentage');
+      return false;
+    }
+    if (formData.passingPercentage < 0 || formData.passingPercentage > 100) {
+      toast.error('Passing percentage must be between 0 and 100');
       return false;
     }
     
@@ -252,20 +260,35 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
     }
     
     const examToSave = {
+      _id: formData._id,
+      roleId: formData.roleId,
       role: formData.role,
       examTitle: formData.examTitle.trim(),
       durationHours: parseInt(formData.durationHours) || 0,
       durationMinutes: parseInt(formData.durationMinutes) || 0,
       passingPercentage: parseInt(formData.passingPercentage),
-      questions: formData.questions,
+      questions: formData.questions.map(q => ({
+        text: q.text,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        ...(q._id && { _id: q._id }) // Include _id if it exists for updates
+      })),
       isDraft: formData.isDraft
     };
     
     onSave(examToSave);
   };
 
-  // Determine if fields should be disabled
-  const isDisabled = isEditing && !formData.isDraft;
+  // Show loading state while fetching data
+  if (fetchLoading) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-8">
+          <Loader loading={true} />
+        </div>
+      </div>
+    );
+  }
 
   if (!isOpen) return null;
 
@@ -275,7 +298,7 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-800">
-              {isEditing ? 'Edit Teacher Examination' : 'Add Teacher Examination'}
+              {isEditing ? 'Edit Role Examination' : 'Add Role Examination'}
             </h2>
             <button
               onClick={onClose}
@@ -284,9 +307,9 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
               &times;
             </button>
           </div>
-          {isDisabled && (
+          {formData.isDraft && (
             <div className="mt-2 text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
-              ⚠️ This exam is published. To edit, please save it as a draft first.
+              ⚠️ This exam is in draft mode. You can edit all fields.
             </div>
           )}
         </div>
@@ -298,19 +321,18 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
               <div>
                 <label className="block text-gray-700 mb-2 font-medium">Select Role *</label>
                 <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
+                  name="roleId"
+                  value={formData.roleId}
+                  onChange={handleRoleSelect}
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
-                  disabled={isDisabled}
                 >
                   <option value="">Select Role</option>
-                  <option value="Photoshop">Photoshop</option>
-                  <option value="Tally accounting">Tally accounting</option>
-                  <option value="ms office">ms office</option>
-                  <option value="Graphic Design">Graphic Design</option>
-                  <option value="Web Development">Web Development</option>
+                  <option value="690dd5426fa7f65963c2b8cb">Photoshop</option>
+                  <option value="690dd5426fa7f65963c2b8cc">Tally Accounting</option>
+                  <option value="690dd5426fa7f65963c2b8cd">MS Office</option>
+                  <option value="690dd5426fa7f65963c2b8ce">Graphic Design</option>
+                  <option value="690dd5426fa7f65963c2b8cf">Web Development</option>
                 </select>
               </div>
 
@@ -325,7 +347,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter exam title"
                   required
-                  disabled={isDisabled}
                 />
               </div>
 
@@ -343,7 +364,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                         onChange={handleInputChange}
                         min="0"
                         className="w-full px-4 py-2 focus:outline-none rounded-l-md"
-                        disabled={isDisabled}
                       />
                       <span className="px-3 text-gray-500">hr</span>
                     </div>
@@ -359,7 +379,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                         min="0"
                         max="59"
                         className="w-full px-4 py-2 focus:outline-none rounded-l-md"
-                        disabled={isDisabled}
                       />
                       <span className="px-3 text-gray-500">min</span>
                     </div>
@@ -381,7 +400,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                     className="w-full px-4 py-2 focus:outline-none rounded-l-md"
                     placeholder="Enter passing percentage"
                     required
-                    disabled={isDisabled}
                   />
                   <span className="px-3 text-gray-500">%</span>
                 </div>
@@ -396,10 +414,9 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                     checked={formData.isDraft}
                     onChange={handleInputChange}
                     className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    disabled={isEditing} 
                   />
                   <span className="text-gray-700 font-medium">Save as Draft</span>
-                  <span className="text-sm text-gray-500">(Draft exams won't be visible to teachers)</span>
+                  <span className="text-sm text-gray-500">(Draft exams won't be visible to students)</span>
                 </label>
               </div>
             </div>
@@ -411,8 +428,7 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                 <button
                   type="button"
                   onClick={addQuestion}
-                  disabled={isDisabled}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium transition-colors disabled:opacity-50"
+                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 text-sm font-medium transition-colors"
                 >
                   + Add Question
                 </button>
@@ -426,8 +442,7 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                       <button
                         type="button"
                         onClick={() => removeQuestion(index)}
-                        disabled={isDisabled}
-                        className="text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
+                        className="text-red-500 hover:text-red-700 transition-colors"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -445,7 +460,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       placeholder="Enter question text"
                       required={!formData.isDraft}
-                      disabled={isDisabled}
                     />
                   </div>
 
@@ -460,7 +474,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                           className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                           placeholder={`Enter option ${option}`}
                           required={!formData.isDraft}
-                          disabled={isDisabled}
                         />
                       </div>
                     ))}
@@ -473,7 +486,6 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
                       onChange={(e) => handleQuestionChange(index, 'answer', e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       required={!formData.isDraft}
-                      disabled={isDisabled}
                     >
                       <option value="A">Option A</option>
                       <option value="B">Option B</option>
@@ -502,7 +514,7 @@ const RoleExamModal = ({ isOpen, onClose, onSave, examData, isEditing, loading }
               </button>
               <button
                 type="submit"
-                disabled={loading || isDisabled}
+                disabled={loading}
                 className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors disabled:opacity-50"
               >
                 {loading ? 'Saving...' : (isEditing ? 'Update Exam' : (formData.isDraft ? 'Save Draft' : 'Submit Exam'))}

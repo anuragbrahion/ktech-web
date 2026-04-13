@@ -40,6 +40,7 @@ export const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.userRole = null;
+       window.location.href = "/login";
     },
     setCredentials: (state, action) => {
       const { token, role } = action.payload;

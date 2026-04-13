@@ -98,6 +98,8 @@ import BlogList from "./components/BlogList";
 import BlogDetail from "./components/BlogDetail";
 import TeacherDashboard from "./pages/Teachers/Dashboard";
 import MyExams from "./pages/Students/MyExams";
+import RoleExamPage from "./components/RoleExamPage";
+import GoalExamPage from "./components/GoalExamPage";
 
 
 const MainLayout = ({
@@ -262,6 +264,9 @@ const App = () => {
           path="/teacher/my-tasks"
           element={<ProtectedRoute>{renderMainLayout(MyTasks)}</ProtectedRoute>}
         />
+<Route path="/teacher/role-exam/:roleId" element={<ProtectedRoute>{renderMainLayout(RoleExamPage)}</ProtectedRoute>} />
+<Route path="/teacher/goal-exam/:goalId" element={<ProtectedRoute>{renderMainLayout(GoalExamPage)}</ProtectedRoute>} />
+
 
         <Route
           path="/teacher/past-exams"

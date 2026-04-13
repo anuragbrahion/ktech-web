@@ -25,8 +25,9 @@ const axiosPrivate = axios.create({
 axiosPrivate.interceptors.request.use(
   (config) => {
     const token = getAuthFromStorage();
+    const resToken=token?.token;
     if (token) {
-      config.headers.Authorization = `Bearer ${token.token}`;
+      config.headers.Authorization = `Bearer ${resToken}`;
     }
     return config;
   },
@@ -43,8 +44,9 @@ const axiosImage = axios.create({
 axiosImage.interceptors.request.use(
   (config) => {
     const token = getAuthFromStorage();
+    const resToken=token?.token;
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${resToken}`;
     }
     return config;
   },
