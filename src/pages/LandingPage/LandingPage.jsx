@@ -61,7 +61,7 @@ const LandingPage = () => {
 
   async function getData() {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth');
       setLoading(true);
 
       const response = await axios.get(`${apiUrl}/website/home`, {

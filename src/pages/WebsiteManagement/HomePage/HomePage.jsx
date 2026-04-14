@@ -127,7 +127,7 @@ const HomePage = () => {
     const formData = new FormData();
     formData.append('files', file);
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth');
       const response = await axios.post(`${apiUrl}/files/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -209,7 +209,7 @@ const HomePage = () => {
 
   const fetchHomeData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth');
       const response = await axios.get(`${apiUrl}/website/home`, {
         headers: {
           Authorization: `Bearer ${token}`

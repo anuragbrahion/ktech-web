@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { apiUrl } from '../../../utils/axiosProvider';
+ 
 const StudentAdmissionModal = ({
   isOpen,
   onClose,
@@ -12,8 +15,18 @@ const StudentAdmissionModal = ({
   batchesData = [],
   plansData = [],
   teachersData = [],
+  sourcesData=[],
   loading = false
 }) => {
+  const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState({
+    profilePhoto: false,
+    signature: false
+  });
+
+   const token = localStorage.getItem('auth');
+   const newToken= JSON.parse(token)
+
   const [formData, setFormData] = useState({
     name: '',
     surname: '',
@@ -55,7 +68,9 @@ const StudentAdmissionModal = ({
     rollNo: '',
     courseDuration: 1,
     addressProof: 'Electricity Bill',
-    examType: 'Online'
+    examType: 'Online',
+    userImage: [], // Array for profile photo
+    signature: []   // Array for signature
   });
 
   const [calculationFields, setCalculationFields] = useState({
@@ -65,6 +80,7 @@ const StudentAdmissionModal = ({
     balance: '',
   });
 
+ 
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -115,7 +131,9 @@ const StudentAdmissionModal = ({
         rollNo: initialData.rollNo || '',
         courseDuration: initialData.courseDuration || 1,
         addressProof: initialData.addressProof || 'Electricity Bill',
-        examType: initialData.examType || 'Online'
+        examType: initialData.examType || 'Online',
+        userImage: initialData.userImage || [],
+        signature: initialData.signature || []
       });
 
       setCalculationFields({
@@ -127,15 +145,81 @@ const StudentAdmissionModal = ({
     }
   }, [initialData]);
 
+ const handleImageUpload = async (file, type) => {
+  setUploading(true);
+  const formDataObj = new FormData();
+  formDataObj.append('files', file); // Note: 'files' is the field name expected by the API
+  
+  try {
+    const response = await axios.post(`${apiUrl}/files/upload`, formDataObj, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${newToken?.token}`
+      }
+    });
+    
+    if (response.data && response.data.data) {
+      setFormData(prev => ({
+        ...prev,
+        [type]: response.data.data
+      }));
+      toast.success(`${type === 'userImage' ? 'Profile photo' : 'Signature'} uploaded successfully`);
+    }
+  } catch (error) {
+    toast.error(error?.response?.data?.message || error.message || `Failed to upload ${type === 'userImage' ? 'profile photo' : 'signature'}`);
+  } finally {
+    setUploading(false);
+  }
+};
+
+  const removeImage = (type) => {
+    setFormData(prev => ({ ...prev, [type]: [] }));
+    toast.success(`${type === 'userImage' ? 'Profile photo' : 'Signature'} removed`);
+  };
+
+  const handleDrag = (e, type) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(prev => ({ ...prev, [type]: true }));
+    } else if (e.type === "dragleave") {
+      setDragActive(prev => ({ ...prev, [type]: false }));
+    }
+  };
+
+  const handleDrop = (e, type) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(prev => ({ ...prev, [type]: false }));
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        handleImageUpload(file, type);
+      } else {
+        toast.error('Please upload an image file');
+      }
+    }
+  };
+
+  const handleFileSelect = (e, type) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type.startsWith('image/')) {
+        handleImageUpload(file, type);
+      } else {
+        toast.error('Please upload an image file');
+      }
+    }
+  };
+
   const genders = ['Male', 'Female', 'Other'];
   const categories = ['General', 'OBC', 'SC', 'ST', 'Other'];
   const religions = ['Hindu', 'Muslim', 'Christian', 'Sikh', 'Buddhist', 'Jain', 'Other'];
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const educationQualifications = ['10th Pass', '12th Pass', 'Graduate', 'Post Graduate', 'Diploma', 'Other'];
-  const sources = ['Online', 'Referral', 'Walk-in', 'Advertisement', 'Social Media'];
-
-  // Filter courses based on selected batch
-  const applicableCourses = useMemo(() => {
+  const sources = sourcesData
+   const applicableCourses = useMemo(() => {
     if (formData.batch && Array.isArray(batchesData) && batchesData.length > 0) {
       const batch = batchesData.find((b) => b._id === formData.batch);
       if (batch && batch.courses && Array.isArray(batch.courses)) {
@@ -145,7 +229,6 @@ const StudentAdmissionModal = ({
     return [];
   }, [formData.batch, batchesData, coursesData]);
 
-  // Filter plans based on selected course
   const applicablePlans = useMemo(() => {
     if (formData.course && Array.isArray(plansData) && plansData.length > 0) {
       return plansData.filter((plan) => plan.course?.includes(formData.course));
@@ -153,7 +236,6 @@ const StudentAdmissionModal = ({
     return [];
   }, [formData.course, plansData]);
 
-  // Auto-fill plan details when plan is selected
   useEffect(() => {
     if (formData.plan && applicablePlans.length > 0) {
       const selectedPlan = applicablePlans.find(plan => plan._id === formData.plan);
@@ -173,7 +255,6 @@ const StudentAdmissionModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Reset dependent fields when batch or course changes
     if (name === 'batch') {
       setFormData(prev => ({ ...prev, batch: value, course: '', plan: '' }));
       setCalculationFields(prev => ({ ...prev, courseFees: '', totalFees: '', balance: '' }));
@@ -243,6 +324,71 @@ const StudentAdmissionModal = ({
     if (viewMode === 'fees') return 'Admission Fees';
     if (viewMode === 'certificate') return 'Certificate';
     return initialData ? 'Edit Student Admission' : 'Add Student Admission';
+  };
+
+  const renderImageUploadSection = (type, label) => {
+    const images = formData[type];
+    const isDragActive = dragActive[type];
+    
+    return (
+      <div className="space-y-2">
+        <label className="block text-gray-700 mb-2 font-medium">{label}</label>
+        
+        {/* Drag and Drop Area */}
+        <div
+          onDragEnter={(e) => handleDrag(e, type)}
+          onDragLeave={(e) => handleDrag(e, type)}
+          onDragOver={(e) => handleDrag(e, type)}
+          onDrop={(e) => handleDrop(e, type)}
+          className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
+            isDragActive 
+              ? 'border-sky-500 bg-sky-50' 
+              : 'border-gray-300 hover:border-sky-400'
+          }`}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileSelect(e, type)}
+            className="hidden"
+            id={`${type}-upload`}
+          />
+          
+          {images && images.length > 0 && images[0]?.url ? (
+            <div className="relative inline-block">
+              <img
+                src={images[0].url}
+                alt={label}
+                className="w-32 h-32 object-cover rounded-lg mx-auto"
+              />
+              <button
+                type="button"
+                onClick={() => removeImage(type)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+          ) : (
+            <div className="py-8">
+              <div className="text-4xl mb-2">📸</div>
+              <p className="text-gray-600 mb-2">
+                Drag & drop an image here, or click to select
+              </p>
+              <label
+                htmlFor={`${type}-upload`}
+                className="inline-block px-4 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 cursor-pointer transition-colors"
+              >
+                Choose File
+              </label>
+              <p className="text-xs text-gray-500 mt-2">
+                Supports: JPG, PNG, GIF (Max 5MB)
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const renderFeesView = () => (
@@ -316,17 +462,48 @@ const StudentAdmissionModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
       <div className={`bg-white rounded-lg shadow-xl max-h-[90vh] overflow-hidden overflow-y-auto ${viewMode === 'certificate' ? 'w-full max-w-3xl' : 'w-full max-w-4xl'} my-8`}>
-        <div className="bg-sky-500 text-white p-4 rounded-t-lg sticky top-0">
+        <div className="bg-sky-500 text-white p-4 rounded-t-lg sticky top-0 z-10">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold">{getModalTitle()}</h2>
             <button onClick={onClose} className="text-white hover:text-gray-200 text-2xl">×</button>
           </div>
         </div>
 
+        {uploading && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-500 mx-auto"></div>
+              <p className="mt-4 text-gray-700">Uploading image...</p>
+            </div>
+          </div>
+        )}
+
         {viewMode === 'fees' ? renderFeesView() : viewMode === 'certificate' ? renderCertificateView() : (
           <form onSubmit={handleSubmit} className="p-6">
             {viewMode === 'view' || viewMode === 'admissionForm' ? (
               <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-6">
+                  {/* Profile Photo Display */}
+                  <div className="col-span-1">
+                    <p className="text-gray-600 mb-2">Profile Photo</p>
+                    {formData.userImage && formData.userImage.length > 0 && formData.userImage[0]?.url ? (
+                      <img src={formData.userImage[0].url} alt="Profile" className="w-32 h-32 object-cover rounded-lg" />
+                    ) : (
+                      <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">No Photo</div>
+                    )}
+                  </div>
+                  
+                  {/* Signature Display */}
+                  <div className="col-span-1">
+                    <p className="text-gray-600 mb-2">Signature</p>
+                    {formData.signature && formData.signature.length > 0 && formData.signature[0]?.url ? (
+                      <img src={formData.signature[0].url} alt="Signature" className="w-32 h-32 object-cover rounded-lg" />
+                    ) : (
+                      <div className="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">No Signature</div>
+                    )}
+                  </div>
+                </div>
+                
                 <div className="grid grid-cols-2 gap-6">
                   <div><p className="text-gray-600">Full Name</p><p className="text-lg font-semibold">{formData.name} {formData.surname}</p></div>
                   <div><p className="text-gray-600">Roll Number</p><p className="text-lg font-semibold">{formData.rollNo || 'N/A'}</p></div>
@@ -344,6 +521,15 @@ const StudentAdmissionModal = ({
               </div>
             ) : (
               <>
+                {/* Image Upload Sections */}
+                <div className="space-y-6 mb-8">
+                  <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Documents Upload</h3>
+                  <div className="grid grid-cols-2 gap-6">
+                    {renderImageUploadSection('userImage', 'Profile Photo')}
+                    {renderImageUploadSection('signature', 'Signature')}
+                  </div>
+                </div>
+
                 <div className="space-y-6 mb-8">
                   <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Personal Information</h3>
                   <div className="grid grid-cols-2 gap-6">
@@ -470,7 +656,6 @@ const StudentAdmissionModal = ({
                 <div className="space-y-6 mb-8">
                   <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">Course Information</h3>
                   
-                  {/* Batch Selection - First */}
                   <div>
                     <label className="block text-gray-700 mb-2">Batch *</label>
                     <select name="batch" value={formData.batch} onChange={handleChange} className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500" required>
@@ -479,7 +664,6 @@ const StudentAdmissionModal = ({
                     </select>
                   </div>
 
-                  {/* Course Selection - Depends on Batch */}
                   <div>
                     <label className="block text-gray-700 mb-2">Course *</label>
                     <select name="course" value={formData.course} onChange={handleChange} className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500" disabled={!formData.batch} required>
@@ -488,7 +672,6 @@ const StudentAdmissionModal = ({
                     </select>
                   </div>
 
-                  {/* Plan Selection - Depends on Course */}
                   <div>
                     <label className="block text-gray-700 mb-2">Plan *</label>
                     <select name="plan" value={formData.plan} onChange={handleChange} className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500" disabled={!formData.course} required>
@@ -502,7 +685,7 @@ const StudentAdmissionModal = ({
                       <label className="block text-gray-700 mb-2">Source</label>
                       <select name="source" value={formData.source} onChange={handleChange} className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <option value="">Select...</option>
-                        {sources.map(s => <option key={s} value={s}>{s}</option>)}
+                        {sources.map(s => <option key={s} value={s?._id}>{s?.name}</option>)}
                       </select>
                     </div>
                     <div>
@@ -586,8 +769,7 @@ const StudentAdmissionModal = ({
                         <select value={inst.mode} onChange={(e) => updateInstallment(idx, 'mode', e.target.value)} className="px-3 py-2 border rounded-md">
                           <option value="">Mode</option>
                           <option value="Cash">Cash</option>
-                          <option value="Card">Card</option>
-                          <option value="Online">Online</option>
+                          <option value="Cheque">Cheque</option>
                         </select>
                         <button type="button" onClick={() => removeInstallment(idx)} className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Remove</button>
                       </div>
@@ -597,8 +779,8 @@ const StudentAdmissionModal = ({
 
                 <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
                   <button type="button" onClick={onClose} className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">Cancel</button>
-                  <button type="submit" disabled={loading} className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                    {loading ? 'Processing...' : (initialData ? 'Update Admission' : 'Create Admission')}
+                  <button type="submit" disabled={loading || uploading} className="px-6 py-2 bg-sky-500 text-white rounded-md hover:bg-sky-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    {loading || uploading ? 'Processing...' : (initialData ? 'Update Admission' : 'Create Admission')}
                   </button>
                 </div>
               </>

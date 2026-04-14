@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Table from "../../components/Atoms/TableData/TableData";
 import StudentAdmissionModal from "../../components/Atoms/UI/StudentAdmissionModal";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +13,7 @@ import {
   coursePlansAllDocuments,
 } from "../../redux/slices/course";
 import { teachersAllDocuments } from "../../redux/slices/employee";
+import { inquirySourceAllDocuments } from "../../redux/slices/branch";
 
 const Admission = ({ adminId }) => {
   const dispatch = useDispatch();
@@ -45,9 +46,14 @@ const Admission = ({ adminId }) => {
     (state) => state?.employee?.teachersAllDocumentsData?.data?.data?.list,
   );
 
+  const sourcesDataList = useSelector(
+    (state) => state?.branch?.inquirySourceAllDocumentsData?.data?.data?.list,
+  );
+
   useEffect(() => {
     fetchData();
     loadMasterData();
+    dispatch(inquirySourceAllDocuments())
   }, [currentPage]);
 
   useEffect(() => {
@@ -418,7 +424,8 @@ const Admission = ({ adminId }) => {
         coursesData={coursesData || []}
         batchesData={batchesData || []}
         plansData={plansData || []}
-        teachersData={teachersData?.data || []}
+        teachersData={teachersData || []}
+        sourcesData={sourcesDataList || []}
         loading={createData?.loading || updateData?.loading}
       />
     </>

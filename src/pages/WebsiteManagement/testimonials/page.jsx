@@ -57,7 +57,7 @@ const AddEditTestimonialModal = ({ testimonial, onSave, onClose }) => {
     formData.append('files', file);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth');
       const response = await axios.post(`${apiUrl}/files/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
