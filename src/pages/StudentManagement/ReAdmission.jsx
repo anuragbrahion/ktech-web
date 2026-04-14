@@ -5,10 +5,11 @@ import {
   courseBatchesAllDocuments,
   coursePlansAllDocuments,
   getAllStudFeeName,
-  reAdmission
+  reAdmission,
 } from "../../redux/slices/course";
 import { coursesAllDocuments } from "../../redux/slices/course";
 import { teachersAllDocuments } from "../../redux/slices/employee";
+import { useMemo } from "react";
 
 const ReAdmission = ({ adminId }) => {
   const dispatch = useDispatch();
@@ -26,7 +27,7 @@ const ReAdmission = ({ adminId }) => {
     discountAmount: 0,
     remarks: "",
     examType: "Online",
-    admissionDate: new Date().toISOString().split('T')[0],
+    admissionDate: new Date().toISOString().split("T")[0],
     incentive: 0,
     teacherid: "",
     installments: [
@@ -72,11 +73,21 @@ const ReAdmission = ({ adminId }) => {
   );
 
   const loadingStates = {
-    students: useSelector((state) => state?.course?.getAllStudFeeNameData?.loading),
-    courses: useSelector((state) => state?.course?.coursesAllDocumentsData?.loading),
-    batches: useSelector((state) => state?.course?.courseBatchesAllDocumentsData?.loading),
-    plans: useSelector((state) => state?.course?.coursePlansAllDocumentsData?.loading),
-    teachers: useSelector((state) => state?.employee?.teachersAllDocumentsData?.loading),
+    students: useSelector(
+      (state) => state?.course?.getAllStudFeeNameData?.loading,
+    ),
+    courses: useSelector(
+      (state) => state?.course?.coursesAllDocumentsData?.loading,
+    ),
+    batches: useSelector(
+      (state) => state?.course?.courseBatchesAllDocumentsData?.loading,
+    ),
+    plans: useSelector(
+      (state) => state?.course?.coursePlansAllDocumentsData?.loading,
+    ),
+    teachers: useSelector(
+      (state) => state?.employee?.teachersAllDocumentsData?.loading,
+    ),
   };
 
   useEffect(() => {
@@ -100,7 +111,9 @@ const ReAdmission = ({ adminId }) => {
   const loadMasterData = () => {
     if (adminId) {
       dispatch(getAllStudFeeName({ query: JSON.stringify({ adminId }) }));
-      dispatch(courseBatchesAllDocuments({ query: JSON.stringify({ adminId }) }));
+      dispatch(
+        courseBatchesAllDocuments({ query: JSON.stringify({ adminId }) }),
+      );
       dispatch(coursePlansAllDocuments({ query: JSON.stringify({ adminId }) }));
       dispatch(teachersAllDocuments({ query: JSON.stringify({ adminId }) }));
     }
@@ -114,11 +127,15 @@ const ReAdmission = ({ adminId }) => {
     if (!formData.batch) newErrors.batch = "Batch selection is required";
     if (!formData.course) newErrors.course = "Course selection is required";
     if (!formData.plan) newErrors.plan = "Plan selection is required";
-    if (!formData.admissionDate) newErrors.admissionDate = "Admission date is required";
+    if (!formData.admissionDate)
+      newErrors.admissionDate = "Admission date is required";
     if (!formData.examType) newErrors.examType = "Exam type is required";
 
     // Validate course fees
-    if (!calculationFields.courseFees || parseFloat(calculationFields.courseFees) <= 0) {
+    if (
+      !calculationFields.courseFees ||
+      parseFloat(calculationFields.courseFees) <= 0
+    ) {
       newErrors.courseFees = "Valid course fees is required";
     }
 
@@ -127,11 +144,13 @@ const ReAdmission = ({ adminId }) => {
       newErrors.installments = "At least one installment is required";
     } else {
       formData.installments.forEach((inst, index) => {
-        if (!inst.name) newErrors[`installment_${index}_name`] = "Installment name required";
+        if (!inst.name)
+          newErrors[`installment_${index}_name`] = "Installment name required";
         if (!inst.amount || parseFloat(inst.amount) <= 0) {
           newErrors[`installment_${index}_amount`] = "Valid amount required";
         }
-        if (!inst.date) newErrors[`installment_${index}_date`] = "Date required";
+        if (!inst.date)
+          newErrors[`installment_${index}_date`] = "Date required";
       });
     }
 
@@ -160,7 +179,7 @@ const ReAdmission = ({ adminId }) => {
       discountAmount: 0,
       remarks: "",
       examType: "Online",
-      admissionDate: new Date().toISOString().split('T')[0],
+      admissionDate: new Date().toISOString().split("T")[0],
       incentive: 0,
       teacherid: "",
       installments: [
@@ -195,6 +214,21 @@ const ReAdmission = ({ adminId }) => {
           ? parseFloat(value) || 0
           : value,
     }));
+
+    if (name === "plan") {
+      if (value) {
+        const plan = plansData.find((plan) => plan._id === value);
+        if (plan) {
+          handleCalculationChange({
+            target: { name: "courseFees", value: plan.amount },
+          });
+        } else {
+          handleCalculationChange({ target: { name: "courseFees", value: 0 } });
+        }
+      } else {
+        handleCalculationChange({ target: { name: "courseFees", value: 0 } });
+      }
+    }
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
@@ -283,7 +317,7 @@ const ReAdmission = ({ adminId }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError("");
-    
+
     if (!validateForm()) {
       // Scroll to first error
       const firstError = Object.keys(errors)[0];
@@ -331,7 +365,29 @@ const ReAdmission = ({ adminId }) => {
   const paymentModes = ["Cash", "Card", "Online", "Cheque", "Bank Transfer"];
 
   // Check if any master data is loading
-  const isLoading = Object.values(loadingStates).some(loading => loading);
+  const isLoading = Object.values(loadingStates).some((loading) => loading);
+
+  const applicableCourses = useMemo(() => {
+    if (
+      formData.batch &&
+      Array.isArray(batchesData) &&
+      batchesData.length > 0
+    ) {
+      const batch = batchesData.find((b) => b._id === formData.batch);
+
+      return coursesData.filter((c) => batch.courses.includes(c._id));
+    } else {
+      return [];
+    }
+  }, [formData.batch]);
+
+  const applicablePlans = useMemo(() => {
+    if (formData.course && Array.isArray(plansData) && plansData.length > 0) {
+      return plansData.filter((c) => c.course.includes(formData.course));
+    } else {
+      return [];
+    }
+  }, [formData.course]);
 
   return (
     <div className="">
@@ -404,7 +460,8 @@ const ReAdmission = ({ adminId }) => {
                     <option value="">Select Student</option>
                     {studentsData.map((student) => (
                       <option key={student._id} value={student._id}>
-                        {student.name} {student.email ? `(${student.email})` : ""}
+                        {student.name}{" "}
+                        {student.email ? `(${student.email})` : ""}
                       </option>
                     ))}
                   </select>
@@ -442,14 +499,17 @@ const ReAdmission = ({ adminId }) => {
                     onChange={handleChange}
                     onBlur={() => handleBlur("batch")}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900 ${
-                      errors.batch && touched.batch ? "border-red-500" : "border-gray-300"
+                      errors.batch && touched.batch
+                        ? "border-red-500"
+                        : "border-gray-300"
                     }`}
                     required
                   >
                     <option value="">Select Batch</option>
                     {batchesData.map((batch) => (
                       <option key={batch._id} value={batch._id}>
-                        {batch.name || `${batch.startTime ?? "0"} - ${batch.endTime ?? "0"}`}
+                        {batch.name ||
+                          `${batch.startTime ?? "0"} - ${batch.endTime ?? "0"}`}
                       </option>
                     ))}
                   </select>
@@ -468,12 +528,15 @@ const ReAdmission = ({ adminId }) => {
                     onChange={handleChange}
                     onBlur={() => handleBlur("course")}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900 ${
-                      errors.course && touched.course ? "border-red-500" : "border-gray-300"
+                      errors.course && touched.course
+                        ? "border-red-500"
+                        : "border-gray-300"
                     }`}
+                    disabled={!formData.batch}
                     required
                   >
                     <option value="">Select Course</option>
-                    {coursesData.map((course) => (
+                    {applicableCourses.map((course) => (
                       <option key={course._id} value={course._id}>
                         {course.courseName}
                       </option>
@@ -494,12 +557,15 @@ const ReAdmission = ({ adminId }) => {
                     onChange={handleChange}
                     onBlur={() => handleBlur("plan")}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900 ${
-                      errors.plan && touched.plan ? "border-red-500" : "border-gray-300"
+                      errors.plan && touched.plan
+                        ? "border-red-500"
+                        : "border-gray-300"
                     }`}
+                    disabled={!formData.course}
                     required
                   >
                     <option value="">Select Plan</option>
-                    {plansData.map((plan) => (
+                    {applicablePlans.map((plan) => (
                       <option key={plan._id} value={plan._id}>
                         {plan.name}
                       </option>
@@ -556,12 +622,16 @@ const ReAdmission = ({ adminId }) => {
                     onChange={handleChange}
                     onBlur={() => handleBlur("admissionDate")}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900 ${
-                      errors.admissionDate && touched.admissionDate ? "border-red-500" : "border-gray-300"
+                      errors.admissionDate && touched.admissionDate
+                        ? "border-red-500"
+                        : "border-gray-300"
                     }`}
                     required
                   />
                   {errors.admissionDate && touched.admissionDate && (
-                    <p className="mt-1 text-sm text-red-600">{errors.admissionDate}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.admissionDate}
+                    </p>
                   )}
                 </div>
               </div>
@@ -584,15 +654,20 @@ const ReAdmission = ({ adminId }) => {
                     onChange={handleCalculationChange}
                     onBlur={() => handleBlur("courseFees")}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 text-gray-900 ${
-                      errors.courseFees && touched.courseFees ? "border-red-500" : "border-gray-300"
-                    }`}
+                      errors.courseFees && touched.courseFees
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    } disabled:cursor-not-allowed`}
                     placeholder="0.00"
                     min="0"
                     step="100"
                     required
+                    disabled
                   />
                   {errors.courseFees && touched.courseFees && (
-                    <p className="mt-1 text-sm text-red-600">{errors.courseFees}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.courseFees}
+                    </p>
                   )}
                 </div>
 
@@ -613,7 +688,8 @@ const ReAdmission = ({ adminId }) => {
 
                 <div>
                   <label className="block text-gray-700 mb-2 font-medium">
-                    Discount {formData.discountRate === "Percent" ? "(%)" : "Amount (₹)"}
+                    Discount{" "}
+                    {formData.discountRate === "Percent" ? "(%)" : "Amount (₹)"}
                   </label>
                   <input
                     type="number"
@@ -668,8 +744,8 @@ const ReAdmission = ({ adminId }) => {
                       parseFloat(calculationFields.balance) > 0
                         ? "text-orange-600"
                         : parseFloat(calculationFields.balance) < 0
-                        ? "text-red-600"
-                        : "text-gray-900"
+                          ? "text-red-600"
+                          : "text-gray-900"
                     }`}
                   />
                 </div>
@@ -693,7 +769,9 @@ const ReAdmission = ({ adminId }) => {
             {/* Installments Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">Installments</h2>
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Installments
+                </h2>
                 <button
                   type="button"
                   onClick={addInstallment}
@@ -741,31 +819,48 @@ const ReAdmission = ({ adminId }) => {
                             type="text"
                             value={installment.name}
                             onChange={(e) =>
-                              handleInstallmentChange(index, "name", e.target.value)
+                              handleInstallmentChange(
+                                index,
+                                "name",
+                                e.target.value,
+                              )
                             }
-                            onBlur={() => handleBlur(`installment_${index}_name`)}
+                            onBlur={() =>
+                              handleBlur(`installment_${index}_name`)
+                            }
                             className={`w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-gray-900 text-sm ${
-                              errors[`installment_${index}_name`] && touched[`installment_${index}_name`]
+                              errors[`installment_${index}_name`] &&
+                              touched[`installment_${index}_name`]
                                 ? "border-red-500"
                                 : "border-gray-300"
                             }`}
                             placeholder="Installment name"
                             required
                           />
-                          {errors[`installment_${index}_name`] && touched[`installment_${index}_name`] && (
-                            <p className="mt-1 text-xs text-red-600">{errors[`installment_${index}_name`]}</p>
-                          )}
+                          {errors[`installment_${index}_name`] &&
+                            touched[`installment_${index}_name`] && (
+                              <p className="mt-1 text-xs text-red-600">
+                                {errors[`installment_${index}_name`]}
+                              </p>
+                            )}
                         </td>
                         <td className="py-3 px-4">
                           <input
                             type="number"
                             value={installment.amount}
                             onChange={(e) =>
-                              handleInstallmentChange(index, "amount", e.target.value)
+                              handleInstallmentChange(
+                                index,
+                                "amount",
+                                e.target.value,
+                              )
                             }
-                            onBlur={() => handleBlur(`installment_${index}_amount`)}
+                            onBlur={() =>
+                              handleBlur(`installment_${index}_amount`)
+                            }
                             className={`w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-gray-900 text-sm ${
-                              errors[`installment_${index}_amount`] && touched[`installment_${index}_amount`]
+                              errors[`installment_${index}_amount`] &&
+                              touched[`installment_${index}_amount`]
                                 ? "border-red-500"
                                 : "border-gray-300"
                             }`}
@@ -774,34 +869,51 @@ const ReAdmission = ({ adminId }) => {
                             min="0"
                             step="100"
                           />
-                          {errors[`installment_${index}_amount`] && touched[`installment_${index}_amount`] && (
-                            <p className="mt-1 text-xs text-red-600">{errors[`installment_${index}_amount`]}</p>
-                          )}
+                          {errors[`installment_${index}_amount`] &&
+                            touched[`installment_${index}_amount`] && (
+                              <p className="mt-1 text-xs text-red-600">
+                                {errors[`installment_${index}_amount`]}
+                              </p>
+                            )}
                         </td>
                         <td className="py-3 px-4">
                           <input
                             type="date"
                             value={installment.date}
                             onChange={(e) =>
-                              handleInstallmentChange(index, "date", e.target.value)
+                              handleInstallmentChange(
+                                index,
+                                "date",
+                                e.target.value,
+                              )
                             }
-                            onBlur={() => handleBlur(`installment_${index}_date`)}
+                            onBlur={() =>
+                              handleBlur(`installment_${index}_date`)
+                            }
                             className={`w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-gray-900 text-sm ${
-                              errors[`installment_${index}_date`] && touched[`installment_${index}_date`]
+                              errors[`installment_${index}_date`] &&
+                              touched[`installment_${index}_date`]
                                 ? "border-red-500"
                                 : "border-gray-300"
                             }`}
                             required
                           />
-                          {errors[`installment_${index}_date`] && touched[`installment_${index}_date`] && (
-                            <p className="mt-1 text-xs text-red-600">{errors[`installment_${index}_date`]}</p>
-                          )}
+                          {errors[`installment_${index}_date`] &&
+                            touched[`installment_${index}_date`] && (
+                              <p className="mt-1 text-xs text-red-600">
+                                {errors[`installment_${index}_date`]}
+                              </p>
+                            )}
                         </td>
                         <td className="py-3 px-4">
                           <select
                             value={installment.paymentStatus}
                             onChange={(e) =>
-                              handleInstallmentChange(index, "paymentStatus", e.target.value)
+                              handleInstallmentChange(
+                                index,
+                                "paymentStatus",
+                                e.target.value,
+                              )
                             }
                             className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-gray-900 text-sm"
                           >
@@ -816,7 +928,11 @@ const ReAdmission = ({ adminId }) => {
                           <select
                             value={installment.paymentmode || ""}
                             onChange={(e) =>
-                              handleInstallmentChange(index, "paymentmode", e.target.value)
+                              handleInstallmentChange(
+                                index,
+                                "paymentmode",
+                                e.target.value,
+                              )
                             }
                             className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-sky-500 text-gray-900 text-sm"
                           >
@@ -850,7 +966,9 @@ const ReAdmission = ({ adminId }) => {
 
               <div className="mt-4 p-4 bg-gray-50 rounded-lg flex justify-between items-center">
                 <p className="text-gray-700">
-                  <span className="font-semibold">Total Installments Amount:</span>{" "}
+                  <span className="font-semibold">
+                    Total Installments Amount:
+                  </span>{" "}
                   <span className="text-lg font-bold text-sky-600">
                     ₹{calculateTotalInstallments().toFixed(2)}
                   </span>
@@ -861,10 +979,11 @@ const ReAdmission = ({ adminId }) => {
                     ₹{calculationFields.totalFees || "0.00"}
                   </span>
                 </p>
-                {Math.abs(calculateTotalInstallments() - (parseFloat(calculationFields.totalFees) || 0)) > 0.01 && (
-                  <p className="text-sm text-orange-600">
-                    ⚠️ Amount mismatch
-                  </p>
+                {Math.abs(
+                  calculateTotalInstallments() -
+                    (parseFloat(calculationFields.totalFees) || 0),
+                ) > 0.01 && (
+                  <p className="text-sm text-orange-600">⚠️ Amount mismatch</p>
                 )}
               </div>
             </div>
@@ -885,9 +1004,25 @@ const ReAdmission = ({ adminId }) => {
               >
                 {reAdmissionData?.loading ? (
                   <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Processing...
                   </span>
