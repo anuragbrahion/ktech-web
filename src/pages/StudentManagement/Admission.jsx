@@ -53,7 +53,7 @@ const Admission = ({ adminId }) => {
   useEffect(() => {
     fetchData();
     loadMasterData();
-    dispatch(inquirySourceAllDocuments())
+    dispatch(inquirySourceAllDocuments());
   }, [currentPage]);
 
   useEffect(() => {
@@ -170,6 +170,8 @@ const Admission = ({ adminId }) => {
           paymentmode: inst.mode || null,
           transctionId: inst.transactionId || null,
         })) || [],
+      userImage: studentData.userImage,
+      signature: studentData.signature,
     };
 
     if (editingStudent) {
@@ -433,8 +435,6 @@ const Admission = ({ adminId }) => {
 };
 
 export default Admission;
-
-
 
 // /* eslint-disable react-hooks/exhaustive-deps */
 // import React, { useEffect, useState } from "react";
