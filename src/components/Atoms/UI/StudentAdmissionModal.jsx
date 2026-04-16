@@ -209,7 +209,7 @@ const StudentAdmissionModal = ({
     formDataObj.append('files', file);
     
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const response = await axios.post(`${apiUrl}/files/upload`, formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data',
